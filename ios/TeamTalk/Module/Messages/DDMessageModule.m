@@ -21,6 +21,7 @@
 #import "DDGroupModule.h"
 #import "MsgReadNotify.h"
 #import "MTTNotification.h"
+#import "DDUserDetailInfoAPI.h"
 
 @interface DDMessageModule(){
 
@@ -110,6 +111,11 @@
             
         }];
         NSArray* messages = [self p_spliteMessage:object];
+        [[MTTDatabaseUtil instance] insertMessages:@[object] success:^{
+            
+        } failure:^(NSString *errorDescripe) {
+            
+        }];
 //        [messages enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
 //            [self p_saveReceivedMessage:obj];
 //        }];
@@ -119,15 +125,36 @@
                 MsgReadACKAPI* readACK = [[MsgReadACKAPI alloc] init];
                 [readACK requestWithObject:@[object.sessionId,@(object.msgID),@(object.sessionType)] Completion:nil];
             }
+            [MTTNotification postNotification:DDNotificationReceiveMessage userInfo:nil object:object];
+        }else {
+            
+            [[DDUserModule shareInstance] getUserForUserID:object.senderId Block:
+             ^(MTTUserEntity *user) {
+                 if(user == NULL) {
+                     DDUserDetailInfoAPI *request = [DDUserDetailInfoAPI new];
+                     NSMutableArray *array = [[NSMutableArray alloc]init];
+                     NSArray *tmpArray = [object.senderId componentsSeparatedByString:@"_"];
+                     if(tmpArray[1]){
+                         [array addObject:@([tmpArray[1] integerValue])];
+                         [request requestWithObject:array Completion:^(NSArray *response, NSError *error) {
+                             if(response){
+                                 [[MTTDatabaseUtil instance] insertAllUser:response completion:^(NSError *error) {
+                                     if(error == NULL) {
+                                         for(MTTUserEntity *user in response){
+                                             [[DDUserModule shareInstance] addMaintanceUser:user];
+                                         }
+                                         [MTTNotification postNotification:DDNotificationReceiveMessage userInfo:nil object:object];
+                                     }
+                                 }];
+                             }
+                         }];
+                     }
+                     return;
+                 }
+                 [MTTNotification postNotification:DDNotificationReceiveMessage userInfo:nil object:object];
+             }];
         }
-        [[MTTDatabaseUtil instance] insertMessages:@[object] success:^{
-            
-        } failure:^(NSString *errorDescripe) {
-            
-        }];
-        [MTTNotification postNotification:DDNotificationReceiveMessage userInfo:nil object:object];
     }];
-    
 }
 
 -(void)getMessageFromServer:(NSInteger)fromMsgID currentSession:(MTTSessionEntity *)session count:(NSInteger)count Block:(void(^)(NSMutableArray *array, NSError *error))block
