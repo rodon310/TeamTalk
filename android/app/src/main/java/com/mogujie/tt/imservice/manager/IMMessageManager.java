@@ -7,6 +7,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedInputStream;
 import com.mogujie.tt.DB.entity.PeerEntity;
 import com.mogujie.tt.DB.entity.SessionEntity;
+import com.mogujie.tt.DB.entity.UserEntity;
 import com.mogujie.tt.config.DBConstant;
 import com.mogujie.tt.DB.DBInterface;
 import com.mogujie.tt.DB.entity.MessageEntity;
@@ -226,13 +227,37 @@ public class IMMessageManager extends IMManager{
             return;
         }
 
-        MessageEntity recvMessage = ProtoBuf2JavaBean.getMessageEntity(imMsgData);
+        final MessageEntity recvMessage = ProtoBuf2JavaBean.getMessageEntity(imMsgData);
         int loginId = IMLoginManager.instance().getLoginId();
         boolean isSend = recvMessage.isSend(loginId);
         recvMessage.buildSessionKey(isSend);
         recvMessage.setStatus(MessageConstant.MSG_SUCCESS);
         /**对于混合消息，未读消息计数还是1,session已经更新*/
 
+        if(recvMessage.getSessionType() == DBConstant.SESSION_TYPE_SINGLE) {
+            UserEntity userEntity =  IMContactManager.instance().findContact(recvMessage.getFromId());
+            if(userEntity == null) {
+                final ArrayList<Integer> uids = new ArrayList<>();
+                uids.add(recvMessage.getFromId());
+                IMContactManager.instance().requestUsersInfo(uids, new IMContactManager.RequsetUsersInfoListener() {
+                    @Override
+                    public void OnSuccess() {
+                        updateAndNotifiyRecvMessage(recvMessage);
+                    }
+
+                    @Override
+                    public void OnFailed(String message) {
+                        logger.i("request user info:" + message + "  for:" + uids);
+                    }
+                });
+                return;
+            }
+        }
+        updateAndNotifiyRecvMessage(recvMessage);
+
+    }
+
+    private void updateAndNotifiyRecvMessage(MessageEntity recvMessage){
         dbInterface.insertOrUpdateMessage(recvMessage);
         sessionManager.updateSession(recvMessage);
 

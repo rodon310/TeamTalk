@@ -1,8 +1,10 @@
 package com.mogujie.tt.imservice.manager;
 
+import com.google.protobuf.CodedInputStream;
 import com.mogujie.tt.DB.DBInterface;
 import com.mogujie.tt.DB.entity.DepartmentEntity;
 import com.mogujie.tt.DB.entity.UserEntity;
+import com.mogujie.tt.imservice.callback.Packetlistener;
 import com.mogujie.tt.imservice.event.UserInfoEvent;
 import com.mogujie.tt.protobuf.helper.ProtoBuf2JavaBean;
 import com.mogujie.tt.protobuf.IMBaseDefine;
@@ -11,6 +13,7 @@ import com.mogujie.tt.utils.IMUIHelper;
 import com.mogujie.tt.utils.Logger;
 import com.mogujie.tt.utils.pinyin.PinYin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -179,6 +182,53 @@ public class IMContactManager extends IMManager {
         }
         return null;
     }
+
+
+
+    public void requestUsersInfo(ArrayList<Integer> userIds, final RequsetUsersInfoListener requsetUsersInfoListener){
+        logger.i("contact#contact#requestUsersInfo");
+        if(null == userIds || userIds.size() <=0){
+            logger.i("contact#contact#requestUsersInfo return,cause by null or empty");
+            requsetUsersInfoListener.OnFailed("userIds error");
+            return;
+        }
+        int loginId = IMLoginManager.instance().getLoginId();
+        IMBuddy.IMUsersInfoReq imUsersInfoReq  =  IMBuddy.IMUsersInfoReq.newBuilder()
+                .setUserId(loginId)
+                .addAllUserIdList(userIds)
+                .build();
+
+        int sid = IMBaseDefine.ServiceID.SID_BUDDY_LIST_VALUE;
+        int cid = IMBaseDefine.BuddyListCmdID.CID_BUDDY_LIST_USER_INFO_REQUEST_VALUE;
+        imSocketManager.sendRequest(imUsersInfoReq, sid, cid, new Packetlistener() {
+            @Override
+            public void onSuccess(Object response) {
+                try {
+                    IMBuddy.IMUsersInfoRsp imUsersInfoRsp = IMBuddy.IMUsersInfoRsp.parseFrom((CodedInputStream)response);
+                    onRepDetailUsers(imUsersInfoRsp);
+                    if(requsetUsersInfoListener != null) {
+                        requsetUsersInfoListener.OnSuccess();
+                        return;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                requsetUsersInfoListener.OnFailed("data error");
+            }
+
+            @Override
+            public void onFaild() {
+                requsetUsersInfoListener.OnFailed("other error");
+            }
+
+            @Override
+            public void onTimeout() {
+                requsetUsersInfoListener.OnFailed("timeout error");
+            }
+        });
+
+    }
+
 
     /**
      * 请求用户详细信息
@@ -416,6 +466,11 @@ public class IMContactManager extends IMManager {
 
     public boolean isUserDataReady() {
         return userDataReady;
+    }
+
+    public interface RequsetUsersInfoListener{
+        void OnSuccess();
+        void OnFailed(String message);
     }
 
 }
