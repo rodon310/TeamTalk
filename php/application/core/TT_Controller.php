@@ -1,6 +1,8 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
-class TT_Controller extends CI_Controller {
+include_once(APPPATH."core/REST_Controller.php");
+
+class TT_Controller extends REST_Controller {
 
 	function __construct()
 	{

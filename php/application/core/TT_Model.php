@@ -56,6 +56,11 @@ class TT_Model extends CI_Model
 		}
 	}
 
+	public function autoInc($id ,$index,$value=1){
+		$this->db->where('id', $id);
+		return $bool = $this->db->set($index, $index.'+'.$value, FALSE);
+	}
+
 	private function _realDelete($id)
 	{
 		if (is_array($id)) {

@@ -1,12 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 include_once(APPPATH."core/TT_Controller.php");
+include_once(APPPATH."libraries/Utils.php");
 
 class User extends TT_Controller {
 
 	public function __construct()
 	{
 		parent::__construct();
+		
 		$this->load->helper('url');
 		$this->load->model('user_model');
 		$this->load->model('depart_model');
@@ -18,7 +20,129 @@ class User extends TT_Controller {
 		$this->load->view('base/header');
 		$this->load->view('base/user');
 		$this->load->view('base/footer');
-	}
+    }
+
+    public function action_get(){
+        $pageSize =  $this->input->get('pageSize');
+        $currentPage = $this->input->get('currentPage');
+        $departs = $this->depart_model->getList(array('status'=>0), '*', 0, 10000);
+		$_departs = array();
+		foreach ($departs as $key => $value) {
+			$_departs[$value['id']] = $value;
+		}
+		if(empty($currentPage)){
+			$currentPage = 1;
+        }
+
+        if(empty($pageSize)){
+            $pageSize = 10;
+		}
+		
+        $users = $this->user_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
+		foreach ($users as $key => $value) {
+			if($value['sex'] == 0){
+				$users[$key]['sex'] = '女';
+			}else{
+				$users[$key]['sex'] = '男';
+			}
+			if(isset($_departs[$value['departId']])){
+				$users[$key]['depart_value'] = $_departs[$value['departId']]['departName'];
+			}else{
+				$users[$key]['depart_value'] = '数据错误';
+			}
+			if($users[$key]['avatar']){
+				$users[$key]['avatar_value'] = $users[$key]['avatar'];
+			}
+		}
+		$count = $this->user_model->getCount(array('status'=>0));
+
+        $result = array(
+            'users'=>$users,
+            'pagination'=> array(
+			   'current'=>intval($currentPage),
+               'total'=>$count,
+               'pageSize'=>intval($pageSize),
+             ),
+			'departMap'=>$_departs
+        );
+        $this->json_out($result);
+
+    }
+
+    public function action_post(){
+		$req_data = $this->json_input();
+		$out_result = array('status'=>'ok','msg'=>'');
+
+		$action = $req_data['method'];
+		if("delete" == $action){
+			$id =  $req_data['id'];
+			$result = $this->user_model->update(array('status'=>3), $id);
+			$msg = "";
+		}else if("add" == $action || "update" == $action) {
+			$record = $req_data['record'];
+			//log_message('info','record:'.json_encode($record));
+			$name = $record['name'];
+			$domain = Utils::getStrDomain($name);
+			$params = array(
+				'name' => $name,
+				'domain' => $domain,
+				'nick'=> $record['nick'],
+				'departId' => $record['departId'],
+				'sex' => $record['sex'],
+				'status'=>0,
+				'updated'=>time(),
+			);
+
+			if(isset($record['phone'])) {
+				$params['phone'] = 	$record['phone'];
+			}
+
+			if(isset($record['email'])) {
+				$params['email'] = $record['email'];
+			}
+
+			if(isset($record['avatar'])) {
+				$params['avatar'] = $record['avatar'];
+			}
+
+			$password = '';
+			if(isset($record['password'])) {
+				$password = $record['password'];
+			}
+
+			if(!empty($password)){
+				$salt = rand()%10000;
+				$params['password'] = md5(md5($password).$salt);
+				$params['salt'] = $salt;
+			}else if("add" == $action) {
+				$out_result['status'] = 'failed';
+				$out_result['msg'] = "lost password";
+				$this->json_out($out_result);  
+				return;
+			}
+
+			if("add" == $action) {
+				$params['created'] = time();
+				$result = $this->user_model->insert($params);
+				if(!$result){
+					$out_result['status'] = 'failed';
+					$out_result['msg'] = "insert failed";
+				}
+			}else {
+				$id = $record['id'];
+				$result = $this->user_model->update($params,$id);
+				if(!$result){
+					$out_result['status'] = 'failed';
+					$out_result['msg'] = "update failed";
+				}
+			}
+		}else {
+			$out_result['msg'] = "no such ".$action;
+		}
+       $this->json_out($out_result);   
+    }
+
+
 
 	public function all()
 	{
@@ -137,8 +261,7 @@ class User extends TT_Controller {
 
 	public function upload()
 	{
-		include_once APPPATH."libraries/image_moo.php";
-
+		include_once APPPATH."libraries/image_moo.php"; 
 		try{
 		    $filename=$this->input->get('filename');
 		    $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -178,8 +301,9 @@ class User extends TT_Controller {
 			    	'file' =>'',
 			    	'real_path'=>''
 			    );
-		    }
-			echo json_encode($array);
+			}
+			$this->json_out($array);
+			//echo json_encode($array);
 		}
 		catch(Exception $e)
 		{
@@ -187,7 +311,7 @@ class User extends TT_Controller {
 				'status' =>'fail',
 				'file' =>0
 			);
-			echo json_encode($array);
+			$this->json_out($array);
 		}
 	}
 

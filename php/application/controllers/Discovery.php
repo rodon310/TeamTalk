@@ -18,6 +18,75 @@ class Discovery extends TT_Controller {
 		$this->load->view('base/footer');
 	}
 
+
+	public function action_get(){
+        $pageSize =  $this->input->get('pageSize');
+		$currentPage = $this->input->get('currentPage');
+		if(empty($currentPage)){
+			$currentPage = 1;
+        }
+
+        if(empty($pageSize)){
+            $pageSize = 10;
+        }
+		$discoverys = $this->discovery_model->getList(array('status'=>0),'*', ($currentPage-1)*$pageSize , $pageSize);
+		$count = $this->discovery_model->getCount(array('status'=>0));
+		$result = array(
+            'pagination'=> array(
+			   'current'=>intval($currentPage),
+               'total'=>$count,
+               'pageSize'=>intval($pageSize),
+             ),
+			 'discoverys'=>$discoverys
+        );
+        $this->json_out($result);
+	}
+
+
+	public function action_post() {
+		$req_data = $this->json_input();
+		$out_result = array('status'=>'ok','msg'=>'');
+		$action = $req_data['method'];
+		if("delete" == $action){
+			$id =  $req_data['id'];
+			$result = $this->discovery_model->update(array('status'=>3), $id);
+			$msg = "";
+		}else if('add' == $action || 'update' == $action) {
+			$record = $req_data['record'];
+			$params = array(
+				'itemName'=>$record['itemName'],
+				'itemUrl'=>$record['itemUrl'],
+				'itemPriority'=>$record['itemPriority'],
+				'updated'=>time()
+			);
+
+			if('add' == $action){
+				$params['created'] = time();
+				$result = $this->discovery_model->insert($params);
+				if(!$result){
+					$out_result['status'] = 'failed';
+					$out_result['msg'] = "insert failed";
+				}
+			}else {
+				$id = $record['id'];
+				$result = $this->discovery_model->update($params,$id);
+				if(!$result){
+					$out_result['status'] = 'failed';
+					$out_result['msg'] = "update failed";
+				}
+			}
+			
+		}else {
+			$out_result['msg'] = "no such ".$action;
+		}
+       	$this->json_out($out_result);   
+	}
+
+	public function action_post_error($error = array()) {
+		$out_result = array('status'=>'failed','msg'=>json_encode($error));
+		$this->json_out($out_result); 
+	}
+
 	public function all()
 	{
 		$discoverys = $this->discovery_model->getList(array('status'=>0));
