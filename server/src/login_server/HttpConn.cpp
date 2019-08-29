@@ -254,15 +254,15 @@ void CHttpConn::_HandleStatusReques(string& url, string& post_data)
     for (it = g_msg_serv_info.begin() ; it != g_msg_serv_info.end(); it++) {
         pMsgServInfo = it->second;
         Json::Value server_value;
-        server_value['port'] = pMsgServInfo->port;
-        server_value['ip_addr1'] = pMsgServInfo->ip_addr1;
-        server_value['ip_addr2'] = pMsgServInfo->ip_addr2;
-        server_value['hostname'] = pMsgServInfo->hostname;
-        server_value['online_count'] = pMsgServInfo->cur_conn_cnt;
+        server_value["port"] = pMsgServInfo->port;
+        server_value["ip_addr1"] = pMsgServInfo->ip_addr1;
+        server_value["ip_addr2"] = pMsgServInfo->ip_addr2;
+        server_value["hostname"] = pMsgServInfo->hostname;
+        server_value["online_count"] = pMsgServInfo->cur_conn_cnt;
         server_arr_value[index] = server_value;
         index ++;
     }
-    value['msg_servers'] = server_arr_value;
+    value["msg_servers"] = server_arr_value;
     string strContent = value.toStyledString();
     char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
     uint32_t nLen = strContent.length();
