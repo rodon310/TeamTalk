@@ -262,6 +262,7 @@ void CHttpConn::_HandleStatusReques(string& url, string& post_data)
         server_arr_value[index] = server_value;
         index ++;
     }
+    value['msg_servers'] = server_arr_value;
     string strContent = value.toStyledString();
     char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
     uint32_t nLen = strContent.length();
