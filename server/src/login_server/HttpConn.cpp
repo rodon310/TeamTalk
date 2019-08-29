@@ -194,7 +194,11 @@ void CHttpConn::OnRead()
 		if (strncmp(url.c_str(), "/msg_server", 11) == 0) {
             string content = m_cHttpParser.GetBodyContent();
             _HandleMsgServRequest(url, content);
-		} else {
+		}else if(strncmp(url.c_str(), "/status", 7 ) == 0) {
+            string content = m_cHttpParser.GetBodyContent();
+            _HandleStatusReques(url, content);
+        }
+        else {
 			log("url unknown, url=%s ", url.c_str());
 			Close();
 		}
@@ -237,6 +241,34 @@ void CHttpConn::OnTimer(uint64_t curr_tick)
 		log("HttpConn timeout, handle=%d ", m_conn_handle);
 		Close();
 	}
+}
+
+
+void CHttpConn::_HandleStatusReques(string& url, string& post_data) 
+{
+    Json::Value value;
+    msg_serv_info_t* pMsgServInfo;
+    map<uint32_t, msg_serv_info_t*>::iterator it;
+    Json::Value  server_arr_value(Json::arrayValue);
+    int index = 0;
+    for (it = g_msg_serv_info.begin() ; it != g_msg_serv_info.end(); it++) {
+        pMsgServInfo = it->second;
+        Json::Value server_value;
+        server_value['port'] = pMsgServInfo->port;
+        server_value['ip_addr1'] = pMsgServInfo->ip_addr1;
+        server_value['ip_addr2'] = pMsgServInfo->ip_addr2;
+        server_value['hostname'] = pMsgServInfo->hostname;
+        server_value['online_count'] = pMsgServInfo->cur_conn_cnt;
+        server_arr_value[index] = server_value;
+        index ++;
+    }
+    string strContent = value.toStyledString();
+    char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
+    uint32_t nLen = strContent.length();
+    snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, strContent.c_str());
+    Send((void*)szContent, strlen(szContent));
+    delete [] szContent;
+    return;
 }
 
 // Add By Lanhu 2014-12-19 通过登陆IP来优选电信还是联通IP
