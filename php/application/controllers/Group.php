@@ -54,6 +54,19 @@ class Group extends TT_Controller {
         );
         $this->json_out($result);
 	}
+
+	public function editmember_post() {
+		$req_data = $this->json_input();
+		$args = array(
+			'req_user_id'   => 0,
+			'app_key'       => 'asdfasdf',
+			'group_id'      => intval($$req_data['id']),
+			'modify_type'   => intval($$req_data['change']),
+			'user_id_list'  => array(intval($req_data['userId']))
+		);                  
+		$res = $this->httpRequest($this->config->config['http_url'].'/query/ChangeMembers','post',json_encode($args));
+		$this->json_out($res);   
+	}
 	
 	public function action_post() {
 		$req_data = $this->json_input();
@@ -194,7 +207,10 @@ class Group extends TT_Controller {
 
 	public function getMember()
 	{
-		$id = $this->input->post('id');
+		$id = $this->input->get('id');
+		if(empty($id)) {
+			$id = $this->input->post('id');
+		}
 		$perpage = 10000;
 		$users = $this->grouprelation_model->getList(array('status'=>0,'groupId'=>$id), '*', 0, $perpage);
 		foreach ($users as $key => $value) {
@@ -217,7 +233,8 @@ class Group extends TT_Controller {
 			'modify_type'   => intval($this->input->post('change')),
 			'user_id_list'  => array(intval($this->input->post('userId')))
 		);                  
-	    $res = $this->httpRequest($this->config->config['http_url'].'/query/ChangeMembers','post',json_encode($add));
+		$res = $this->httpRequest($this->config->config['http_url'].'/query/ChangeMembers','post',json_encode($add));
+		$this->json_out($res);
 	}
 
 	public function httpRequest($url,$method,$params=array()){
