@@ -57,11 +57,12 @@ class Group extends TT_Controller {
 
 	public function editmember_post() {
 		$req_data = $this->json_input();
+		log_message('info',json_encode($req_data));
 		$args = array(
 			'req_user_id'   => 0,
 			'app_key'       => 'asdfasdf',
-			'group_id'      => intval($$req_data['id']),
-			'modify_type'   => intval($$req_data['change']),
+			'group_id'      => intval($req_data['id']),
+			'modify_type'   => intval($req_data['change']),
 			'user_id_list'  => array(intval($req_data['userId']))
 		);                  
 		$res = $this->httpRequest($this->config->config['http_url'].'/query/ChangeMembers','post',json_encode($args));
