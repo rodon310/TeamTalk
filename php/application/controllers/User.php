@@ -199,10 +199,12 @@ class User extends TT_Controller {
 		if(strpos($avatar, $this->config->config['msfs_url']) === false){
 			$avatar = $this->config->config['msfs_url'].$this->input->post('avatar');
 		}
+		$name = $this->input->post('name');
+		$domain = Utils::getStrDomain($name);
 		$params = array(
 			'sex'=>$this->input->post('sex'),
-			'name'=>$this->input->post('name'),
-			'domain'=>$this->input->post('domain'),
+			'name'=>$name,
+			'domain'=>$domain,
 			'nick'=>$this->input->post('nick'),
 			'password'=>md5(md5($this->input->post('password')).$salt),
 			'salt'=>$salt,
@@ -226,10 +228,12 @@ class User extends TT_Controller {
 		if(strpos($avatar, $this->config->config['msfs_url']) === false){
 			$avatar = $this->config->config['msfs_url'].$this->input->post('avatar');
 		}
+		$name = $this->input->post('name');
+		$domain = Utils::getStrDomain($name);
 		$params = array(
 			'sex'=>$this->input->post('sex'),
-			'name'=>$this->input->post('name'),
-			'domain'=>$this->input->post('domain'),
+			'name'=>$name,
+			'domain'=>$domain,
 			'nick'=>$this->input->post('nick'),
 			'phone'=>$this->input->post('phone'),
 			'email'=>$this->input->post('email'),
