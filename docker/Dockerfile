@@ -1,6 +1,6 @@
 FROM centos:latest
 
-RUN yum update;
+RUN yum -y update;
 
 #VOLUME ["/sys/fs/cgroup:/sys/fs/cgroup"]
 
