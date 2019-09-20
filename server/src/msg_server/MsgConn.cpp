@@ -465,7 +465,7 @@ void CMsgConn::_HandleLoginRequest(CImPdu* pPdu)
         result = IM::BaseDefine::REFUSE_REASON_NO_ROUTE_SERVER;
         result_string = "服务端异常";
     
-}
+    }
     if (result) {
         IM::Login::IMLoginRes msg;
         msg.set_server_time(time(NULL));

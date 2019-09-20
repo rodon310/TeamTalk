@@ -252,8 +252,6 @@ void CFileHandler::HandleFileNotify(CImPdu* pPdu)
 {
     IM::File::IMFileNotify msg;
     CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
-
-    
     uint32_t from_user_id = msg.from_user_id();
     uint32_t to_user_id = msg.to_user_id();
     string file_name = msg.file_name();
