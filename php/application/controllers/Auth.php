@@ -29,8 +29,20 @@ class Auth extends REST_Controller {
     public function currentuser(){
         $result = array('name'=>'guest');
         if(isset($this->session->userdata['account'])){
-            $result['avatar'] = 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png';
-            $result['name'] = $this->session->userdata['account'];    
+			$result['avatar'] = 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png';
+			$account = $this->session->userdata['account'];
+			if(is_array($account)) {
+				$result['name'] = $account['uname']; 
+				if($account['type'] == "1"){
+					$result['authority'] = "admin";
+				}else {
+					$result['authority'] = "user";
+				}   
+			}else {
+				$result['name'] = $account;    
+				$result['authority'] = $account;
+			}
+            
         }
         $this->json_out($result);
     }
@@ -43,12 +55,25 @@ class Auth extends REST_Controller {
         if($submit){
 			$admin = $this->admin_model->getOne(array('uname'=>$account));
 			if(md5($password) == $admin['pwd']){
-				$session = array(
-					'account' => $account
-				);
-                $this->session->set_userdata($session);
-                $result['msg'] = 'right';
-                $result['currentAuthority'] = 'admin';
+				$result['msg'] = 'right';
+				if(isset($admin['type'])) {
+					$session = array(
+						'account' => $admin
+					);
+					$this->session->set_userdata($session);
+					if($admin['type'] == "1"){
+						$result['currentAuthority'] = 'admin';
+					}else {
+						$result['currentAuthority'] = 'user';
+					}
+				}else {
+					$session = array(
+						'account' => $account
+					);
+					$this->session->set_userdata($session);
+					$result['currentAuthority'] = 'admin';
+				}
+                
 			}
         }
         $this->json_out($result);
