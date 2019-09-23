@@ -22,21 +22,22 @@ USE teamtalk;
 DROP TABLE IF EXISTS `IMAdmin`;
 
 CREATE TABLE `IMAdmin` (
-  `id` mediumint(6) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `uname` varchar(40) NOT NULL COMMENT '用户名',
   `pwd` char(32) NOT NULL COMMENT '密码',
+  `type` int(4) unsigned DEFAULT '0' COMMENT '管理员类型 1:admin 2:user',
   `status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '用户状态 0 :正常 1:删除 可扩展',
-  `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间´',
-  `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间´',
+  `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `IMAdmin` WRITE;
 /*!40000 ALTER TABLE `IMAdmin` DISABLE KEYS */;
 
-INSERT INTO `IMAdmin` (`id`, `uname`, `pwd`, `status`, `created`, `updated`)
+INSERT INTO `IMAdmin` (`id`, `uname`, `pwd`, `type`, `status`, `created`, `updated`)
 VALUES
-	(1,'admin','21232f297a57a5a743894a0e4a801fc3',0,0,0);
+	(1,'admin','21232f297a57a5a743894a0e4a801fc3',1,0,0,0);
 
 /*!40000 ALTER TABLE `IMAdmin` ENABLE KEYS */;
 UNLOCK TABLES;
