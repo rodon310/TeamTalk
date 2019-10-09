@@ -95,7 +95,7 @@ class Group extends TT_Controller {
 					'req_user_id' 	=> 0,
 					'app_key'		=> 'asdfasdf',
 					'group_name'	=> $record['name'],
-					'group_type'	=> $record['type'],
+					'group_type'	=> intval($record['type']),
 					'group_avatar'	=> $avatar,
 					'user_id_list'	=> array()
 				);
