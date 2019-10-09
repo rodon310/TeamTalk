@@ -31,11 +31,10 @@ class Group extends TT_Controller {
         if(empty($pageSize)){
             $pageSize = 10;
         }
-        $groups = $this->group_model->getList(array('status'=>0), '*', ($currentPage-1)*$pageSize , $pageSize);
+		$groups = $this->group_model->getList(array('status'=>0), '*', ($currentPage-1)*$pageSize , $pageSize);
 
 		foreach ($groups as $key => $value) {
 			if($groups[$key]['avatar']){
-
 				if(substr($groups[$key]['avatar'], 0, 4) === "http") {
 					$groups[$key]['avatar_value'] = $groups[$key]['avatar'];
 				}else {
@@ -97,7 +96,7 @@ class Group extends TT_Controller {
 					'group_name'	=> $record['name'],
 					'group_type'	=> intval($record['type']),
 					'group_avatar'	=> $avatar,
-					'user_id_list'	=> array()
+					'user_id_list'	=> array(1)
 				);
 				$res = $this->httpRequest($this->config->config['http_url'].'/query/CreateGroup','post',json_encode($array));
 				log_message('info','result:'.$res);
