@@ -54,6 +54,14 @@ xiaoyang 123456
 test  123456
 ~~~~
 
+## 后台管理测试(账号 密码: test test)
+
+[http://tt.xiaominfc.com](http://tt.xiaominfc.com)
+[http://admin.xiaominfc.com](http://admin.xiaominfc.com)
+
+
+
+
 # 在线demo
 
 [http://im.xiaominfc.com/](http://im.xiaominfc.com/)
