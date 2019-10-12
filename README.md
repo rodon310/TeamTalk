@@ -56,7 +56,11 @@ test  123456
 
 ## 后台管理测试(账号 密码: test test)
 
+### ant版
 [http://tt.xiaominfc.com](http://tt.xiaominfc.com)
+
+
+### 原版
 [http://admin.xiaominfc.com](http://admin.xiaominfc.com)
 
 
