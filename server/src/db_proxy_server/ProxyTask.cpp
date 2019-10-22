@@ -16,12 +16,12 @@ CProxyTask::CProxyTask(uint32_t conn_uuid, pdu_handler_t pdu_handler, CImPdu* pP
 {
 	m_conn_uuid = conn_uuid;
 	m_pdu_handler = pdu_handler;
-    m_pPdu = pPdu;
+	m_pPdu = pPdu;
 }
 
 CProxyTask::~CProxyTask()
 {
-    if (m_pPdu) {
+	if (m_pPdu) {
 		delete m_pPdu;
 	}
 }

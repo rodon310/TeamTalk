@@ -233,18 +233,3 @@ void CSessionModel::fillSessionMsg(uint32_t nUserId, list<IM::BaseDefine::Contac
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
