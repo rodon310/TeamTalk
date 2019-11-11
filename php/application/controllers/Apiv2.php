@@ -33,7 +33,7 @@ class Apiv2 extends REST_Controller {
 				$this->_fail_msg_out('用户已存在!');
 				return;
 			}
-			$parans['domain'] = Utils::getStrDomain($params['name']);
+			$params['domain'] = Utils::getStrDomain($params['name']);
 		}else {
 			$this->_fail_msg_out('lost name');
 			return;
