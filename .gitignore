@@ -11,3 +11,14 @@ server/src/libsecurity/android/obj
 */push_server
 */file_server
 *msfs
+
+
+.vscode
+
+
+docker/im_server/
+
+
+server/src/slog/liblog4cxx*
+server/run/*_server
+server/src/*_server/*_server

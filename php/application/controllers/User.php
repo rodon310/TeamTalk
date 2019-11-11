@@ -8,7 +8,7 @@ class User extends TT_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		
+
 		$this->load->helper('url');
 		$this->load->model('user_model');
 		$this->load->model('depart_model');
@@ -20,25 +20,25 @@ class User extends TT_Controller {
 		$this->load->view('base/header');
 		$this->load->view('base/user');
 		$this->load->view('base/footer');
-    }
+	}
 
-    public function action_get(){
-        $pageSize =  $this->input->get('pageSize');
-        $currentPage = $this->input->get('currentPage');
-        $departs = $this->depart_model->getList(array('status'=>0), '*', 0, 10000);
+	public function action_get(){
+		$pageSize =  $this->input->get('pageSize');
+		$currentPage = $this->input->get('currentPage');
+		$departs = $this->depart_model->getList(array('status'=>0), '*', 0, 10000);
 		$_departs = array();
 		foreach ($departs as $key => $value) {
 			$_departs[$value['id']] = $value;
 		}
 		if(empty($currentPage)){
 			$currentPage = 1;
-        }
-
-        if(empty($pageSize)){
-            $pageSize = 10;
 		}
-		
-        $users = $this->user_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
+
+		if(empty($pageSize)){
+			$pageSize = 10;
+		}
+
+		$users = $this->user_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
 		foreach ($users as $key => $value) {
 			if($value['sex'] == 0){
 				$users[$key]['sex'] = '女';
@@ -56,20 +56,20 @@ class User extends TT_Controller {
 		}
 		$count = $this->user_model->getCount(array('status'=>0));
 
-        $result = array(
-            'users'=>$users,
-            'pagination'=> array(
-			   'current'=>intval($currentPage),
-               'total'=>$count,
-               'pageSize'=>intval($pageSize),
-             ),
+		$result = array(
+			'users'=>$users,
+			'pagination'=> array(
+				'current'=>intval($currentPage),
+				'total'=>$count,
+				'pageSize'=>intval($pageSize),
+			),
 			'departMap'=>$_departs
-        );
-        $this->json_out($result);
+		);
+		$this->json_out($result);
 
-    }
+	}
 
-    public function action_post(){
+	public function action_post(){
 		$req_data = $this->json_input();
 		$out_result = array('status'=>'ok','msg'=>'');
 
@@ -122,11 +122,17 @@ class User extends TT_Controller {
 			}
 
 			if("add" == $action) {
-				$params['created'] = time();
-				$result = $this->user_model->insert($params);
-				if(!$result){
-					$out_result['status'] = 'failed';
-					$out_result['msg'] = "insert failed";
+				$count = $this->user_model->getCount(array('name'=>$name));
+				if($count == 0) {
+					$params['created'] = time();
+					$result = $this->user_model->insert($params);
+					if(!$result){
+						$out_result['status'] = 'failed';
+						$out_result['msg'] = "insert failed";
+					}
+				}else {
+						$out_result['status'] = 'failed';
+						$out_result['msg'] = "user is existed";
 				}
 			}else {
 				$id = $record['id'];
@@ -139,8 +145,8 @@ class User extends TT_Controller {
 		}else {
 			$out_result['msg'] = "no such ".$action;
 		}
-       $this->json_out($out_result);   
-    }
+		$this->json_out($out_result);   
+	}
 
 
 
@@ -267,44 +273,44 @@ class User extends TT_Controller {
 	{
 		include_once APPPATH."libraries/image_moo.php"; 
 		try{
-		    $filename=$this->input->get('filename');
-		    $ext = pathinfo($filename, PATHINFO_EXTENSION);
-		    $filename = time().".".$ext;
-		    $input = file_get_contents("php://input");
-		    file_put_contents('./download/'.$filename, $input);
-		    // $image = new Image_moo();
-		    // $image
-		    // 	->load('./download/'.$filename)
-		    // 	->resize_crop(100,100)
-		    // 	->save('./download/1.jpg');
-		    // 裁剪头像
-		    // $targ_w = $targ_h = 100;
-		    // $jpeg_quality = 90;
+			$filename=$this->input->get('filename');
+			$ext = pathinfo($filename, PATHINFO_EXTENSION);
+			$filename = time().".".$ext;
+			$input = file_get_contents("php://input");
+			file_put_contents('./download/'.$filename, $input);
+			// $image = new Image_moo();
+			// $image
+			// 	->load('./download/'.$filename)
+			// 	->resize_crop(100,100)
+			// 	->save('./download/1.jpg');
+			// 裁剪头像
+			// $targ_w = $targ_h = 100;
+			// $jpeg_quality = 90;
 
-		    // $img_r = imagecreatefromjpeg('./download/'.$filename);
-		    // $dst_r = ImageCreateTrueColor( $targ_w, $targ_h );
+			// $img_r = imagecreatefromjpeg('./download/'.$filename);
+			// $dst_r = ImageCreateTrueColor( $targ_w, $targ_h );
 
-		    // imagecopyresampled($dst_r,$img_r,0,0,0,0,
-		    //     $targ_w,$targ_h,100,100);
+			// imagecopyresampled($dst_r,$img_r,0,0,0,0,
+			//     $targ_w,$targ_h,100,100);
 
-		    // header('Content-type: image/jpeg');
-		    // imagejpeg($dst_r, './download/'.$filename, $jpeg_quality);
+			// header('Content-type: image/jpeg');
+			// imagejpeg($dst_r, './download/'.$filename, $jpeg_quality);
 
 
 
-		    $res = $this->_upload('./download/'.$filename);
-		    if($res['error_code'] == 0){	    	
-			    $array = array(
-			    	'status' =>'success',
-			    	'file' =>$res['path'],
-			    	'real_path'=>$this->config->config['msfs_url'].$res['path']
-			    );
-		    }else{
-		    	$array = array(
-			    	'status' =>'fail',
-			    	'file' =>'',
-			    	'real_path'=>''
-			    );
+			$res = $this->_upload('./download/'.$filename);
+			if($res['error_code'] == 0){	    	
+				$array = array(
+					'status' =>'success',
+					'file' =>$res['path'],
+					'real_path'=>$this->config->config['msfs_url'].$res['path']
+				);
+			}else{
+				$array = array(
+					'status' =>'fail',
+					'file' =>'',
+					'real_path'=>''
+				);
 			}
 			$this->json_out($array);
 			//echo json_encode($array);
