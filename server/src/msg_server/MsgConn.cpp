@@ -874,7 +874,8 @@ void CMsgConn::_HandleClientAllUserRequest(CImPdu* pPdu)
 	}
 }
 
-
+void CMsgConn::_HandleChangeAvatarRequest(CImPdu* pPdu)
+{
 	IM::Buddy::IMChangeAvatarReq msg;
 	CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
 	log("HandleChangeAvatarRequest, user_id=%u ", GetUserId());
