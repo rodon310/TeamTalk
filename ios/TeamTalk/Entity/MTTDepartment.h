@@ -12,11 +12,11 @@
 
 @property(nonatomic ,copy)NSString *ID;
 @property(nonatomic ,copy)NSString *parentID;
-@property(nonatomic ,copy)NSString *title;
-@property(nonatomic ,copy)NSString *description;
-@property(nonatomic ,copy)NSString *leader;
+@property(nonatomic ,copy)NSString *departName;
+@property(nonatomic ,assign)NSInteger priority;
 @property(nonatomic ,assign)NSInteger status;
-@property(nonatomic ,assign)NSInteger count;
+@property(nonatomic ,assign)NSInteger created;
+@property(nonatomic ,assign)NSInteger updated;
 
 +(id)departmentFromDic:(NSDictionary *)dic;
 @end

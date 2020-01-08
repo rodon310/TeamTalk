@@ -207,7 +207,8 @@
 
 -(NSString *)getAvatarUrl
 {
-    return [NSString stringWithFormat:@"%@_100x100.jpg",self.avatar];
+    //return [NSString stringWithFormat:@"%@_100x100.jpg",self.avatar];
+    return self.avatar;
 }
 -(NSString *)get300AvatarUrl
 {

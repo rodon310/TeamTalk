@@ -10,11 +10,16 @@
 #import "MTTUserEntity.h"
 @interface ContactsModule : NSObject
 @property(strong)NSMutableArray *groups;
+@property(strong)NSMutableDictionary *departmentDict;
 @property(assign)int contactsCount;
++ (instancetype)shareInstance;
+
 -(NSMutableDictionary *)sortByContactPy;
 -(NSMutableDictionary *)sortByDepartment;
 +(void)favContact:(MTTUserEntity *)user;
 +(NSArray *)getFavContact;
+-(MTTDepartment*)findDepartmentById:(NSString*)departID;
+-(void)addDepartMent:(MTTDepartment*)department;
 -(BOOL)isInFavContactList:(MTTUserEntity *)user;
 +(void)getDepartmentData:(void(^)(id response))block;
 @end

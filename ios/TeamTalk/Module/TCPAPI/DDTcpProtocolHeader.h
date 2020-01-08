@@ -58,6 +58,8 @@ enum{
     IM_USERS_STAT_REQ                           = 0x020a,
     IM_USERS_STAT_RSP                           = 0x020b,
     IM_PC_LOGIN_STATUS_NOTIFY                   = 0x020e,
+    IM_ALL_DEPARTMENT_REQ                       = 0x0210,
+    IM_ALL_DEPARTMENT_RES                       = 0x0211,
     IM_CHANGE_SIGN_INFO_REQ                     = 0x0213,
     IM_CHANGE_SIGN_INFO_RES                     = 0x0214,
     IM_SIGN_INFO_CHANGED_NOTIFY                 = 0x0215,

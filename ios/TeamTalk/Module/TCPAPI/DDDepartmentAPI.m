@@ -7,6 +7,8 @@
 //
 
 #import "DDDepartmentAPI.h"
+#import "ImBuddy.pbobjc.h"
+#import "ImBaseDefine.pbobjc.h"
 
 @implementation DMTTDepartmentAPI
 
@@ -27,7 +29,7 @@
  */
 - (int)requestServiceID
 {
-    return 2;
+    return SID_BUDDY_LIST;
 }
 
 /**
@@ -37,7 +39,7 @@
  */
 - (int)responseServiceID
 {
-    return 2;
+    return SID_BUDDY_LIST;
 }
 
 /**
@@ -47,7 +49,8 @@
  */
 - (int)requestCommendID
 {
-    return 18;
+    return IM_ALL_DEPARTMENT_REQ;
+    
 }
 
 /**
@@ -57,7 +60,7 @@
  */
 - (int)responseCommendID
 {
-    return 19;
+    return IM_ALL_DEPARTMENT_RES;
 }
 
 /**
@@ -70,28 +73,23 @@
     
     Analysis analysis = (id)^(NSData* data)
     {
-        DDDataInputStream* bodyData = [DDDataInputStream dataInputStreamWithData:data];
-        NSInteger departCount = [bodyData readInt];
+        IMDepartmentRsp* rsp = [IMDepartmentRsp parseFromData:data error:nil];
+        NSInteger departCount = [rsp deptListArray_Count];
         NSMutableArray *array = [NSMutableArray new];
+        NSInteger recordTime = [[NSDate date] timeIntervalSince1970];
         for (int i = 0 ; i<departCount; i++) {
-            NSString *departID = [bodyData readUTF];
-            NSString *title = [bodyData readUTF];
-            NSString *description = [bodyData readUTF];
-            NSString *parentID = [bodyData readUTF];
-            NSString *leader = [bodyData readUTF];
-            NSInteger isDelete = [bodyData readInt];
-            NSDictionary *result = @{@"departCount": @(departCount),
-                                     @"departID":departID,
-                                     @"title":title,
-                                     @"description":description,
-                                     @"parentID":parentID,
-                                     @"leader":leader,
-                                     @"isDelete":@(isDelete)
+            DepartInfo* info = [rsp deptListArray][i];
+            NSDictionary *result = @{@"departID":[@(info.deptId) stringValue],
+                                     @"departName":info.deptName,
+                                     @"parentID":[@(info.parentDeptId) stringValue],
+                                     @"priority":@(info.priority),
+                                     @"status":@(info.deptStatus),
+                                     @"created":@(recordTime),
+                                     @"updated":@(recordTime),
                                      };
             [array addObject:result];
-
         }
-    
+
         return array;
     };
     return analysis;
@@ -106,12 +104,18 @@
 {
     Package package = (id)^(id object,uint32_t seqNo)
     {
+        IMDepartmentReq *reqBuilder = [IMDepartmentReq new];
+        NSInteger lastTime = [object[0] intValue];
+        [reqBuilder setUserId:0];
+        [reqBuilder setLatestUpdateTime:lastTime];
+
         DDDataOutputStream *dataout = [[DDDataOutputStream alloc] init];
-        [dataout writeInt:IM_PDU_HEADER_LEN];
-        [dataout writeTcpProtocolHeader:2
-                                    cId:18
+        [dataout writeInt:0];
+        [dataout writeTcpProtocolHeader:SID_BUDDY_LIST
+                                    cId:IM_ALL_DEPARTMENT_REQ
                                   seqNo:seqNo];
-    
+        [dataout directWriteBytes:[reqBuilder data]];
+        [dataout writeDataCount];
         return [dataout toByteArray];
     };
     return package;

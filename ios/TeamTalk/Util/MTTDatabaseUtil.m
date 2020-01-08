@@ -25,7 +25,7 @@
 #define SQL_CREATE_MESSAGE_INDEX        [NSString stringWithFormat:@"CREATE INDEX msgid on %@(messageID)",TABLE_MESSAGE]
 
 
-#define SQL_CREATE_DEPARTMENTS      [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (ID text UNIQUE,parentID text,title text, description text,leader text, status integer,count integer)",TABLE_DEPARTMENTS]
+#define SQL_CREATE_DEPARTMENTS      [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (ID text UNIQUE,parentID text,departName text, priority integer , status integer,created real,updated real)",TABLE_DEPARTMENTS]
 
 
 #define SQL_CREATE_ALL_CONTACTS      [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (ID text UNIQUE,Name text,Nick text,Avatar text, Department text,DepartID text, Email text,Postion text,Telphone text,Sex integer,updated real,pyname text,signature text)",TABLE_ALL_CONTACTS]
@@ -49,7 +49,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         g_databaseUtil = [[MTTDatabaseUtil alloc] init];
-        [NSString stringWithFormat:@""];
+        //[NSString stringWithFormat:@""];
     });
     return g_databaseUtil;
 }
@@ -98,8 +98,9 @@
         NSInteger lastDbVersion = [MTTUtil getLastDBVersion];
         if(dbVersion > lastDbVersion){
             // 删除联系人数据 重新获取.
-            [self clearTable:TABLE_ALL_CONTACTS];
+            [self clearTable:TABLE_MESSAGE];
             [self clearTable:TABLE_DEPARTMENTS];
+            [self clearTable:TABLE_ALL_CONTACTS];
             [self clearTable:TABLE_GROUPS];
             [self clearTable:TABLE_RECENT_SESSION];
             [MTTUtil setLastDBVersion:dbVersion];
@@ -290,12 +291,12 @@
 {
     
     NSDictionary *dic = @{@"departID": [resultSet stringForColumn:@"ID"],
-                          @"title":[resultSet stringForColumn:@"title"],
-                          @"description":[resultSet stringForColumn:@"description"],
-                          @"leader":[resultSet stringForColumn:@"leader"],
+                          @"departName":[resultSet stringForColumn:@"departName"],
                           @"parentID":[resultSet stringForColumn:@"parentID"],
+                          @"priority":[NSNumber numberWithInt:[resultSet intForColumn:@"priority"]],
                           @"status":[NSNumber numberWithInt:[resultSet intForColumn:@"status"]],
-                          @"count":[NSNumber numberWithInt:[resultSet intForColumn:@"count"]],
+                          @"created":@([resultSet longForColumn:@"created"]),
+                          @"updated":@([resultSet longForColumn:@"updated"])
                           };
     MTTDepartment *deaprtment = [MTTDepartment departmentFromDic:dic];
     return deaprtment;
@@ -516,7 +517,6 @@
 
 - (void)deleteMesages:(MTTMessageEntity * )message completion:(DeleteSessionCompletion)completion
 {
-    ;
     [_dataBaseQueue inDatabase:^(FMDatabase *db) {
         NSString* sql = @"DELETE FROM message WHERE messageID = ?";
         BOOL result = [_database executeUpdate:sql,@(message.msgID)];
@@ -679,6 +679,65 @@
 //        }
 //    }];
 //}
+
+
+- (void)getAllDepartments:(LoadAllContactsComplection )completion
+{
+    [_dataBaseQueue inDatabase:^(FMDatabase *db) {
+        if ([_database tableExists:TABLE_DEPARTMENTS])
+        {
+            [_database setShouldCacheStatements:YES];
+            NSMutableArray* array = [[NSMutableArray alloc] init];
+            NSString* sqlString = [NSString stringWithFormat:@"SELECT * FROM %@ ",TABLE_DEPARTMENTS];
+            FMResultSet* result = [_database executeQuery:sqlString];
+            MTTDepartment* department = nil;
+            while ([result next])
+            {
+                department = [self departmentFromResult:result];
+                [array addObject:department];
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completion(array,nil);
+            });
+        }
+    }];
+}
+
+- (void)insertDepartment:(MTTDepartment*)department completion:(InsertsRecentContactsCOmplection)completion {
+    [_dataBaseQueue inDatabase:^(FMDatabase *db) {
+        [_database beginTransaction];
+        __block BOOL isRollBack = NO;
+        @try {
+                NSString* sql = [NSString stringWithFormat:@"INSERT OR REPLACE INTO %@ VALUES(?,?,?,?,?,?,?)",TABLE_DEPARTMENTS];
+                BOOL result = [_database executeUpdate:sql,department.ID,department.parentID,department.departName,   @(department.priority),@(department.status),@(department.created),@(department.updated)];
+                if (!result)
+                {
+                    isRollBack = YES;
+                }
+            
+        }
+        @catch (NSException *exception) {
+            [_database rollback];
+        }
+        @finally {
+            if (isRollBack)
+            {
+                [_database rollback];
+                DDLog(@"insert to database failure content");
+                NSError* error = [NSError errorWithDomain:@"批量插入部门信息失败" code:0 userInfo:nil];
+                completion(error);
+            }
+            else
+            {
+                [_database commit];
+                completion(nil);
+            }
+        }
+    }];
+}
+
+
+
 - (void)insertDepartments:(NSArray*)departments completion:(InsertsRecentContactsCOmplection)completion
 {
     [_dataBaseQueue inDatabase:^(FMDatabase *db) {
@@ -688,8 +747,7 @@
             [departments enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
                 MTTDepartment* department = [MTTDepartment departmentFromDic:obj];
                 NSString* sql = [NSString stringWithFormat:@"INSERT OR REPLACE INTO %@ VALUES(?,?,?,?,?,?,?)",TABLE_DEPARTMENTS];
-                //ID,Name,Nick,Avatar,Role,updated,reserve1,reserve2
-                BOOL result = [_database executeUpdate:sql,department.ID,department.parentID,department.title,department.description,department.leader,@(department.status),@(department.count)];
+                BOOL result = [_database executeUpdate:sql,department.ID,department.parentID,department.departName,   @(department.priority),@(department.status),@(department.created),@(department.updated)];
                 if (!result)
                 {
                     isRollBack = YES;

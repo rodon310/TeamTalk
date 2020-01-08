@@ -147,6 +147,9 @@ typedef void(^InsertsRecentContactsCOmplection)(NSError* error);
  *  @param completion  完成插入
  */
 - (void)insertDepartments:(NSArray*)departments completion:(InsertsRecentContactsCOmplection)completion;
+- (void)insertDepartment:(MTTDepartment*)department completion:(InsertsRecentContactsCOmplection)completion;
+
+- (void)getAllDepartments:(LoadAllContactsComplection )completion;
 
 - (void)getDepartmentFromID:(NSString*)departmentID completion:(void(^)(MTTDepartment *department))completion;
 - (void)insertAllUser:(NSArray*)users completion:(InsertsRecentContactsCOmplection)completion;

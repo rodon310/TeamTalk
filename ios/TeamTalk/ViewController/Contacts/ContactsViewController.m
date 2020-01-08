@@ -443,6 +443,13 @@
         text = [self.allKeys[section] uppercaseString];
         if(text.length == 0){
             text = @"神奇账号";
+        }else {
+            MTTDepartment* department = [[ContactsModule shareInstance]findDepartmentById:text];
+            if(department == nil) {
+                text = @"未知部门";
+            }else {
+                text = department.departName;
+            }
         }
     }
     UIView *sectionHeadView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 22)];

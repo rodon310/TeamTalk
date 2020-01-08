@@ -86,7 +86,7 @@
 -(void)initData
 {
     UIImage* placeholder = [UIImage imageNamed:@"user_placeholder"];
-    [_avatar sd_setImageWithURL:[NSURL URLWithString:[self.user get300AvatarUrl]] placeholderImage:placeholder];
+    [_avatar sd_setImageWithURL:[NSURL URLWithString:[self.user getAvatarUrl]] placeholderImage:placeholder];
     [_name setText:self.user.nick];
     [_cname setText:self.user.name];
 }
@@ -225,7 +225,13 @@
     switch (indexPath.row) {
         case 0:
         {
-            [cell setDesc:@"部门" detail:self.user.department];
+            MTTDepartment* department =[[ContactsModule shareInstance]findDepartmentById:self.user.department];
+            if(department == nil) {
+                [cell setDesc:@"部门" detail:@"未知部门"];
+            }else{
+                [cell setDesc:@"部门" detail:department.departName];
+            }
+            
             cell.userInteractionEnabled = NO;
         }
             break;

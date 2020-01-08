@@ -23,16 +23,37 @@
     self = [super init];
     if (self) {
         self.groups = [NSMutableArray new];
+        self.departmentDict = [NSMutableDictionary new];
        
     }
     return self;
 }
 
 
++ (instancetype)shareInstance
+{
+    static ContactsModule* g_contactModule;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        g_contactModule = [[ContactsModule alloc] init];
+    });
+    return g_contactModule;
+}
+
 -(void)addContact:(MTTUserEntity *)user
 {
     
 }
+
+
+-(void)addDepartMent:(MTTDepartment*)department {
+    [self.departmentDict setValue:department forKey:department.ID];
+}
+
+-(MTTDepartment*)findDepartmentById:(NSString*)departID {
+    return [self.departmentDict objectForKey:departID];
+}
+
 /**
  *  按首字母展示
  *
