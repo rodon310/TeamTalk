@@ -579,3 +579,25 @@ CREATE TABLE `IMUser` (
   KEY `idx_phone` (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
+
+
+
+# Dump of table IMProject
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `IMProject`;
+
+
+CREATE TABLE `IMProject` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) NOT NULL DEFAULT '' COMMENT '项目名称',
+  `type` int(11) NOT NULL,
+  `status` tinyint(2) NOT NULL DEFAULT '0',
+  `creatorId` int(11) NOT NULL,
+  `created` int(11) NOT NULL,
+  `updated` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+
