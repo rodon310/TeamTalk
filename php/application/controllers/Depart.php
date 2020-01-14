@@ -21,17 +21,17 @@ class Depart extends TT_Controller {
 
 
 	public function action_get(){
-        $pageSize =  $this->input->get('pageSize');
+		$pageSize =  $this->input->get('pageSize');
 		$currentPage = $this->input->get('currentPage');
 		if(empty($currentPage)){
 			$currentPage = 1;
-        }
+		}
 
-        if(empty($pageSize)){
-            $pageSize = 10;
-        }
-		
-        $departs = $this->depart_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
+		if(empty($pageSize)){
+			$pageSize = 10;
+		}
+
+		$departs = $this->depart_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
 		$data = array();
 		foreach ($departs as $key => $value) {
 			$data[$value['id']] = $value;
@@ -44,17 +44,17 @@ class Depart extends TT_Controller {
 			}
 		}
 		$count = $this->depart_model->getCount(array('status'=>0));
-        $result = array(
-            'pagination'=> array(
-			   'current'=>intval($currentPage),
-               'total'=>$count,
-               'pageSize'=>intval($pageSize),
-             ),
+		$result = array(
+			'pagination'=> array(
+				'current'=>intval($currentPage),
+				'total'=>$count,
+				'pageSize'=>intval($pageSize),
+			),
 			'departs'=>$departs
-        );
-        $this->json_out($result);
+		);
+		$this->json_out($result);
 	}
-	
+
 	public function action_post(){
 		$req_data = $this->json_input();
 		$out_result = array('status'=>'ok','msg'=>'');
@@ -101,11 +101,11 @@ class Depart extends TT_Controller {
 					$out_result['msg'] = "update failed";
 				}
 			}
-			
+
 		}else {
 			$out_result['msg'] = "no such ".$action;
 		}
-       	$this->json_out($out_result);   
+		$this->json_out($out_result);   
 	}
 
 

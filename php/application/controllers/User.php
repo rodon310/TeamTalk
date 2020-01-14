@@ -131,8 +131,8 @@ class User extends TT_Controller {
 						$out_result['msg'] = "insert failed";
 					}
 				}else {
-						$out_result['status'] = 'failed';
-						$out_result['msg'] = "user is existed";
+					$out_result['status'] = 'failed';
+					$out_result['msg'] = "user is existed";
 				}
 			}else {
 				$id = $record['id'];

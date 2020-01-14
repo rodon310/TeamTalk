@@ -20,26 +20,26 @@ class Discovery extends TT_Controller {
 
 
 	public function action_get(){
-        $pageSize =  $this->input->get('pageSize');
+		$pageSize =  $this->input->get('pageSize');
 		$currentPage = $this->input->get('currentPage');
 		if(empty($currentPage)){
 			$currentPage = 1;
-        }
+		}
 
-        if(empty($pageSize)){
-            $pageSize = 10;
-        }
+		if(empty($pageSize)){
+			$pageSize = 10;
+		}
 		$discoverys = $this->discovery_model->getList(array('status'=>0),'*', ($currentPage-1)*$pageSize , $pageSize);
 		$count = $this->discovery_model->getCount(array('status'=>0));
 		$result = array(
-            'pagination'=> array(
-			   'current'=>intval($currentPage),
-               'total'=>$count,
-               'pageSize'=>intval($pageSize),
-             ),
-			 'discoverys'=>$discoverys
-        );
-        $this->json_out($result);
+			'pagination'=> array(
+				'current'=>intval($currentPage),
+				'total'=>$count,
+				'pageSize'=>intval($pageSize),
+			),
+			'discoverys'=>$discoverys
+		);
+		$this->json_out($result);
 	}
 
 
@@ -75,11 +75,11 @@ class Discovery extends TT_Controller {
 					$out_result['msg'] = "update failed";
 				}
 			}
-			
+
 		}else {
 			$out_result['msg'] = "no such ".$action;
 		}
-       	$this->json_out($out_result);   
+		$this->json_out($out_result);   
 	}
 
 	public function action_post_error($error = array()) {

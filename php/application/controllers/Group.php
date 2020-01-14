@@ -22,15 +22,15 @@ class Group extends TT_Controller {
 
 
 	public function action_get(){
-        $pageSize =  $this->input->get('pageSize');
+		$pageSize =  $this->input->get('pageSize');
 		$currentPage = $this->input->get('currentPage');
 		if(empty($currentPage)){
 			$currentPage = 1;
-        }
+		}
 
-        if(empty($pageSize)){
-            $pageSize = 10;
-        }
+		if(empty($pageSize)){
+			$pageSize = 10;
+		}
 		$groups = $this->group_model->getList(array('status'=>0), '*', ($currentPage-1)*$pageSize , $pageSize);
 
 		foreach ($groups as $key => $value) {
@@ -43,15 +43,15 @@ class Group extends TT_Controller {
 			}
 		}
 		$count = $this->group_model->getCount(array('status'=>0));
-        $result = array(
-            'pagination'=> array(
-			   'current'=>intval($currentPage),
-               'total'=>$count,
-               'pageSize'=>intval($pageSize),
-             ),
+		$result = array(
+			'pagination'=> array(
+				'current'=>intval($currentPage),
+				'total'=>$count,
+				'pageSize'=>intval($pageSize),
+			),
 			'groups'=>$groups
-        );
-        $this->json_out($result);
+		);
+		$this->json_out($result);
 	}
 
 	public function editmember_post() {

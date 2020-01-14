@@ -13,42 +13,41 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 include_once(APPPATH."core/TT_Controller.php");
 
-
 class Admin extends TT_Controller {
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->load->helper('url');
-        $this->load->model('admin_model');
-    }
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->helper('url');
+		$this->load->model('admin_model');
+	}
 
-    public function action_get() {
-        $pageSize =  $this->input->get('pageSize');
+	public function action_get() {
+		$pageSize =  $this->input->get('pageSize');
 		$currentPage = $this->input->get('currentPage');
 		if(empty($currentPage)){
 			$currentPage = 1;
-        }
+		}
 
-        if(empty($pageSize)){
-            $pageSize = 10;
-        }
+		if(empty($pageSize)){
+			$pageSize = 10;
+		}
 		$admin_users = $this->admin_model->getList(array('status'=>0),'*', ($currentPage-1)*$pageSize , $pageSize);
 		$count = $this->admin_model->getCount(array('status'=>0));
 		$result = array(
-            'pagination'=> array(
-			   'current'=>intval($currentPage),
-               'total'=>$count,
-               'pageSize'=>intval($pageSize),
-             ),
-			 'admin_users'=>$admin_users
-        );
-        $this->json_out($result);     
-    }
+			'pagination'=> array(
+				'current'=>intval($currentPage),
+				'total'=>$count,
+				'pageSize'=>intval($pageSize),
+			),
+			'admin_users'=>$admin_users
+		);
+		$this->json_out($result);     
+	}
 
-    public function action_post() {
-    
-        $req_data = $this->json_input();
+	public function action_post() {
+
+		$req_data = $this->json_input();
 		$out_result = array('status'=>'ok','msg'=>'');
 		$action = $req_data['method'];
 		if("delete" == $action){
@@ -94,12 +93,12 @@ class Admin extends TT_Controller {
 					$out_result['msg'] = "update failed";
 				}
 			}
-			
+
 		}else {
 			$out_result['msg'] = "no such ".$action;
 		}
-       	$this->json_out($out_result);   
-    }
+		$this->json_out($out_result);   
+	}
 
 }
 

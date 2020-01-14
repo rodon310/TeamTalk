@@ -22,13 +22,13 @@ class Auth extends REST_Controller {
 			exit();
 		}
 		$this->load->view('auth/login');
-    }
+	}
 
 
 
-    public function currentuser(){
-        $result = array('name'=>'guest');
-        if(isset($this->session->userdata['account'])){
+	public function currentuser(){
+		$result = array('name'=>'guest');
+		if(isset($this->session->userdata['account'])){
 			$result['avatar'] = 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png';
 			$account = $this->session->userdata['account'];
 			if(is_array($account)) {
@@ -42,17 +42,17 @@ class Auth extends REST_Controller {
 				$result['name'] = $account;    
 				$result['authority'] = $account;
 			}
-            
-        }
-        $this->json_out($result);
-    }
 
-    public function userlogin_post(){
-        $submit = $this->json_input('submit');
+		}
+		$this->json_out($result);
+	}
+
+	public function userlogin_post(){
+		$submit = $this->json_input('submit');
 		$account = $this->json_input('account');
 		$password = $this->json_input('password');
-        $result = array('status'=>'ok','msg'=>'wrong');
-        if($submit){
+		$result = array('status'=>'ok','msg'=>'wrong');
+		if($submit){
 			$admin = $this->admin_model->getOne(array('uname'=>$account));
 			if(md5($password) == $admin['pwd']){
 				$result['msg'] = 'right';
@@ -73,36 +73,36 @@ class Auth extends REST_Controller {
 					$this->session->set_userdata($session);
 					$result['currentAuthority'] = 'admin';
 				}
-                
+
 			}
-        }
-        $this->json_out($result);
+		}
+		$this->json_out($result);
 	}
-	
+
 
 	public function userlogout(){
 		$this->session->sess_destroy();
-        $result = array('status'=>'ok','msg'=>'logout');
-        $this->json_out($result);
-    }
+		$result = array('status'=>'ok','msg'=>'logout');
+		$this->json_out($result);
+	}
 
-    public function login_post(){
+	public function login_post(){
 		$submit = $this->input->post('submit');
 		$account = $this->input->post('account');
 		$password = $this->input->post('password');
-        $result = array('status'=>0,'msg'=>'wrong');
-        if($submit){
+		$result = array('status'=>0,'msg'=>'wrong');
+		if($submit){
 			$admin = $this->admin_model->getOne(array('uname'=>$account));
 			if(md5($password) == $admin['pwd']){
 				$session = array(
 					'account' => $account
 				);
-                $this->session->set_userdata($session);
-                $result['msg'] = 'right';
+				$this->session->set_userdata($session);
+				$result['msg'] = 'right';
 			}
-        }
-        $this->json_out($result);
-    }
+		}
+		$this->json_out($result);
+	}
 
 	public function logout(){
 		$this->session->sess_destroy();
