@@ -57,6 +57,7 @@ $route['api/logout'] = "auth/userlogout";
 $route['api/currentUser'] = "auth/currentUser";
 $route['api/user'] = "user/action";
 $route['api/admin'] = "admin/action";
+$route['api/project'] = "project/action";
 $route['api/group'] = "group/action";
 $route['api/depart'] = "depart/action";
 $route['api/discoverys'] = "discovery/action";
