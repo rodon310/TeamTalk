@@ -16,6 +16,4 @@ class Home extends TT_Controller {
 		$this->load->view('base/home');
 		$this->load->view('base/footer');
 	}
-
-
 }
