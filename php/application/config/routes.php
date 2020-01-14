@@ -54,6 +54,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // for ant manager backend (https://github.com/xiaominfc/teamtalk_ant)
 $route['api/login/account'] = "auth/userlogin";
 $route['api/logout'] = "auth/userlogout";
+$route['api/register'] = "auth/userregister";
 $route['api/currentUser'] = "auth/currentUser";
 $route['api/user'] = "user/action";
 $route['api/admin'] = "admin/action";
@@ -61,7 +62,7 @@ $route['api/project'] = "project/action";
 $route['api/group'] = "group/action";
 $route['api/depart'] = "depart/action";
 $route['api/discoverys'] = "discovery/action";
-$route['api/groupusers'] = "group/getMember";
+$route['api/groupusers'] = "group/getmember";
 $route['api/editmember'] = "group/editmember";
 
 // for ant manager backend

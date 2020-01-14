@@ -47,6 +47,45 @@ class Auth extends REST_Controller {
 		$this->json_out($result);
 	}
 
+	public function userregister_post() {
+		$req_data = $this->json_input();
+		$out_result = array('status'=>'ok','currentAuthority'=>'user');	
+
+		if(!isset($req_data['mail'])) {
+			$out_result['status'] = 'error';
+			$out_result['msg'] = 'lost mail';
+			$this->json_out($out_result);
+			return;
+		}
+
+		if((!isset($req_data['password'])) || (!isset($req_data['confirm']))) {
+			$out_result['status'] = 'error'; 
+			$out_result['msg'] = 'lost password or confirm';
+			$this->json_out($out_result);
+			return;
+		}else if($req_data['password'] != $req_data['confirm']) {
+			$out_result['status'] = 'error'; 
+			$out_result['msg'] = 'password not equal confirm'; 
+			$this->json_out($out_result); 
+			return;
+		}
+
+		$params = array(
+			'uname'=>$req_data['mail'],
+			'pwd'=>md5($req_data['password']),
+			'type'=>2,
+			'updated'=>time(),
+			'created'=>time()
+		);
+		$result = $this->admin_model->insert($params);
+		
+		if(!$result) {
+			$out_result['status'] = 'error';
+			$out_result['currentAuthority'] = '';	
+		}
+		$this->json_out($out_result);
+	}
+
 	public function userlogin_post(){
 		$submit = $this->json_input('submit');
 		$account = $this->json_input('account');
