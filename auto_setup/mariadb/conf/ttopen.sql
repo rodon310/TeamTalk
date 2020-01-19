@@ -74,6 +74,7 @@ CREATE TABLE `IMDepart` (
   `status` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '状态',
   `created` int(11) unsigned NOT NULL COMMENT '创建时间',
   `updated` int(11) unsigned NOT NULL COMMENT '更新时间',
+  `pid` int(11) NOT NULL DEFAULT '0' COMMENT '项目ID',
   PRIMARY KEY (`id`),
   KEY `idx_departName` (`departName`),
   KEY `idx_priority_status` (`priority`,`status`)
@@ -94,6 +95,7 @@ CREATE TABLE `IMDiscovery` (
   `status` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '状态',
   `created` int(11) unsigned NOT NULL COMMENT '创建时间',
   `updated` int(11) unsigned NOT NULL COMMENT '更新时间',
+  `pid` int(11) NOT NULL DEFAULT '0' COMMENT '项目ID',
   PRIMARY KEY (`id`),
   KEY `idx_itemName` (`itemName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
@@ -116,6 +118,7 @@ CREATE TABLE `IMGroup` (
   `lastChated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '最后聊天时间',
   `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `pid` int(11) NOT NULL DEFAULT '0' COMMENT '项目ID',
   PRIMARY KEY (`id`),
   KEY `idx_name` (`name`(191)),
   KEY `idx_creator` (`creator`)
@@ -573,6 +576,7 @@ CREATE TABLE `IMUser` (
   `updated` int(11) unsigned NOT NULL COMMENT '更新时间',
   `push_shield_status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0关闭勿扰 1开启勿扰',
   `sign_info` varchar(128) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '个性签名',
+  `pid` int(11) NOT NULL DEFAULT '0' COMMENT '项目ID',
   PRIMARY KEY (`id`),
   KEY `idx_domain` (`domain`),
   KEY `idx_name` (`name`),
