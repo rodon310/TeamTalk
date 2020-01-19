@@ -1,8 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-include_once(APPPATH."core/TT_Controller.php");
+include_once(APPPATH."core/BaseController.php");
 
-class Depart extends TT_Controller {
+class Depart extends BaseController {
 
 	public function __construct()
 	{
@@ -19,19 +19,13 @@ class Depart extends TT_Controller {
 		$this->load->view('base/footer');
 	}
 
+	public function default_model(){
+		return $this->depart_model;
+	}
 
-	public function action_get(){
-		$pageSize =  $this->input->get('pageSize');
-		$currentPage = $this->input->get('currentPage');
-		if(empty($currentPage)){
-			$currentPage = 1;
-		}
 
-		if(empty($pageSize)){
-			$pageSize = 10;
-		}
-
-		$departs = $this->depart_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
+	//override package data
+	public function package_data($departs) {
 		$data = array();
 		foreach ($departs as $key => $value) {
 			$data[$value['id']] = $value;
@@ -43,22 +37,47 @@ class Depart extends TT_Controller {
 				$departs[$key]['parentId_value'] = '当前部门是父部门';
 			}
 		}
-		$count = $this->depart_model->getCount(array('status'=>0));
+
 		$result = array(
-			'pagination'=> array(
-				'current'=>intval($currentPage),
-				'total'=>$count,
-				'pageSize'=>intval($pageSize),
-			),
 			'departs'=>$departs
 		);
-		$this->json_out($result);
+		return $result;
+	}
+
+	public function prepare_data($record, $action){
+		$params = array(
+			'departName'=>$record['departName'],
+			'priority'=>$record['priority'],
+			'parentId'=>$record['parentId'],
+			//'updated'=>time(),
+		);
+		return $params;	
+	}
+
+	public function remove_record($id){
+			$departCount = $this->depart_model->getCount(array('status'=>0,'parentId'=>$id));
+			if($departCount){
+				$out_result['status'] = 'failed';
+				$out_result['msg'] = "has departs";
+				$this->json_out($out_result); 
+				exit();
+			}
+			$userCount = $this->user_model->getCount(array('status'=>0,'departId'=>$id));
+			if($userCount){
+				$out_result['status'] = 'failed';
+				$out_result['msg'] = "has users";
+				$this->json_out($out_result); 
+				exit();
+			}
+			$this->depart_model->update(array('status'=>3), $id);
+			$this->json_out(array('status'=>'ok','msg'=>''));
 	}
 
 	public function action_post(){
 		$req_data = $this->json_input();
 		$out_result = array('status'=>'ok','msg'=>'');
 		$action = $req_data['method'];
+		$pid = $req_data['pid'];
 		if("delete" == $action){
 			$id =  $req_data['id'];
 			$departCount = $this->depart_model->getCount(array('status'=>0,'parentId'=>$id));
@@ -83,11 +102,12 @@ class Depart extends TT_Controller {
 				'departName'=>$record['departName'],
 				'priority'=>$record['priority'],
 				'parentId'=>$record['parentId'],
-				'updated'=>time()
+				'updated'=>time(),
 			);
 
 			if('add' == $action){
 				$params['created'] = time();
+				$params['pid'] = $pid;
 				$result = $this->depart_model->insert($params);
 				if(!$result){
 					$out_result['status'] = 'failed';

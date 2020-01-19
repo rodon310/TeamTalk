@@ -1,8 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-include_once(APPPATH."core/TT_Controller.php");
+include_once(APPPATH."core/BaseController.php");
 
-class Group extends TT_Controller {
+class Group extends BaseController {
 
 	public function __construct()
 	{
@@ -21,18 +21,11 @@ class Group extends TT_Controller {
 	}
 
 
-	public function action_get(){
-		$pageSize =  $this->input->get('pageSize');
-		$currentPage = $this->input->get('currentPage');
-		if(empty($currentPage)){
-			$currentPage = 1;
-		}
+	public function default_model() {
+		return $this->group_model;
+	}
 
-		if(empty($pageSize)){
-			$pageSize = 10;
-		}
-		$groups = $this->group_model->getList(array('status'=>0), '*', ($currentPage-1)*$pageSize , $pageSize);
-
+	public function package_data($groups){
 		foreach ($groups as $key => $value) {
 			if($groups[$key]['avatar']){
 				if(substr($groups[$key]['avatar'], 0, 4) === "http") {
@@ -42,16 +35,60 @@ class Group extends TT_Controller {
 				}
 			}
 		}
-		$count = $this->group_model->getCount(array('status'=>0));
 		$result = array(
-			'pagination'=> array(
-				'current'=>intval($currentPage),
-				'total'=>$count,
-				'pageSize'=>intval($pageSize),
-			),
 			'groups'=>$groups
 		);
-		$this->json_out($result);
+		return $result;
+	}
+
+	//init base info for add or update
+	public function prepare_data($record,$action){
+			return $record;
+	}
+
+	//add new record
+	public function add_record($record) {
+		$avatar ='';
+		if(isset($record['avatar'])) {
+			$avatar = $record['avatar'];
+		}
+		$array = array(
+			'req_user_id' 	=> 0,
+			'app_key'		=> 'asdfasdf',
+			'group_name'	=> $record['name'],
+			'group_type'	=> intval($record['type']),
+			'group_avatar'	=> $avatar,
+			'user_id_list'	=> array()
+		);
+		$res = $this->httpRequest($this->config->config['http_url'].'/query/CreateGroup','post',json_encode($array));
+		log_message('info','result:'.$res);
+		$res = json_decode($res,1);
+		if(!$res || $res['error_code'] != 0){
+			$this->json_out(array('status'=>'failed', 'msg'=>'insert failed'));
+			return;
+		}
+		$this->json_out(array('status'=>'ok', 'msg'=>''));
+	}
+
+	public function update_record($record){
+		$avatar ='';
+		if(isset($record['avatar'])){
+			$avatar = $record['avatar'];
+		}
+		$id = $record['id'];
+		$params = array(
+			'name'	=> $record['name'],
+			'type'	=> $record['type'],
+			'avatar'	=> $avatar,
+		);
+		$result = $this->default_model()->update($params,$id);
+		if(!$result){
+			$this->json_out(array('status'=>'failed', 'msg'=>'update failed')); 
+			return;
+		}else {
+			$this->default_model()->autoInc($id,'version');
+		}
+		$this->json_out(array('status'=>'ok', 'msg'=>''));
 	}
 
 	public function editmember_post() {
@@ -66,67 +103,6 @@ class Group extends TT_Controller {
 		);                  
 		$res = $this->httpRequest($this->config->config['http_url'].'/query/ChangeMembers','post',json_encode($args));
 		$this->json_out($res);   
-	}
-	
-	public function action_post() {
-		$req_data = $this->json_input();
-		$out_result = array('status'=>'ok','msg'=>'');
-
-		
-		$action = $req_data['method'];
-		if("delete" == $action){
-			$id =  $req_data['id'];
-			$result = $this->group_model->update(array('status'=>3), $id);
-			$msg = "";
-		}else if("add" == $action || "update" == $action) {
-			$record = $req_data['record'];
-			$avatar = '';
-			if(isset($record['avatar'])){
-				$avatar = $record['avatar'];
-			}
-			if("add" == $action) {
-				
-				if(!$avatar) {
-					$avatar = '';
-				}
-
-				$array = array(
-					'req_user_id' 	=> 0,
-					'app_key'		=> 'asdfasdf',
-					'group_name'	=> $record['name'],
-					'group_type'	=> intval($record['type']),
-					'group_avatar'	=> $avatar,
-					'user_id_list'	=> array(1)
-				);
-				$res = $this->httpRequest($this->config->config['http_url'].'/query/CreateGroup','post',json_encode($array));
-				log_message('info','result:'.$res);
-				$res = json_decode($res,1);
-				if(!$res || $res['error_code'] != 0){
-					$out_result['status'] = 'failed';
-					$out_result['msg'] = "insert failed";
-				}
-			}else {
-				$id = $record['id'];
-				$params = array(
-					'name'	=> $record['name'],
-					'type'	=> $record['type'],
-					'avatar'	=> $avatar,
-				);
-				
-				$result = $this->group_model->update($params,$id);
-				
-				if(!$result){
-					$out_result['status'] = 'failed';
-					$out_result['msg'] = "update failed";
-				}else {
-					$this->group_model->autoInc($id,'version');
-				}
-			}
-			
-		}else {
-			$out_result['msg'] = "no such ".$action;
-		}
-        $this->json_out($out_result);   
 	}
 
 	public function all()

@@ -1,9 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-include_once(APPPATH."core/TT_Controller.php");
+include_once(APPPATH."core/BaseController.php");
 include_once(APPPATH."libraries/Utils.php");
 
-class User extends TT_Controller {
+class User extends BaseController {
 
 	public function __construct()
 	{
@@ -22,23 +22,18 @@ class User extends TT_Controller {
 		$this->load->view('base/footer');
 	}
 
-	public function action_get(){
-		$pageSize =  $this->input->get('pageSize');
-		$currentPage = $this->input->get('currentPage');
-		$departs = $this->depart_model->getList(array('status'=>0), '*', 0, 10000);
+	public function default_model(){
+		return $this->user_model;
+	}
+
+	public function package_data($users){
+		$pid = $this->input->get('pid');
+		$departs = $this->depart_model->getList(array('status'=>0,'pid'=>$pid), '*', 0, 10000);
 		$_departs = array();
 		foreach ($departs as $key => $value) {
 			$_departs[$value['id']] = $value;
 		}
-		if(empty($currentPage)){
-			$currentPage = 1;
-		}
 
-		if(empty($pageSize)){
-			$pageSize = 10;
-		}
-
-		$users = $this->user_model->getList(array('status'=>0), '*',($currentPage-1)*$pageSize , $pageSize);
 		foreach ($users as $key => $value) {
 			if($value['sex'] == 0){
 				$users[$key]['sex'] = '女';
@@ -54,33 +49,16 @@ class User extends TT_Controller {
 				$users[$key]['avatar_value'] = $users[$key]['avatar'];
 			}
 		}
-		$count = $this->user_model->getCount(array('status'=>0));
-
 		$result = array(
 			'users'=>$users,
-			'pagination'=> array(
-				'current'=>intval($currentPage),
-				'total'=>$count,
-				'pageSize'=>intval($pageSize),
-			),
 			'departMap'=>$_departs
 		);
-		$this->json_out($result);
-
+		return $result;
 	}
 
-	public function action_post(){
-		$req_data = $this->json_input();
-		$out_result = array('status'=>'ok','msg'=>'');
 
-		$action = $req_data['method'];
-		if("delete" == $action){
-			$id =  $req_data['id'];
-			$result = $this->user_model->update(array('status'=>3), $id);
-			$msg = "";
-		}else if("add" == $action || "update" == $action) {
-			$record = $req_data['record'];
-			//log_message('info','record:'.json_encode($record));
+	//init base info for add or update
+	public function prepare_data($record,$action){
 			$name = $record['name'];
 			$domain = Utils::getStrDomain($name);
 			$params = array(
@@ -90,7 +68,7 @@ class User extends TT_Controller {
 				'departId' => $record['departId'],
 				'sex' => $record['sex'],
 				'status'=>0,
-				'updated'=>time(),
+//				'updated'=>time(),
 			);
 
 			if(isset($record['phone'])) {
@@ -120,35 +98,23 @@ class User extends TT_Controller {
 				$this->json_out($out_result);  
 				return;
 			}
-
-			if("add" == $action) {
-				$count = $this->user_model->getCount(array('name'=>$name));
-				if($count == 0) {
-					$params['created'] = time();
-					$result = $this->user_model->insert($params);
-					if(!$result){
-						$out_result['status'] = 'failed';
-						$out_result['msg'] = "insert failed";
-					}
-				}else {
-					$out_result['status'] = 'failed';
-					$out_result['msg'] = "user is existed";
-				}
-			}else {
-				$id = $record['id'];
-				$result = $this->user_model->update($params,$id);
-				if(!$result){
-					$out_result['status'] = 'failed';
-					$out_result['msg'] = "update failed";
-				}
-			}
-		}else {
-			$out_result['msg'] = "no such ".$action;
-		}
-		$this->json_out($out_result);   
+			return $params;
 	}
 
-
+	//add new record
+	public function add_record($params) {
+		$count = $this->default_model()->getCount(array('name'=>$params['name']));
+		if($count == 0) {
+			$result = $this->default_model()->insert($params);
+			if(!$result){
+				$this->json_out(array('status'=>'failed', 'msg'=>'insert  failed'));
+			}else {
+				$this->json_out(array('status'=>'ok', 'msg'=>''));
+			}
+		}else {
+			$this->json_out(array('status'=>'failed', 'msg'=>'user is existed'));
+		}
+	}
 
 	public function all()
 	{
