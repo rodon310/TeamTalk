@@ -279,8 +279,7 @@ void CImUserManager::RemoveImUser(CImUser *pUser)
 
 void CImUserManager::RemoveAll()
 {
-    for (ImUserMapByName_t::iterator it = m_im_user_map_by_name.begin(); it != m_im_user_map_by_name.end();
-         it++)
+    for (ImUserMapByName_t::iterator it = m_im_user_map_by_name.begin(); it != m_im_user_map_by_name.end();it++)
     {
         CImUser* pUser = it->second;
         if (pUser != NULL) {
