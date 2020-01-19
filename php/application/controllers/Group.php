@@ -70,7 +70,7 @@ class Group extends BaseController {
 		$this->json_out(array('status'=>'ok', 'msg'=>''));
 	}
 
-	public function update_record($record){
+	public function update_record($record,$id){
 		$avatar ='';
 		if(isset($record['avatar'])){
 			$avatar = $record['avatar'];
@@ -80,6 +80,7 @@ class Group extends BaseController {
 			'name'	=> $record['name'],
 			'type'	=> $record['type'],
 			'avatar'	=> $avatar,
+			'update'=>time(),
 		);
 		$result = $this->default_model()->update($params,$id);
 		if(!$result){
