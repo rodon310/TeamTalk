@@ -58,6 +58,16 @@ class Project extends TT_Controller {
 		return $count > 0;
 	}
 
+	
+
+  //此处生成要保证唯一性 简单点处理先
+	private function createAppKey($id_time) {
+		return substr(md5($id_time),16,8);
+	}
+
+	private function createAppSecret($appId) {
+		return substr(sha1($appId),20);
+	}
 
 	public function action_post() {
 		$req_data = $this->json_input();
@@ -67,7 +77,7 @@ class Project extends TT_Controller {
 		if("delete" == $action){
 			$id =  $req_data['id'];
 			//auth id for creatorId
-			if(!$this->auth_id($id)) {
+			if(!$this->auth_pid($id)) {
 				$out_result['status'] = 'failed';
 				$out_result['msg'] = '没有权限进行此操作';
 				$this->json_out($out_result);
@@ -98,6 +108,11 @@ class Project extends TT_Controller {
 					if(!$result){
 						$out_result['status'] = 'failed';
 						$out_result['msg'] = "insert failed";
+					}else {
+						$appkey = $this->createAppKey($result."#".$params['created']);
+						$params = array('appkey'=>$appkey, 'appsecret'=>$this->createAppSecret($appkey."#APP"));
+						$out_result['msg'] = "create:".$result;
+						$result = $this->project_model->update($params,$result);
 					}
 				}else{
 					$out_result['status'] = 'failed';
@@ -105,7 +120,7 @@ class Project extends TT_Controller {
 				}
 			}else {
 				$id = $record['id'];
-				if(!$this->auth_id($id)) {
+				if(!$this->auth_pid($id)) {
 					$out_result['status'] = 'failed';
 					$out_result['msg'] = '没有权限进行此操作';
 					$this->json_out($out_result);

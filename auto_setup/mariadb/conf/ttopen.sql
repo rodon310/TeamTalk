@@ -596,6 +596,8 @@ CREATE TABLE `IMProject` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL DEFAULT '' COMMENT '项目名称',
   `type` int(11) NOT NULL,
+	`appkey` varchar(16) NOT NULL DEFAULT '',
+  `appsecret` varchar(20) NOT NULL DEFAULT '',
   `status` tinyint(2) NOT NULL DEFAULT '0',
   `creatorId` int(11) NOT NULL,
   `created` int(11) NOT NULL,
