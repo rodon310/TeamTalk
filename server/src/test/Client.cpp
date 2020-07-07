@@ -36,7 +36,7 @@ CClient::~CClient()
 void CClient::TimerCallback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
 	CClient *client = (CClient*)callback_data;
-	if (client->g_bLogined) {
+	if (client->g_bLogined && client->g_pConn) {
 		uint64_t cur_time = get_tick_count();
 		client->g_pConn->OnTimer(cur_time);
 	}
@@ -118,12 +118,16 @@ void CClient::onConnect()
 
 void CClient::close()
 {
+	g_bLogined = false;
+	netlib_delete_timer(CClient::TimerCallback, this);
 	g_pConn->Close();
+	g_pConn = NULL;
+	
 }
 
 void CClient::onClose()
 {
-	
+	close();
 }
 
 uint32_t CClient::login(const string& strName, const string& strPass)

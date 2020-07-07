@@ -50,11 +50,18 @@ void ClientConn::OnConfirm()
 
 void ClientConn::OnClose()
 {
-	Close();
+	printf("ClientConn::OnClose\n");
+	if(m_pCallback)
+	{
+		m_pCallback->onClose();
+	}else {
+		Close();	
+	}
 }
 
 void ClientConn::OnTimer(uint64_t curr_tick)
 {
+	
 	if (curr_tick > m_last_send_tick + CLIENT_HEARTBEAT_INTERVAL) {
 		CImPdu cPdu;
 		IM::Other::IMHeartBeat msg;
@@ -68,7 +75,12 @@ void ClientConn::OnTimer(uint64_t curr_tick)
 	
 	if (curr_tick > m_last_recv_tick + CLIENT_TIMEOUT) {
 		log("conn to msg_server timeout\n");
-		Close();
+		if(m_pCallback)
+		{
+			m_pCallback->onClose();
+		}else {
+			Close();	
+		}
 	}
 }
 
@@ -242,6 +254,7 @@ uint32_t ClientConn::checkHasOfflineFile(uint32_t nUserId){
 void ClientConn::Close()
 {
 	if (m_handle != NETLIB_INVALID_HANDLE) {
+		client_conn_map.erase(m_handle);
 		netlib_close(m_handle);
 	}
 	ReleaseRef();

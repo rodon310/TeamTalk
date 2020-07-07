@@ -81,16 +81,16 @@ int main(int argc, char* argv[])
 
 	char* str_aes_key = config_file.GetConfigName("aesKey");
 	if (!str_aes_key || strlen(str_aes_key)!=32) {
-       	   	 log("aes key is invalied");
-       		 return -1;
-    }
-    pAes = new CAes(str_aes_key);
+		log("aes key is invalied");
+		return -1;
+	}
+	pAes = new CAes(str_aes_key);
 
 	if (!listen_ip || !str_listen_port) {
 		log("config file miss, exit... ");
 		return -1;
 	}
-    
+
 	uint16_t listen_port = atoi(str_listen_port);
     
 	int ret = netlib_init();
