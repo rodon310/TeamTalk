@@ -209,7 +209,7 @@ void AiClient::connect()
 		strBackupIp = value["backupIp"].asString();
 		nPort = atoi(value["port"].asString().c_str());
 		
-	} catch (std::runtime_error msg) {
+	} catch (std::runtime_error emsg) {
 		printf("login falied. get json error:%s\n", strResp.c_str());
 		//callback
 		char *msg = (char*)malloc(1024);
