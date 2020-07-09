@@ -67,6 +67,7 @@ class CHttpQuery
 		static void _Login(const string&strAppKey, Json::Value& post_json, CHttpConn* pHttpConn);
 		static void _Online(CHttpConn* pHttpConn);
 		static void _SendMessage(const string&strAppKey, Json::Value& post_json, CHttpConn* pHttpConn);
+		static void _TestCallBack(const string&strAppKey, Json::Value& post_json, CHttpConn* pHttpConn);
 
 		static HTTP_ERROR_CODE _CheckAuth(const string& strAppKey, const uint32_t userId, const string& strInterface, const string& strIp);
 		static HTTP_ERROR_CODE _CheckPermission(const string& strAppKey, uint8_t nType, const list<uint32_t>& lsToId , string strMsg);

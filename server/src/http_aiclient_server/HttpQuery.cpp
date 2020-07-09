@@ -130,6 +130,9 @@ void CHttpQuery::DispatchQuery(std::string& url, std::string& post_data, CHttpCo
 	}else if(strcmp(url.c_str(), "/aichat/SendMsg") == 0)
 	{
 		_SendMessage(strAppKey, value, pHttpConn);	
+	}else if(strcmp(url.c_str(), "/aichat/CallBack") == 0)
+	{
+		_TestCallBack(strAppKey, value, pHttpConn);	
 	}
 	else {
 		log("url not support for post:%s",url.c_str());
@@ -176,6 +179,34 @@ void CHttpQuery::_Login(const string&strAppKey, Json::Value& post_json_obj, CHtt
 		paramErrorOut(pHttpConn);
 	}
 }
+
+void CHttpQuery::_TestCallBack(const string&strAppKey, Json::Value& post_json_obj, CHttpConn* pHttpConn){
+	if(checkValueIsNullForJson(post_json_obj,"text")
+		||checkValueIsNullForJson(post_json_obj,"fromId")
+		||checkValueIsNullForJson(post_json_obj,"toId")
+		||checkValueIsNullForJson(post_json_obj,"msgType")
+		){
+		paramErrorOut(pHttpConn);
+		return;
+	}
+
+	try{
+		string text = post_json_obj["text"].asString();
+		uint32_t fromId = post_json_obj["fromId"].asUInt();
+		uint32_t toId = post_json_obj["toId"].asUInt();
+		uint32_t msgType = post_json_obj["msgType"].asUInt();
+		log("test callback fromId:%d  toId:%d msgType:%d text:%s",fromId, toId, msgType, text.c_str());
+		char *response_buf = PackSendResult(0,"test callback ok");
+		pHttpConn->Send(response_buf, (uint32_t)strlen(response_buf));
+		pHttpConn->Close();
+	}catch(std::runtime_error msg)
+	{
+		log("parse json data failed.");
+		paramErrorOut(pHttpConn);
+	}
+}
+
+
 void CHttpQuery::_SendMessage(const string&strAppKey, Json::Value& post_json_obj, CHttpConn* pHttpConn) {
 	if(checkValueIsNullForJson(post_json_obj,"senderId")
 		||checkValueIsNullForJson(post_json_obj,"toId")
@@ -200,6 +231,10 @@ void CHttpQuery::_SendMessage(const string&strAppKey, Json::Value& post_json_obj
 				return;
 			}
 			aiClient->sendMsg(toId,IM::BaseDefine::MSG_TYPE_SINGLE_TEXT,text);
+			log("sendmsg senderId:%d  toId:%d text:%s",uid, toId, text.c_str());
+			char *response_buf = PackSendResult(0,"send msg ok");
+			pHttpConn->Send(response_buf, (uint32_t)strlen(response_buf));
+			pHttpConn->Close();
 			return;
 		}else {
 			
