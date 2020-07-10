@@ -138,15 +138,23 @@ void AiClient::OnLoginOk(){
 	http_handle = 0;
 }
 
-void AiClient::ErrorLogin(char *msg){
+void AiClient::ErrorLogin(const char *format, ...){
+
 	if(http_handle <=0) {
 		return;
 	}
+
 	CHttpConn* pHttpConn = FindHttpConnByHandle(http_handle);
 	if(!pHttpConn){
 		return;
 	}
-	char *response_buf = PackSendResult(1,msg);
+
+	va_list args;
+	va_start(args, format);
+	char szBuffer[1024];
+	vsnprintf(szBuffer, sizeof(szBuffer), format, args);
+	va_end(args);
+	char *response_buf = PackSendResult(1,szBuffer);
 	pHttpConn->Send(response_buf, (uint32_t)strlen(response_buf));
 	pHttpConn->Close();
 	http_handle = 0;
@@ -169,11 +177,7 @@ void AiClient::connect()
 	if(nRet != CURLE_OK)
 	{
 		printf("login falied. access url:%s error:%d\n", strUrl.c_str(), nRet);
-		char *msg = (char*)malloc(1024);
-		memset(msg,0,1024);
-		sprintf(msg,"login falied. access url:%s error:%d\n", strUrl.c_str(), nRet);
-		ErrorLogin(msg);
-		free(msg);
+		ErrorLogin("login falied. access url:%s error:%d\n", strUrl.c_str(), nRet);
 		return;
 	}
 	Json::Reader reader;
@@ -181,12 +185,7 @@ void AiClient::connect()
 	if(!reader.parse(strResp, value))
 	{
 		printf("login falied. parse response error:%s\n", strResp.c_str());
-		//callback
-		char *msg = (char*)malloc(1024);
-		memset(msg,0,1024);
-		sprintf(msg,"login falied. parse response error:%s\n", strResp.c_str());
-		ErrorLogin(msg);
-		free(msg);
+		ErrorLogin("login falied. parse response error:%s\n", strResp.c_str());
 		return;
 	}
 	string strPriorIp, strBackupIp;
@@ -197,11 +196,7 @@ void AiClient::connect()
 		{
 			string strMsg = value["msg"].asString();
 			printf("login falied. errorMsg:%s\n", strMsg.c_str());
-			char *msg = (char*)malloc(1024);
-			memset(msg,0,1024);
-			sprintf(msg,"login falied errorMsg:%s\n", strMsg.c_str());
-			ErrorLogin(msg);
-			free(msg);
+			ErrorLogin("login falied errorMsg:%s\n", strMsg.c_str());
 			//callback
 			return;
 		}
@@ -212,11 +207,7 @@ void AiClient::connect()
 	} catch (std::runtime_error emsg) {
 		printf("login falied. get json error:%s\n", strResp.c_str());
 		//callback
-		char *msg = (char*)malloc(1024);
-		memset(msg,0,1024);
-		sprintf(msg,"login falied. get json error:%s\n", strResp.c_str());
-		ErrorLogin(msg);
-		free(msg);
+		ErrorLogin("login falied. get json error:%s\n", strResp.c_str());
 		return;
 	}
 	
@@ -288,11 +279,7 @@ void AiClient::onLogin(uint32_t nSeqNo, uint32_t nResultCode, string& strMsg, IM
 	if(nResultCode != 0)
 	{
 		printf("login failed.errorCode=%u, msg=%s\n",nResultCode, strMsg.c_str());
-		char *msg = (char*)malloc(1024);
-		memset(msg,0,1024);
-		sprintf(msg,"login failed.errorCode=%u, msg=%s\n",nResultCode, strMsg.c_str());
-		ErrorLogin(msg);
-		free(msg);
+		ErrorLogin("login failed.errorCode=%u, msg=%s\n",nResultCode, strMsg.c_str());
 		return;
 	}
 	if(pUser)

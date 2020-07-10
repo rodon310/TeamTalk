@@ -30,7 +30,7 @@ public:
 	void doLogin(uint32_t handle,const string &callbackurl);
 	virtual void onLogin(uint32_t nSeqNo, uint32_t nResultCode, string& strMsg, IM::BaseDefine::UserInfo* pUser = NULL);
 	void OnLoginOk();
-	void ErrorLogin(char *msg);
+	void ErrorLogin(const char *format, ...);
 	void onClose();
 	void onRecvMsg(uint32_t nSeqNo, uint32_t nFromId, uint32_t nToId, uint32_t nMsgId, uint32_t nCreateTime, IM::BaseDefine::MsgType nMsgType, const string& strMsgData);
 	void toJson(Json::Value &json_data);
