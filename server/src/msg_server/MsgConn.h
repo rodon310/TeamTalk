@@ -9,6 +9,7 @@
 #define MSGCONN_H_
 
 #include "imconn.h"
+#include "BaseSocket.h"
 
 
 
@@ -50,6 +51,10 @@ public:
 	virtual void OnConnect(net_handle_t handle);
 	virtual void OnClose();
     virtual void OnRead();
+
+	virtual  int Send(void* data, int len);
+	virtual void OnWrite();
+	
 	virtual inline void OnTimer(uint64_t curr_tick);
 
 	virtual void HandlePdu(CImPdu* pPdu);
@@ -103,6 +108,8 @@ private:
     uint32_t        m_client_type;        //客户端登录方式
     
     uint32_t        m_online_status;      //在线状态 1-online, 2-off-line, 3-leave
+
+	CBaseSocket*	m_basesocket;
 };
 
 

@@ -24,6 +24,7 @@
 #include "ImPduBase.h"
 #include "ThreadPool.h"
 
+
 using namespace IM::BaseDefine;
 
 #define TIMEOUT_WATI_LOGIN_RESPONSE		15000	// 15 seconds
@@ -205,6 +206,8 @@ void CMsgConn::OnConnect(net_handle_t handle)
 	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_msg_conn_map);
 	netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
 	netlib_option(handle, NETLIB_OPT_GET_REMOTE_PORT, (void*)&m_peer_port);
+	m_basesocket = FindBaseSocket(m_handle);
+	
 }
 
 void CMsgConn::OnClose()
@@ -267,7 +270,8 @@ void CMsgConn::OnRead()
 		if (free_buf_len < READ_BUF_SIZE)
 			m_in_buf.Extend(READ_BUF_SIZE);
 
-		int ret = netlib_recv(m_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
+		//int ret = netlib_recv(m_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
+		int ret = m_basesocket->Recv( m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
 		if (ret <= 0)
 			break;
 
@@ -290,7 +294,7 @@ void CMsgConn::OnRead()
 			//HandlePdu(pPdu);
 			//delete pPdu;
 			pPdu = NULL;
-			//			++g_recv_pkt_cnt;
+			//++g_recv_pkt_cnt;
 		}
 	} catch (CPduException& ex) {
 		log("!!!catch exception, sid=%u, cid=%u, err_code=%u, err_msg=%s, close the connection ",
@@ -301,6 +305,78 @@ void CMsgConn::OnRead()
 		}
 		OnClose();
 	}
+}
+
+
+int CMsgConn::Send(void* data, int len)
+{
+	m_last_send_tick = get_tick_count();
+	//	++g_send_pkt_cnt;
+
+	if (m_busy)
+	{
+		m_out_buf.Write(data, len);
+		return len;
+	}
+
+	int offset = 0;
+	int remain = len;
+	while (remain > 0) {
+		int send_size = remain;
+		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
+			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
+		}
+
+		//int ret = netlib_send(m_handle, (char*)data + offset , send_size);
+		int ret = m_basesocket->Send((char*)data + offset, send_size);
+		if (ret <= 0) {
+			ret = 0;
+			break;
+		}
+
+		offset += ret;
+		remain -= ret;
+    }
+
+	if (remain > 0)
+	{
+		m_out_buf.Write((char*)data + offset, remain);
+		m_busy = true;
+		log("send busy, remain=%d ", m_out_buf.GetWriteOffset());
+	}
+	else
+	{
+		OnWriteCompelete();
+    }
+	return len;
+}
+
+
+void CMsgConn::OnWrite()
+{
+	if (!m_busy)
+		return;
+
+	while (m_out_buf.GetWriteOffset() > 0) {
+		int send_size = m_out_buf.GetWriteOffset();
+		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
+			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
+		}
+
+		//int ret = netlib_send(m_handle, m_out_buf.GetBuffer(), send_size);
+		int ret = m_basesocket->Send(m_out_buf.GetBuffer(), send_size);
+		if (ret <= 0) {
+			ret = 0;
+			break;
+		}
+		m_out_buf.Read(NULL, ret);
+	}
+
+	if (m_out_buf.GetWriteOffset() == 0) {
+		m_busy = false;
+	}
+
+	log("onWrite, remain=%d ", m_out_buf.GetWriteOffset());
 }
 
 void CMsgConn::HandlePdu(CImPdu* pPdu)
