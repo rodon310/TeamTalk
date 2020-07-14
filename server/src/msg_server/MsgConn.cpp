@@ -125,7 +125,7 @@ void immsgconn_callback(void* callback_data, uint8_t msg, uint32_t handle, void*
 			log("!!!imconn_callback error msg: %d ", msg);
 			break;
 	}
-	pConn->ReleaseRef();
+	//pConn->ReleaseRef();
 }
 
 void init_msg_conn()
@@ -238,8 +238,10 @@ void CMsgConn::OnConnect(net_handle_t handle)
 
 	g_msg_conn_map.insert(make_pair(handle, this));
 	m_basesocket = FindBaseSocket(m_handle);
-	m_basesocket->SetCallbackData(this);
+	this->AddRef();
+
 	m_basesocket->SetCallback(immsgconn_callback);
+	m_basesocket->SetCallbackData(this);
 	m_peer_ip = m_basesocket->GetRemoteIP();
 	m_peer_port = m_basesocket->GetRemotePort();
 
