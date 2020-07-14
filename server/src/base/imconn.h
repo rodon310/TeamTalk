@@ -53,7 +53,7 @@ protected:
 	uint32_t		m_recv_bytes;
 	uint64_t		m_last_send_tick;
 	uint64_t		m_last_recv_tick;
-    uint64_t        m_last_all_user_tick;
+    uint64_t		m_last_all_user_tick;
 };
 
 

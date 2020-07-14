@@ -94,6 +94,40 @@ static void signal_handler_hup(int sig_no)
 	}
 }
 
+
+void immsgconn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
+{
+	NOTUSED_ARG(handle);
+	NOTUSED_ARG(pParam);
+
+	if (!callback_data)
+		return;
+		
+	CMsgConn* pConn = (CMsgConn*)callback_data;
+	if (!pConn)
+		return;
+
+	switch (msg)
+	{
+		case NETLIB_MSG_CONFIRM:
+			pConn->OnConfirm();
+			break;
+		case NETLIB_MSG_READ:
+			pConn->OnRead();
+			break;
+		case NETLIB_MSG_WRITE:
+			pConn->OnWrite();
+			break;
+		case NETLIB_MSG_CLOSE:
+			pConn->OnClose();
+			break;
+		default:
+			log("!!!imconn_callback error msg: %d ", msg);
+			break;
+	}
+	pConn->ReleaseRef();
+}
+
 void init_msg_conn()
 {
 	g_last_stat_tick = get_tick_count();
@@ -116,6 +150,7 @@ CMsgConn::CMsgConn()
 	m_msg_cnt_per_sec = 0;
 	m_send_msg_list.clear();
 	m_online_status = IM::BaseDefine::USER_STATUS_OFFLINE;
+	m_basesocket = NULL;
 }
 
 CMsgConn::~CMsgConn()
@@ -190,8 +225,9 @@ void CMsgConn::Close(bool kick_user)
 			CImUserManager::GetInstance()->RemoveImUser(pImUser);
 		}
 	}
-
-
+	if(m_basesocket) {
+		m_basesocket->ReleaseRef();
+	}
 	ReleaseRef();
 }
 
@@ -201,12 +237,17 @@ void CMsgConn::OnConnect(net_handle_t handle)
 	m_login_time = get_tick_count();
 
 	g_msg_conn_map.insert(make_pair(handle, this));
-
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_msg_conn_map);
-	netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
-	netlib_option(handle, NETLIB_OPT_GET_REMOTE_PORT, (void*)&m_peer_port);
 	m_basesocket = FindBaseSocket(m_handle);
+	m_basesocket->SetCallbackData(this);
+	m_basesocket->SetCallback(immsgconn_callback);
+	m_peer_ip = m_basesocket->GetRemoteIP();
+	m_peer_port = m_basesocket->GetRemotePort();
+
+	// netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
+	// netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_msg_conn_map);
+	// netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
+	// netlib_option(handle, NETLIB_OPT_GET_REMOTE_PORT, (void*)&m_peer_port);
+	
 	
 }
 
