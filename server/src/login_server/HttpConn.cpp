@@ -41,8 +41,9 @@ void httpconn_callback(void* callback_data, uint8_t msg, uint32_t handle, uint32
 	NOTUSED_ARG(pParam);
 
 	// convert void* to uint32_t, oops
-	uint32_t conn_handle = *((uint32_t*)(&callback_data));
-	CHttpConn* pConn = FindHttpConnByHandle(conn_handle);
+	//uint32_t conn_handle = *((uint32_t*)(&callback_data));
+	//CHttpConn* pConn = FindHttpConnByHandle(conn_handle);
+	CHttpConn* pConn = (CHttpConn*)callback_data;
 	if (!pConn) {
 		return;
 	}
@@ -90,6 +91,7 @@ CHttpConn::CHttpConn()
 	m_busy = false;
 	m_sock_handle = NETLIB_INVALID_HANDLE;
 	m_state = CONN_STATE_IDLE;
+	m_basesocket = NULL;
 
 	m_last_send_tick = m_last_recv_tick = get_tick_count();
 	m_conn_handle = ++g_conn_handle_generator;
@@ -115,7 +117,8 @@ int CHttpConn::Send(void* data, int len)
 		return len;
 	}
 
-	int ret = netlib_send(m_sock_handle, data, len);
+	//int ret = netlib_send(m_sock_handle, data, len);
+	int ret = m_basesocket->Send( data, len);
 	if (ret < 0)
 		ret = 0;
 
@@ -139,20 +142,26 @@ void CHttpConn::Close()
 
 	g_http_conn_map.erase(m_conn_handle);
 	netlib_close(m_sock_handle);
-
+	if(m_basesocket) {
+		m_basesocket->ReleaseRef();
+	}
 	ReleaseRef();
 }
 
 void CHttpConn::OnConnect(net_handle_t handle)
 {
-	printf("OnConnect, handle=%d\n", handle);
+	//printf("OnConnect, handle=%d\n", handle);
 	m_sock_handle = handle;
 	m_state = CONN_STATE_CONNECTED;
 	g_http_conn_map.insert(make_pair(m_conn_handle, this));
+	m_basesocket =  FindBaseSocket(handle);
 
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)httpconn_callback);
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, reinterpret_cast<void *>(m_conn_handle) );
-	netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
+	m_basesocket->SetCallback((void*)httpconn_callback);
+	m_basesocket->SetCallbackData(this);
+	m_peer_ip = m_basesocket->GetRemoteIP();
+	//netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)httpconn_callback);
+	//netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, reinterpret_cast<void *>(m_conn_handle) );
+	//netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
 }
 
 void CHttpConn::OnRead()
@@ -163,7 +172,8 @@ void CHttpConn::OnRead()
 		if (free_buf_len < READ_BUF_SIZE + 1)
 			m_in_buf.Extend(READ_BUF_SIZE + 1);
 
-		int ret = netlib_recv(m_sock_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
+		//int ret = netlib_recv(m_sock_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
+		int ret = m_basesocket->Recv(m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
 		if (ret <= 0)
 			break;
 
@@ -212,7 +222,9 @@ void CHttpConn::OnWrite()
 	if (!m_busy)
 		return;
 
-	int ret = netlib_send(m_sock_handle, m_out_buf.GetBuffer(), m_out_buf.GetWriteOffset());
+	//int ret = netlib_send(m_sock_handle, m_out_buf.GetBuffer(), m_out_buf.GetWriteOffset());
+	int ret = m_basesocket->Send(m_out_buf.GetBuffer(), m_out_buf.GetWriteOffset());
+	
 	if (ret < 0)
 		ret = 0;
 

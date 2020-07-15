@@ -1,8 +1,8 @@
 /*
  * HttpPdu.cpp
  *
- *  Created on: 2013-10-1
- *      Author: ziteng@mogujie.com
+ * Created on: 2013-10-1
+ *	  Author: ziteng@mogujie.com
  */
 
 #include "util.h"
@@ -44,7 +44,7 @@ static char g_response_buf[MAX_BUF_SIZE];
 //http://www.cnitblog.com/luckydmz/archive/2010/10/12/69959.html
 inline char fromHex(const char &x)
 {
-    return isdigit(x) ? x-'0' : x-'A'+10;
+	return isdigit(x) ? x-'0' : x-'A'+10;
 }
 
 bool CPostDataParser::Parse(const char* content)
@@ -99,63 +99,63 @@ char* GetErrorMsg(uint32_t error_code)
 
 char* PackSendResult(uint32_t error_code, const char* error_msg)
 {
-    Json::Value json_obj;
-    
-    json_obj["error_code"] = error_code;
-    json_obj["error_msg"] = error_msg;
-    std::string json_str = json_obj.toStyledString();
-    uint32_t content_len = json_str.size();
-    
-    snprintf(g_response_buf, MAX_BUF_SIZE, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
-    return g_response_buf;
+	Json::Value json_obj;
+	
+	json_obj["error_code"] = error_code;
+	json_obj["error_msg"] = error_msg;
+	std::string json_str = json_obj.toStyledString();
+	uint32_t content_len = json_str.size();
+	
+	snprintf(g_response_buf, MAX_BUF_SIZE, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
+	return g_response_buf;
 }
 
 uint32_t PackSendResult(uint32_t error_code, const char* error_msg, uint32_t msg_id , char * out_data, uint32_t size)
 {
-    Json::Value json_obj;
-    json_obj["error_code"] = error_code;
-    json_obj["error_msg"] = error_msg;
-    json_obj["msg_id"] = msg_id;
-    std::string json_str = json_obj.toStyledString();
-    uint32_t content_len = json_str.size();
-    return snprintf(out_data, size, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
+	Json::Value json_obj;
+	json_obj["error_code"] = error_code;
+	json_obj["error_msg"] = error_msg;
+	json_obj["msg_id"] = msg_id;
+	std::string json_str = json_obj.toStyledString();
+	uint32_t content_len = json_str.size();
+	return snprintf(out_data, size, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
 }
 
 char* PackSendCreateGroupResult(uint32_t error_code, const char* error_msg, uint32_t group_id)
 {
-    Json::Value json_obj;
-    
-    json_obj["error_code"] = error_code;
-    json_obj["error_msg"] = error_msg;
-    json_obj["group_id"] = group_id;
-    std::string json_str = json_obj.toStyledString();
-    uint32_t content_len = json_str.size();
-    
-    snprintf(g_response_buf, MAX_BUF_SIZE, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
-    return g_response_buf;
+	Json::Value json_obj;
+	
+	json_obj["error_code"] = error_code;
+	json_obj["error_msg"] = error_msg;
+	json_obj["group_id"] = group_id;
+	std::string json_str = json_obj.toStyledString();
+	uint32_t content_len = json_str.size();
+	
+	snprintf(g_response_buf, MAX_BUF_SIZE, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
+	return g_response_buf;
 }
 
 char* PackGetUserIdByNickNameResult(uint32_t result, std::list<IM::BaseDefine::UserInfo> user_list)
 {
-    Json::Value json_obj;
-    Json::Value user_info_array;
-    json_obj["error_code"] = result;
-    json_obj["error_msg"] = "成功";
-    if (user_list.size() > 0) {
-        for (auto user_info : user_list)
-        {
-            Json::Value user_info_obj;
-            user_info_obj.append(user_info.user_nick_name());
-            user_info_obj.append(user_info.user_id());
-            user_info_array.append(user_info_obj);
-        }
-        json_obj["user_info_list"] = user_info_array;
-    }
-    std::string json_str = json_obj.toStyledString();
-    uint32_t content_len = json_str.size();
-    
-    snprintf(g_response_buf, MAX_BUF_SIZE, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
-    return g_response_buf;
+	Json::Value json_obj;
+	Json::Value user_info_array;
+	json_obj["error_code"] = result;
+	json_obj["error_msg"] = "成功";
+	if (user_list.size() > 0) {
+		for (auto user_info : user_list)
+		{
+			Json::Value user_info_obj;
+			user_info_obj.append(user_info.user_nick_name());
+			user_info_obj.append(user_info.user_id());
+			user_info_array.append(user_info_obj);
+		}
+		json_obj["user_info_list"] = user_info_array;
+	}
+	std::string json_str = json_obj.toStyledString();
+	uint32_t content_len = json_str.size();
+	
+	snprintf(g_response_buf, MAX_BUF_SIZE, HTTP_QUEYR_HEADER, content_len, json_str.c_str());
+	return g_response_buf;
 }
 
 

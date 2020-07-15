@@ -1,8 +1,8 @@
 /*
  * HttpPdu.h
  *
- *  Created on: 2013-10-1
- *      Author: ziteng@mogujie.com
+ * Created on: 2013-10-1
+ * Author: ziteng@mogujie.com
  */
 
 #ifndef HTTPPDU_H_

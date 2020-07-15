@@ -11,6 +11,7 @@
 #include "netlib.h"
 #include "util.h"
 #include "HttpParserWrapper.h"
+#include "BaseSocket.h"
 
 #define HTTP_CONN_TIMEOUT			60000
 
@@ -65,6 +66,8 @@ protected:
 	uint64_t		m_last_recv_tick;
     
     CHttpParserWrapper m_cHttpParser;
+
+	CBaseSocket*  m_basesocket;
 };
 
 typedef hash_map<uint32_t, CHttpConn*> HttpConnMap_t;
