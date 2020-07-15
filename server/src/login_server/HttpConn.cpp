@@ -35,9 +35,9 @@ CHttpConn* FindHttpConnByHandle(uint32_t conn_handle)
 	return pConn;
 }
 
-void httpconn_callback(void* callback_data, uint8_t msg, uint32_t handle, uint32_t uParam, void* pParam)
+void httpconn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
-	NOTUSED_ARG(uParam);
+	NOTUSED_ARG(handle);
 	NOTUSED_ARG(pParam);
 
 	// convert void* to uint32_t, oops
