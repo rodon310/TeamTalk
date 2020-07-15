@@ -12,6 +12,7 @@
 #include "util.h"
 #include "HttpParserWrapper.h"
 #include "BaseSocket.h"
+#include "Task.h"
 
 #define HTTP_CONN_TIMEOUT			60000
 
@@ -47,6 +48,8 @@ public:
     void OnClose();
     void OnTimer(uint64_t curr_tick);
     void OnWriteComlete();
+
+	void http_work();
 private:
     void _HandleMsgServRequest(string& url, string& post_data);
     void _HandleStatusReques(string& url, string& post_data);
@@ -68,6 +71,23 @@ protected:
     CHttpParserWrapper m_cHttpParser;
 
 	CBaseSocket*  m_basesocket;
+};
+
+class HttpTask:public CTask {
+
+public:
+	HttpTask(CHttpConn* http_conn){
+		m_http_conn = http_conn;
+	}
+	~HttpTask(){
+		m_http_conn = NULL;
+	}
+
+	virtual void run();
+
+private:
+	CHttpConn* m_http_conn;
+
 };
 
 typedef hash_map<uint32_t, CHttpConn*> HttpConnMap_t;

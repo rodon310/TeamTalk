@@ -10,8 +10,10 @@
 #include "LoginConn.h"
 #include "HttpParserWrapper.h"
 #include "ipparser.h"
+#include "ThreadPool.h"
 
 static HttpConnMap_t g_http_conn_map;
+static CThreadPool g_thread_pool;
 
 extern map<uint32_t, msg_serv_info_t*>  g_msg_serv_info;
 
@@ -82,6 +84,7 @@ void http_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle,
 
 void init_http_conn()
 {
+	g_thread_pool.Init(4);
 	netlib_register_timer(http_conn_timer_callback, NULL, 1000);
 }
 
@@ -141,8 +144,9 @@ void CHttpConn::Close()
 	m_state = CONN_STATE_CLOSED;
 
 	g_http_conn_map.erase(m_conn_handle);
-	netlib_close(m_sock_handle);
+	//netlib_close(m_sock_handle);
 	if(m_basesocket) {
+		m_basesocket->Close();
 		m_basesocket->ReleaseRef();
 	}
 	ReleaseRef();
@@ -181,8 +185,12 @@ void CHttpConn::OnRead()
 
 		m_last_recv_tick = get_tick_count();
 	}
+	g_thread_pool.AddTask(new HttpTask(this));
+	//http_work();
+}
 
-	// 每次请求对应一个HTTP连接，所以读完数据后，不用在同一个连接里面准备读取下个请求
+void CHttpConn::http_work(){
+// 每次请求对应一个HTTP连接，所以读完数据后，不用在同一个连接里面准备读取下个请求
 	char* in_buf = (char*)m_in_buf.GetBuffer();
 	uint32_t buf_len = m_in_buf.GetWriteOffset();
 	in_buf[buf_len] = '\0';
@@ -363,3 +371,7 @@ void CHttpConn::OnWriteComlete()
 	Close();
 }
 
+
+void HttpTask::run(){
+	m_http_conn->http_work();
+}
