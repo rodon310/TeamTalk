@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 $config['base_url']	= ''; // http://{domain}/
 $config['msfs_url'] = ''; // msfs 地址  http://{ip or domain}:8700/
-$config['http_url'] = '';// http_msg_server 地址  http://{ip or domain}:8400/
+$config['http_url'] = '';// http_msg_server 地址  http://{ip or domain}:8400
 
 /*
 |--------------------------------------------------------------------------
