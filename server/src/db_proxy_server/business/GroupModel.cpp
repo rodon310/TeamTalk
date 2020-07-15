@@ -57,35 +57,20 @@ CGroupModel *CGroupModel::getInstance()
 uint32_t CGroupModel::createGroup(uint32_t nUserId, const string &strGroupName, const string &strGroupAvatar, uint32_t nGroupType, set<uint32_t> &setMember)
 {
 	uint32_t nGroupId = INVALID_VALUE;
-	do
+	if (strGroupName.empty() || (!insertNewGroup(nUserId, strGroupName, strGroupAvatar, nGroupType, (uint32_t)setMember.size(), nGroupId)))
 	{
-		if (strGroupName.empty())
-		{
-			break;
-		}
-		if (setMember.empty())
-		{
-			break;
-		}
-		// remove repeat user
+			return nGroupId;
+	}
+	bool bRet = CGroupMessageModel::getInstance()->resetMsgId(nGroupId);
+	if (!bRet)
+	{
+		log("reset msgId failed. groupId=%u", nGroupId);
+	}
 
-		//insert IMGroup
-		if (!insertNewGroup(nUserId, strGroupName, strGroupAvatar, nGroupType, (uint32_t)setMember.size(), nGroupId))
-		{
-			break;
-		}
-		bool bRet = CGroupMessageModel::getInstance()->resetMsgId(nGroupId);
-		if (!bRet)
-		{
-			log("reset msgId failed. groupId=%u", nGroupId);
-		}
-
-		//insert IMGroupMember
+	if(!setMember.empty()) {
 		clearGroupMember(nGroupId);
 		insertNewMember(nGroupId, setMember);
-
-	} while (false);
-
+	}
 	return nGroupId;
 }
 
