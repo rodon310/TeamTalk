@@ -156,7 +156,7 @@ void CHttpConn::OnConnect(net_handle_t handle)
 	g_http_conn_map.insert(make_pair(m_conn_handle, this));
 	m_basesocket =  FindBaseSocket(handle);
 
-	m_basesocket->SetCallback((void*)httpconn_callback);
+	m_basesocket->SetCallback(httpconn_callback);
 	m_basesocket->SetCallbackData(this);
 	m_peer_ip = m_basesocket->GetRemoteIP();
 	//netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)httpconn_callback);
