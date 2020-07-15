@@ -10,7 +10,7 @@
 #include "ConfigFileReader.h"
 #include "version.h"
 #include "ServInfo.h"
-#include "HttpConn.h"
+#include "AiHttpConn.h"
 #include "HttpQuery.h"
 #include "util.h"
 #include "EncDec.h"
@@ -25,7 +25,7 @@ void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pPar
 {
 	if (msg == NETLIB_MSG_CONNECT)
 	{
-		CHttpConn* pConn = new CHttpConn();
+		CHttpConn* pConn = new AiHttpConn();
 		pConn->OnConnect(handle);
 	}
 	else

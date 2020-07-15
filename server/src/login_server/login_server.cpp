@@ -9,7 +9,7 @@
 #include "netlib.h"
 #include "ConfigFileReader.h"
 #include "version.h"
-#include "HttpConn.h"
+#include "WorkHttpConn.h"
 #include "ipparser.h"
 
 IpParser* pIpParser = NULL;
@@ -50,7 +50,7 @@ void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pPar
 {
 	if (msg == NETLIB_MSG_CONNECT)
 	{
-		CHttpConn* pConn = new CHttpConn();
+		CHttpConn* pConn = new WorkHttpConn();
 		pConn->OnConnect(handle);
 	}
 	else
@@ -79,8 +79,7 @@ int main(int argc, char* argv[])
 	char* str_msg_server_port = config_file.GetConfigName("MsgServerPort");
 	char* str_msfs_url = config_file.GetConfigName("msfs");
 	char* str_discovery = config_file.GetConfigName("discovery");
-  char* str_api = config_file.GetConfigName("BaseUrl");
-
+	char* str_api = config_file.GetConfigName("BaseUrl");
 	if (!msg_server_listen_ip || !str_msg_server_port || !http_listen_ip
 			|| !str_http_port || !str_msfs_url || !str_discovery) {
 		log("config item missing, exit... ");
@@ -92,7 +91,7 @@ int main(int argc, char* argv[])
 	uint16_t http_port = atoi(str_http_port);
 	strMsfsUrl = str_msfs_url;
 	strDiscovery = str_discovery;
-  strBaseUrl = str_api;
+	strBaseUrl = str_api;
 
 	pIpParser = new IpParser();
 

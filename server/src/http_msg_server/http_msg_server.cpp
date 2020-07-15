@@ -16,6 +16,7 @@
 #include "HttpQuery.h"
 #include "util.h"
 #include "EncDec.h"
+#include "QueryHttpConn.h"
 
 CAes* pAes;
 
@@ -26,7 +27,7 @@ void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pPar
 {
 	if (msg == NETLIB_MSG_CONNECT)
 	{
-		CHttpConn* pConn = new CHttpConn();
+		CHttpConn* pConn = new QueryHttpConn();
 		pConn->OnConnect(handle);
 	}
 	else
