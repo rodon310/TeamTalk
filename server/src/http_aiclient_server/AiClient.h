@@ -17,6 +17,13 @@
 
 using namespace std;
 
+#define HTTP_JSON_QUEYR_HEADER "HTTP/1.1 200 OK\r\n"\
+		"Cache-Control:no-cache\r\n"\
+		"Connection:close\r\n"\
+		"Content-Length:%d\r\n"\
+		"Content-Type:text/html;charset=utf-8\r\n\r\n%s"
+
+
 class ReConnectThread;
 class AiClient;
 

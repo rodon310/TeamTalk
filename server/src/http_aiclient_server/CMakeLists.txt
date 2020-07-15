@@ -22,11 +22,15 @@ ADD_DEFINITIONS( -g -W -Wall -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DAC_HAS_INFO
 -DAC_HAS_WARNING -DAC_HAS_ERROR -DAC_HAS_CRITICAL -DTIXML_USE_STL
 -DAC_HAS_DEBUG -DLINUX_DAEMON -std=c++11)
 
-INCLUDE_DIRECTORIES(./ ../test  ../base ../base/jsoncpp ../base/pb/protocol ${PB_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(./ ../http_msg_server ../test  ../base ../base/jsoncpp ../base/pb/protocol ${PB_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 LINK_DIRECTORIES(./ ../base ${PB_LIB_DIR} ${SLOG_LIB_DIR} ${OPENSSL_LIB_DIR})
 
 LIST(REMOVE_ITEM SRC_TEST_LIST ../test/test_client.cpp)
 LIST(REMOVE_ITEM SRC_TEST_LIST ../test/playsound.mm)
+
+LIST(APPEND SRC_LIST ../http_msg_server/AttachData.cpp)
+LIST(APPEND SRC_LIST ../http_msg_server/HttpPdu.cpp)
+LIST(APPEND SRC_LIST ../http_msg_server/HttpConn.cpp)
 
 
 #ADD_XXXX必须在TARGET_LINK_LIBRARIES前面，否则会报错
