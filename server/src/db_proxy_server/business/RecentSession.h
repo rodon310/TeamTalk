@@ -3,9 +3,9 @@
  *
  *   文件名称：FriendShip.h
  *   创 建 者：Zhang Yuanhao
- *   邮    箱：bluefoxah@gmail.com
+ *   邮	箱：bluefoxah@gmail.com
  *   创建日期：2014年12月15日
- *   描    述：
+ *   描	述：
  *
  ================================================================*/
 
@@ -16,9 +16,9 @@
 
 namespace DB_PROXY {
 
-    void getRecentSession(CImPdu* pPdu, uint32_t conn_uuid);
-    
-    void deleteRecentSession(CImPdu* pPdu, uint32_t conn_uuid);
+	void getRecentSession(CImPdu* pPdu, uint32_t conn_uuid);
+	
+	void deleteRecentSession(CImPdu* pPdu, uint32_t conn_uuid);
 
 };
 

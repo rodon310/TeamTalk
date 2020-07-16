@@ -3,9 +3,9 @@
  *
  *   文件名称：MessageModel.h
  *   创 建 者：Zhang Yuanhao
- *   邮    箱：bluefoxah@gmail.com
+ *   邮	箱：bluefoxah@gmail.com
  *   创建日期：2014年12月15日
- *   描    述：
+ *   描	述：
  *
  ================================================================*/
 
@@ -26,24 +26,24 @@ public:
 	virtual ~CMessageModel();
 	static CMessageModel* getInstance();
 
-    bool sendMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t nToId, IM::BaseDefine::MsgType nMsgType, uint32_t nCreateTime,
-                     uint32_t nMsgId, string& strMsgContent);
-    bool sendAudioMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t nToId, IM::BaseDefine::MsgType nMsgType, uint32_t nCreateTime,
-                          uint32_t nMsgId, const char* pMsgContent, uint32_t nMsgLen);
-    void getMessage(uint32_t nUserId, uint32_t nPeerId, uint32_t nMsgId, uint32_t nMsgCnt,
-                    list<IM::BaseDefine::MsgInfo>& lsMsg);
-    bool clearMessageCount(uint32_t nUserId, uint32_t nPeerId);
-    
-    uint32_t getMsgId(uint32_t nRelateId);
-    void getUnreadMsgCount(uint32_t nUserId, uint32_t &nTotalCnt, list<IM::BaseDefine::UnreadInfo>& lsUnreadCount);
-    void getLastMsg(uint32_t nFromId, uint32_t nToId, uint32_t& nMsgId, string& strMsgData, IM::BaseDefine::MsgType & nMsgType, uint32_t nStatus = 0);
-    void getUnReadCntAll(uint32_t nUserId, uint32_t &nTotalCnt);
-    void getMsgByMsgId(uint32_t nUserId, uint32_t nPeerId, const list<uint32_t>& lsMsgId, list<IM::BaseDefine::MsgInfo>& lsMsg);
-    bool resetMsgId(uint32_t nRelateId);
+	bool sendMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t nToId, IM::BaseDefine::MsgType nMsgType, uint32_t nCreateTime,
+					 uint32_t nMsgId, string& strMsgContent);
+	bool sendAudioMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t nToId, IM::BaseDefine::MsgType nMsgType, uint32_t nCreateTime,
+						  uint32_t nMsgId, const char* pMsgContent, uint32_t nMsgLen);
+	void getMessage(uint32_t nUserId, uint32_t nPeerId, uint32_t nMsgId, uint32_t nMsgCnt,
+					list<IM::BaseDefine::MsgInfo>& lsMsg);
+	bool clearMessageCount(uint32_t nUserId, uint32_t nPeerId);
+	
+	uint32_t getMsgId(uint32_t nRelateId);
+	void getUnreadMsgCount(uint32_t nUserId, uint32_t &nTotalCnt, list<IM::BaseDefine::UnreadInfo>& lsUnreadCount);
+	void getLastMsg(uint32_t nFromId, uint32_t nToId, uint32_t& nMsgId, string& strMsgData, IM::BaseDefine::MsgType & nMsgType, uint32_t nStatus = 0);
+	void getUnReadCntAll(uint32_t nUserId, uint32_t &nTotalCnt);
+	void getMsgByMsgId(uint32_t nUserId, uint32_t nPeerId, const list<uint32_t>& lsMsgId, list<IM::BaseDefine::MsgInfo>& lsMsg);
+	bool resetMsgId(uint32_t nRelateId);
 private:
 	CMessageModel();
-    void incMsgCount(uint32_t nFromId, uint32_t nToId);
-    uint32_t getMsgIdFromDb(uint32_t nRelateId);
+	void incMsgCount(uint32_t nFromId, uint32_t nToId);
+	uint32_t getMsgIdFromDb(uint32_t nRelateId);
 private:
 	static CMessageModel*	m_pInstance;
 };

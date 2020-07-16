@@ -3,9 +3,9 @@
  *
  *   文件名称：GroupModel.cpp
  *   创 建 者：Zhang Yuanhao
- *   邮    箱：bluefoxah@gmail.com
+ *   邮	箱：bluefoxah@gmail.com
  *   创建日期：2014年12月15日
- *   描    述：
+ *   描	述：
  *
  ================================================================*/
 
@@ -46,11 +46,11 @@ CGroupModel *CGroupModel::getInstance()
 /**
  *  创建群
  *
- *  @param nUserId        创建者
+ *  @param nUserId		创建者
  *  @param strGroupName   群名
  *  @param strGroupAvatar 群头像
- *  @param nGroupType     群类型1,固定群;2,临时群
- *  @param setMember      群成员列表，为了踢出重复的userId，使用set存储
+ *  @param nGroupType	 群类型1,固定群;2,临时群
+ *  @param setMember	  群成员列表，为了踢出重复的userId，使用set存储
  *
  *  @return 成功返回群Id，失败返回0;
  */

@@ -3,9 +3,9 @@
  *
  *   文件名称：GroupModel.h
  *   创 建 者：Zhang Yuanhao
- *   邮    箱：bluefoxah@gmail.com
+ *   邮	箱：bluefoxah@gmail.com
  *   创建日期：2014年12月15日
- *   描    述：
+ *   描	述：
  *
  ================================================================*/
 
@@ -31,7 +31,7 @@ class CGroupModel {
 public:
 	virtual ~CGroupModel();
 	static CGroupModel* getInstance();
-    
+	
 public:
 	uint32_t createGroup(uint32_t nUserId, const string& strGroupName, const string& strGroupAvatar, uint32_t nGroupType, set<uint32_t>& setMember);
 	bool removeGroup(uint32_t nUserId, uint32_t nGroupId, list<uint32_t>& lsCurUserId);
@@ -43,10 +43,10 @@ public:
 	bool modifyGroupMember(uint32_t nUserId, uint32_t nGroupId, IM::BaseDefine::GroupModifyType nType, set<uint32_t>& setUserId,list<uint32_t>& lsCurUserId);
 	void getGroupUser(uint32_t nGroupId, list<uint32_t>& lsUserId);
 	bool isInGroup(uint32_t nUserId, uint32_t nGroupId);
-    
+	
 	void updateGroupChat(uint32_t nGroupId);
 	bool isValidateGroupId(uint32_t nGroupId);
-    
+	
 	uint32_t getUserJoinTime(uint32_t nGroupId, uint32_t nUserId);
 private:
 	CGroupModel();
@@ -63,7 +63,7 @@ private:
 	bool incGroupVersion(uint32_t nGroupId);
 	void clearGroupMember(uint32_t nGroupId);
 	void fillGroupMember(list<IM::BaseDefine::GroupInfo>& lsGroups);
-    
+	
 private:
 	static CGroupModel*	m_pInstance;
 };
