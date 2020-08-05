@@ -227,6 +227,7 @@ void CMsgConn::Close(bool kick_user)
 	}
 	if(m_basesocket) {
 		m_basesocket->ReleaseRef();
+		m_basesocket = NULL;
 	}
 	ReleaseRef();
 }

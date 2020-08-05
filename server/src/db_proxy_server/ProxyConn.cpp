@@ -164,9 +164,8 @@ void CProxyConn::OnRead()
 			HandlePduBuf(m_in_buf.GetBuffer(), pdu_len);
 			m_in_buf.Read(NULL, pdu_len);
 		}
-	} catch (CPduException& ex) {
-		log("!!!catch exception, err_code=%u, err_msg=%s, close the connection ",
-			ex.GetErrorCode(), ex.GetErrorMsg());
+    } catch (CPduException& ex) {
+		log("!!!catch exception, err_code=%u, err_msg=%s, close the connection ",ex.GetErrorCode(), ex.GetErrorMsg());
 		OnClose();
 	}
 	

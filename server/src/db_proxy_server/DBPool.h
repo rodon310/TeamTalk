@@ -48,8 +48,8 @@ public:
 
 	void SetParam(uint32_t index, int& value);
 	void SetParam(uint32_t index, uint32_t& value);
-    void SetParam(uint32_t index, string& value);
-    void SetParam(uint32_t index, const string& value);
+	void SetParam(uint32_t index, string& value);
+	void SetParam(uint32_t index, const string& value);
 
 	bool ExecuteUpdate();
     CResultSet* ExecuteQuery();

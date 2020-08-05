@@ -65,8 +65,18 @@ int CacheConn::Init()
 
 		return 1;
 	}
+	redisReply* reply = NULL;
+	if(m_pCachePool->needAuth()) {
+		reply = (redisReply *)redisCommand(m_pContext, "AUTH %s", m_pCachePool->GetAuthPassword());
+		if (!reply ||  (reply->type != REDIS_REPLY_STATUS) || (strncmp(reply->str, "OK", 2) != 0)) {
+			log("AUTH cache db failed");	
+			return 2;
+		}
+		freeReplyObject(reply);			
+	}
 
-	redisReply* reply = (redisReply *)redisCommand(m_pContext, "SELECT %d", m_pCachePool->GetDBNum());
+
+	reply = (redisReply *)redisCommand(m_pContext, "SELECT %d", m_pCachePool->GetDBNum());
 	if (reply && (reply->type == REDIS_REPLY_STATUS) && (strncmp(reply->str, "OK", 2) == 0)) {
 		freeReplyObject(reply);
 		return 0;
@@ -224,6 +234,32 @@ bool CacheConn::isExists(string &key)
         return true;
     }
 }
+
+bool CacheConn::hExists(string key, string field)
+{
+    if (Init()) {
+        return false;
+    }
+    
+    redisReply* reply = (redisReply*) redisCommand(m_pContext, "HEXISTS %s %s", key.c_str(),field.c_str());
+    if(!reply)
+    {
+        log("redisCommand failed:%s", m_pContext->errstr);
+        redisFree(m_pContext);
+        return false;
+    }
+    long ret_value = reply->integer;
+    freeReplyObject(reply);
+    if(0 == ret_value)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 long CacheConn::hdel(string key, string field)
 {
 	if (Init()) {
@@ -567,6 +603,7 @@ CachePool::CachePool(const char* pool_name, const char* server_ip, int server_po
 	m_db_num = db_num;
 	m_max_conn_cnt = max_conn_cnt;
 	m_cur_conn_cnt = MIN_CACHE_CONN_CNT;
+	m_need_auth = false;
 }
 
 CachePool::~CachePool()
@@ -596,6 +633,11 @@ int CachePool::Init()
 
 	log("cache pool: %s, list size: %lu", m_pool_name.c_str(), m_free_list.size());
 	return 0;
+}
+
+void CachePool::configAuth(const char* auth) {
+	m_need_auth = true;
+	m_auth_password = auth;
 }
 
 CacheConn* CachePool::GetCacheConn()
@@ -668,53 +710,75 @@ CacheManager* CacheManager::getInstance()
 			s_cache_manager = NULL;
 		}
 	}
-
 	return s_cache_manager;
+}
+
+int CacheManager::InitWithConfig(const char * conf)
+{
+    CConfigFileReader config_file(conf);
+
+    char* cache_instances = config_file.GetConfigName("CacheInstances");
+    if (!cache_instances) {
+        log("not configure CacheIntance");
+        return 1;
+    }
+
+    char* str_default_redis_host = config_file.GetConfigName("default_redis_host");
+    char* str_default_redis_port = config_file.GetConfigName("default_redis_port");
+    char* str_default_redis_auth = config_file.GetConfigName("default_redis_auth");
+    char* str_default_redis_max_conn_cnt = config_file.GetConfigName("default_redis_maxconncnt");
+
+    char host[64];
+    char port[64];
+    char db[64];
+    char maxconncnt[64];
+    char auth[64];
+    CStrExplode instances_name(cache_instances, ',');
+    for (uint32_t i = 0; i < instances_name.GetItemCnt(); i++) {
+        char* pool_name = instances_name.GetItem(i);
+        //printf("%s", pool_name);
+        snprintf(host, 64, "%s_host", pool_name);
+        snprintf(port, 64, "%s_port", pool_name);
+        snprintf(db, 64, "%s_db", pool_name);
+        snprintf(maxconncnt, 64, "%s_maxconncnt", pool_name);
+        snprintf(auth, 64, "%s_auth", pool_name);
+
+        char* cache_host = config_file.GetConfigName(host, str_default_redis_host);
+        char* str_cache_port = config_file.GetConfigName(port, str_default_redis_port);
+        char* str_cache_db = config_file.GetConfigName(db);
+        char* str_max_conn_cnt = config_file.GetConfigName(maxconncnt, str_default_redis_max_conn_cnt);
+        char* str_auth = config_file.GetConfigName(auth);
+        if(!str_auth && str_default_redis_host) {
+            str_auth = str_default_redis_auth;
+        }
+        
+        if (!cache_host || !str_cache_port || !str_cache_db || !str_max_conn_cnt) {
+            log("not configure cache instance: %s", pool_name);
+            return 2;
+        }else {
+            log("connect redis config host:%s  port:%s  dbIndex:%s  max_conn_cnt:%s", cache_host, str_cache_port, str_cache_db, str_max_conn_cnt);
+        }
+
+        CachePool* pCachePool = new CachePool(pool_name, cache_host, atoi(str_cache_port),
+                atoi(str_cache_db), atoi(str_max_conn_cnt));
+        if(str_auth) {
+            pCachePool->configAuth(str_auth);
+        }
+        if (pCachePool->Init()) {
+            log("Init cache pool failed");
+            return 3;
+        }
+
+        m_cache_pool_map.insert(make_pair(pool_name, pCachePool));
+    }
+
+    return 0;
 }
 
 int CacheManager::Init()
 {
-	CConfigFileReader config_file("dbproxyserver.conf");
-
-	char* cache_instances = config_file.GetConfigName("CacheInstances");
-	if (!cache_instances) {
-		log("not configure CacheIntance");
-		return 1;
-	}
-
-	char host[64];
-	char port[64];
-	char db[64];
-    char maxconncnt[64];
-	CStrExplode instances_name(cache_instances, ',');
-	for (uint32_t i = 0; i < instances_name.GetItemCnt(); i++) {
-		char* pool_name = instances_name.GetItem(i);
-		//printf("%s", pool_name);
-		snprintf(host, 64, "%s_host", pool_name);
-		snprintf(port, 64, "%s_port", pool_name);
-		snprintf(db, 64, "%s_db", pool_name);
-        snprintf(maxconncnt, 64, "%s_maxconncnt", pool_name);
-
-		char* cache_host = config_file.GetConfigName(host);
-		char* str_cache_port = config_file.GetConfigName(port);
-		char* str_cache_db = config_file.GetConfigName(db);
-        char* str_max_conn_cnt = config_file.GetConfigName(maxconncnt);
-		if (!cache_host || !str_cache_port || !str_cache_db || !str_max_conn_cnt) {
-			log("not configure cache instance: %s", pool_name);
-			return 2;
-		}
-
-		CachePool* pCachePool = new CachePool(pool_name, cache_host, atoi(str_cache_port),
-				atoi(str_cache_db), atoi(str_max_conn_cnt));
-		if (pCachePool->Init()) {
-			log("Init cache pool failed");
-			return 3;
-		}
-
-		m_cache_pool_map.insert(make_pair(pool_name, pCachePool));
-	}
-
-	return 0;
+	//CConfigFileReader config_file("dbproxyserver.conf");
+    return InitWithConfig("dbproxyserver.conf");
 }
 
 CacheConn* CacheManager::GetCacheConn(const char* pool_name)

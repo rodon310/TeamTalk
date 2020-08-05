@@ -237,7 +237,9 @@ void CHttpQuery::_SendMessage(const string&strAppKey, Json::Value& post_json_obj
 			pHttpConn->Close();
 			return;
 		}else {
-			
+			char *response_buf = PackSendResult(1,"sender no login");
+			pHttpConn->Send(response_buf, (uint32_t)strlen(response_buf));
+			pHttpConn->Close();
 		}
 	}catch(std::runtime_error msg)
 	{
