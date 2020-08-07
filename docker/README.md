@@ -41,11 +41,11 @@ cd /opt/tt_source_code #默认我挂在的路径 在docker_build.sh写了
 
 cd server/src
 
-./make_log4cxx.sh
+./make_log4cxx.sh(报错的话可用make_error_log4cxx.sh试试 编译出来lib即可)
 ./make_protobuf.sh
 ./make_hiredis.sh
 
-./build.sh veriosn {version_name}
+./build.sh version {version_name}
 
 # 这样就编译完了
 ~~~
