@@ -325,8 +325,7 @@ void CHttpQuery::_QueryChangeMember(const string& strAppKey, Json::Value &post_j
 		uint32_t user_cnt =  post_json_obj["user_id_list"].size();
 		uint32_t handle = pHttpConn->GetConnHandle();
 
-		log("QueryChangeMember, user_id: %u, group_id: %u, modify type: %u, user_cnt: %u , handle: %u",
-				user_id, group_id, modify_type, user_cnt, handle);
+		log("QueryChangeMember, user_id: %u, group_id: %u, modify type: %u, user_cnt: %u , handle: %u",user_id, group_id, modify_type, user_cnt, handle);
 		if (!IM::BaseDefine::GroupModifyType_IsValid(modify_type)) {
 			log("QueryChangeMember, unvalid modify_type");
 			char* response_buf = PackSendResult(HTTP_ERROR_PARMENT, HTTP_ERROR_MSG[1].c_str());
@@ -341,8 +340,19 @@ void CHttpQuery::_QueryChangeMember(const string& strAppKey, Json::Value &post_j
 		msg.set_group_id(group_id);
 		for (uint32_t i = 0; i < user_cnt; i++) {
 			uint32_t member_id = post_json_obj["user_id_list"][i].asUInt();
-			msg.add_member_id_list(member_id);
+			if(member_id>0) {
+				msg.add_member_id_list(member_id);
+			}
 		}
+
+		if(msg.member_id_list_size() == 0) {
+			log("user list is empty");
+			char* response_buf = PackSendResult(HTTP_ERROR_PARMENT, HTTP_ERROR_MSG[1].c_str());
+			pHttpConn->Send(response_buf, (uint32_t)strlen(response_buf));
+			pHttpConn->Close();
+			return;
+		}
+
 		msg.set_attach_data(attach_data.GetBuffer(), attach_data.GetLength());
 		CImPdu pdu;
 		pdu.SetPBMsg(&msg);
