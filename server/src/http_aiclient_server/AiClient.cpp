@@ -91,6 +91,7 @@ char* OnlineInfo(){
 	}
 	Json::Value result;
 	result["userList"] = user_list;
+	result["userCount"] = (uint32_t)g_aiclient_map.size();
 	result["error_code"] = 0;
 	string result_str = result.toStyledString();
 	size_t content_len = result_str.size();
