@@ -63,8 +63,11 @@ void CLoginConn::Close()
 			map<uint32_t, msg_serv_info_t*>::iterator it = g_msg_serv_info.find(m_handle);
 			if (it != g_msg_serv_info.end()) {
 				msg_serv_info_t* pMsgServInfo = it->second;
-
-				g_total_online_user_cnt -= pMsgServInfo->cur_conn_cnt;
+				if(g_total_online_user_cnt < pMsgServInfo->cur_conn_cnt) {
+					g_total_online_user_cnt = 0;
+				}else {
+					g_total_online_user_cnt -= pMsgServInfo->cur_conn_cnt;
+				}
 				log("onclose from MsgServer: %s:%u ", pMsgServInfo->hostname.c_str(), pMsgServInfo->port);
 				delete pMsgServInfo;
 				g_msg_serv_info.erase(it);
@@ -166,41 +169,47 @@ void CLoginConn::_HandleUserCntUpdate(CImPdu* pPdu)
 	map<uint32_t, msg_serv_info_t*>::iterator it = g_msg_serv_info.find(m_handle);
 	if (it != g_msg_serv_info.end()) {
 		msg_serv_info_t* pMsgServInfo = it->second;
-        IM::Server::IMUserCntUpdate msg;
-        msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength());
+		IM::Server::IMUserCntUpdate msg;
+		msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength());
 
 		uint32_t action = msg.user_action();
 		if (action == USER_CNT_INC) {
 			pMsgServInfo->cur_conn_cnt++;
 			g_total_online_user_cnt++;
 		} else {
-			pMsgServInfo->cur_conn_cnt--;
-			g_total_online_user_cnt--;
+			if(pMsgServInfo->cur_conn_cnt == 0) {
+				pMsgServInfo->cur_conn_cnt = 0;
+			}else {
+				pMsgServInfo->cur_conn_cnt--;
+			}
+			if(g_total_online_user_cnt == 0) {
+				g_total_online_user_cnt = 0;
+			}else {
+				g_total_online_user_cnt--;
+			}
 		}
-
-		log("%s:%d, cur_cnt=%u, total_cnt=%u ", pMsgServInfo->hostname.c_str(),
-            pMsgServInfo->port, pMsgServInfo->cur_conn_cnt, g_total_online_user_cnt);
+		log("%s:%d, cur_cnt=%u, total_cnt=%u ", pMsgServInfo->hostname.c_str(),pMsgServInfo->port, pMsgServInfo->cur_conn_cnt, g_total_online_user_cnt);
 	}
 }
 
 void CLoginConn::_HandleMsgServRequest(CImPdu* pPdu)
 {
-    IM::Login::IMMsgServReq msg;
-    msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength());
+	IM::Login::IMMsgServReq msg;
+	msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength());
 
 	log("HandleMsgServReq. ");
 
 	// no MessageServer available
 	if (g_msg_serv_info.size() == 0) {
-        IM::Login::IMMsgServRsp msg;
-        msg.set_result_code(::IM::BaseDefine::REFUSE_REASON_NO_MSG_SERVER);
-        CImPdu pdu;
-        pdu.SetPBMsg(&msg);
-        pdu.SetServiceId(SID_LOGIN);
-        pdu.SetCommandId(CID_LOGIN_RES_MSGSERVER);
-        pdu.SetSeqNum(pPdu->GetSeqNum());
-        SendPdu(&pdu);
-        Close();
+		IM::Login::IMMsgServRsp msg;
+		msg.set_result_code(::IM::BaseDefine::REFUSE_REASON_NO_MSG_SERVER);
+		CImPdu pdu;
+		pdu.SetPBMsg(&msg);
+		pdu.SetServiceId(SID_LOGIN);
+		pdu.SetCommandId(CID_LOGIN_RES_MSGSERVER);
+		pdu.SetSeqNum(pPdu->GetSeqNum());
+		SendPdu(&pdu);
+		Close();
 		return;
 	}
 
@@ -211,9 +220,8 @@ void CLoginConn::_HandleMsgServRequest(CImPdu* pPdu)
 
 	for (it = g_msg_serv_info.begin() ; it != g_msg_serv_info.end(); it++) {
 		pMsgServInfo = it->second;
-		if ( (pMsgServInfo->cur_conn_cnt < pMsgServInfo->max_conn_cnt) &&
-			 (pMsgServInfo->cur_conn_cnt < min_user_cnt))
-        {
+		if((pMsgServInfo->cur_conn_cnt < pMsgServInfo->max_conn_cnt) && (pMsgServInfo->cur_conn_cnt < min_user_cnt))
+		{
 			it_min_conn = it;
 			min_user_cnt = pMsgServInfo->cur_conn_cnt;
 		}
@@ -221,29 +229,28 @@ void CLoginConn::_HandleMsgServRequest(CImPdu* pPdu)
 
 	if (it_min_conn == g_msg_serv_info.end()) {
 		log("All TCP MsgServer are full ");
-        IM::Login::IMMsgServRsp msg;
-        msg.set_result_code(::IM::BaseDefine::REFUSE_REASON_MSG_SERVER_FULL);
-        CImPdu pdu;
-        pdu.SetPBMsg(&msg);
-        pdu.SetServiceId(SID_LOGIN);
-        pdu.SetCommandId(CID_LOGIN_RES_MSGSERVER);
-        pdu.SetSeqNum(pPdu->GetSeqNum());
-        SendPdu(&pdu);
+		IM::Login::IMMsgServRsp msg;
+		msg.set_result_code(::IM::BaseDefine::REFUSE_REASON_MSG_SERVER_FULL);
+		CImPdu pdu;
+		pdu.SetPBMsg(&msg);
+		pdu.SetServiceId(SID_LOGIN);
+		pdu.SetCommandId(CID_LOGIN_RES_MSGSERVER);
+		pdu.SetSeqNum(pPdu->GetSeqNum());
+		SendPdu(&pdu);
 	}
-    else
-    {
-        IM::Login::IMMsgServRsp msg;
-        msg.set_result_code(::IM::BaseDefine::REFUSE_REASON_NONE);
-        msg.set_prior_ip(it_min_conn->second->ip_addr1);
-        msg.set_backip_ip(it_min_conn->second->ip_addr2);
-        msg.set_port(it_min_conn->second->port);
-        CImPdu pdu;
-        pdu.SetPBMsg(&msg);
-        pdu.SetServiceId(SID_LOGIN);
-        pdu.SetCommandId(CID_LOGIN_RES_MSGSERVER);
-        pdu.SetSeqNum(pPdu->GetSeqNum());
-        SendPdu(&pdu);
-    }
-
+	else
+	{
+		IM::Login::IMMsgServRsp msg;
+		msg.set_result_code(::IM::BaseDefine::REFUSE_REASON_NONE);
+		msg.set_prior_ip(it_min_conn->second->ip_addr1);
+		msg.set_backip_ip(it_min_conn->second->ip_addr2);
+		msg.set_port(it_min_conn->second->port);
+		CImPdu pdu;
+		pdu.SetPBMsg(&msg);
+		pdu.SetServiceId(SID_LOGIN);
+		pdu.SetCommandId(CID_LOGIN_RES_MSGSERVER);
+		pdu.SetSeqNum(pPdu->GetSeqNum());
+		SendPdu(&pdu);
+	}
 	Close();	// after send MsgServResponse, active close the connection
 }

@@ -70,6 +70,7 @@ void WorkHttpConn::_HandleStatusReques(string& url, string& post_data)
 	map<uint32_t, msg_serv_info_t*>::iterator it;
 	Json::Value  server_arr_value(Json::arrayValue);
 	int index = 0;
+	int all_online_count = 0;
 	for (it = g_msg_serv_info.begin() ; it != g_msg_serv_info.end(); it++) {
 		pMsgServInfo = it->second;
 		Json::Value server_value;
@@ -79,13 +80,15 @@ void WorkHttpConn::_HandleStatusReques(string& url, string& post_data)
 		server_value["hostname"] = pMsgServInfo->hostname;
 		server_value["online_count"] = pMsgServInfo->cur_conn_cnt;
 		server_arr_value[index] = server_value;
+		all_online_count = all_online_count + pMsgServInfo->cur_conn_cnt;
 		index ++;
 	}
+	value["all_online_count"] = all_online_count;
 	value["msg_servers"] = server_arr_value;
 	string strContent = value.toStyledString();
 	char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
 	uint32_t nLen = strContent.length();
-	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, strContent.c_str());
+	snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, nLen, strContent.c_str());
 	Send((void*)szContent, strlen(szContent));
 	delete [] szContent;
 	return;
@@ -105,7 +108,7 @@ void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 		value["msg"] = "没有msg_server";
 		string strContent = value.toStyledString();
 		char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
-		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, strContent.length(), strContent.c_str());
+		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, strContent.length(), strContent.c_str());
 		Send((void*)szContent, strlen(szContent));
 		delete [] szContent;
 		return ;
@@ -127,7 +130,7 @@ void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 		value["msg"] = "负载过高";
 		string strContent = value.toStyledString();
 		char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
-		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, strContent.length(), strContent.c_str());
+		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, strContent.length(), strContent.c_str());
 		Send((void*)szContent, strlen(szContent));
 		delete [] szContent;
 		return;
@@ -155,7 +158,7 @@ void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 		string strContent = value.toStyledString();
 		char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
 		uint32_t nLen = strContent.length();
-		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_HTML, nLen, strContent.c_str());
+		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, nLen, strContent.c_str());
 		Send((void*)szContent, strlen(szContent));
 		delete [] szContent;
 		return;
