@@ -2,7 +2,7 @@
  * GroupChat.h
  *
  *  Created on: 2014-1-3
- *      Author: ziteng@mogujie.com
+ *	  Author: ziteng@mogujie.com
  */
 
 #ifndef GROUPCHAT_H_
@@ -22,27 +22,26 @@ public:
 
 	static CGroupChat* GetInstance();
 
-    void HandleClientGroupNormalRequest(CImPdu* pPdu, CMsgConn* pFromConn);
-    void HandleGroupNormalResponse(CImPdu* pPdu);
-    
-    void HandleClientGroupInfoRequest(CImPdu* pPdu, CMsgConn* pFromConn);
-    void HandleGroupInfoResponse(CImPdu* pPdu);
+	void HandleClientGroupNormalRequest(CImPdu* pPdu, CMsgConn* pFromConn);
+	void HandleGroupNormalResponse(CImPdu* pPdu);
+	
+	void HandleClientGroupInfoRequest(CImPdu* pPdu, CMsgConn* pFromConn);
+	void HandleGroupInfoResponse(CImPdu* pPdu);
 
 	void HandleGroupMessage(CImPdu* pPdu);
-    void HandleGroupMessageBroadcast(CImPdu* pPdu);
-    
+	void HandleGroupMessageBroadcast(CImPdu* pPdu);
+	
 	void HandleClientGroupCreateRequest(CImPdu* pPdu, CMsgConn* pFromConn);
 	void HandleGroupCreateResponse(CImPdu* pPdu);
-    
+	
 	void HandleClientGroupChangeMemberRequest(CImPdu* pPdu, CMsgConn* pFromConn);
 	void HandleGroupChangeMemberResponse(CImPdu* pPdu);
 	void HandleGroupChangeMemberBroadcast(CImPdu* pPdu);
 
-    void HandleClientGroupShieldGroupRequest(CImPdu* pPdu,
-        CMsgConn* pFromConn);
-    
-    void HandleGroupShieldGroupResponse(CImPdu* pPdu);
-    void HandleGroupGetShieldByGroupResponse(CImPdu* pPdu);
+	void HandleClientGroupShieldGroupRequest(CImPdu* pPdu,CMsgConn* pFromConn);
+	
+	void HandleGroupShieldGroupResponse(CImPdu* pPdu);
+	void HandleGroupGetShieldByGroupResponse(CImPdu* pPdu);
 private:
 	CGroupChat() {}	// for singleton;
 

@@ -2,7 +2,7 @@
  * FileHandler.h
  *
  *  Created on: 2013-12-17
- *      Author: ziteng@mogujie.com
+ *	  Author: ziteng@mogujie.com
  */
 
 #ifndef FILEHANDLER_H_
@@ -19,12 +19,12 @@ public:
 
 	static CFileHandler* getInstance();
 
-    void HandleClientFileRequest(CMsgConn* pMsgConn, CImPdu* pPdu);
-    void HandleClientFileHasOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu);
-    void HandleClientFileAddOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu);
-    void HandleClientFileDelOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu);
-    void HandleFileHasOfflineRes(CImPdu* pPdu);
-    void HandleFileNotify(CImPdu* pPdu);
+	void HandleClientFileRequest(CMsgConn* pMsgConn, CImPdu* pPdu);
+	void HandleClientFileHasOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu);
+	void HandleClientFileAddOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu);
+	void HandleClientFileDelOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu);
+	void HandleFileHasOfflineRes(CImPdu* pPdu);
+	void HandleFileNotify(CImPdu* pPdu);
 private:
 	CFileHandler() {}
 
