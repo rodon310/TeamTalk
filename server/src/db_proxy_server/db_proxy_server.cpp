@@ -61,40 +61,40 @@ int main(int argc, char* argv[])
 		log("DBManager init failed");
 		return -1;
 	}
-    puts("db init success");
+	printf("db init success\n");
 	// 主线程初始化单例，不然在工作线程可能会出现多次初始化
 	if (!CAudioModel::getInstance()) {
 		return -1;
 	}
-    
-    if (!CGroupMessageModel::getInstance()) {
-        return -1;
-    }
-    
-    if (!CGroupModel::getInstance()) {
-        return -1;
-    }
-    
-    if (!CMessageModel::getInstance()) {
-        return -1;
-    }
+		
+	if (!CGroupMessageModel::getInstance()) {
+		return -1;
+	}
+		
+	if (!CGroupModel::getInstance()) {
+		return -1;
+	}
+		
+	if (!CMessageModel::getInstance()) {
+		return -1;
+	}
 
 	if (!CSessionModel::getInstance()) {
 		return -1;
 	}
-    
-    if(!CRelationModel::getInstance())
-    {
-        return -1;
-    }
-    
-    if (!CUserModel::getInstance()) {
-        return -1;
-    }
-    
-    if (!CFileModel::getInstance()) {
-        return -1;
-    }
+		
+	if(!CRelationModel::getInstance())
+	{
+		return -1;
+	}
+		
+	if (!CUserModel::getInstance()) {
+		return -1;
+	}
+		
+	if (!CFileModel::getInstance()) {
+	return -1;
+	}
 
 
 	
@@ -143,14 +143,12 @@ int main(int argc, char* argv[])
     CAudioModel::getInstance()->setUrl(strFileSite);
 
 	int ret = netlib_init();
-
-	if (ret == NETLIB_ERROR)
+	if (ret == NETLIB_ERROR){
 		return ret;
-    
-    /// yunfan add 2014.9.28
-    // for 603 push
-    curl_global_init(CURL_GLOBAL_ALL);
-    /// yunfan add end
+	}
+		
+
+	curl_global_init(CURL_GLOBAL_ALL);
 
 	init_proxy_conn(thread_num);
     CSyncCenter::getInstance()->init();
@@ -162,16 +160,15 @@ int main(int argc, char* argv[])
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}
-    if(unix_socket_path)
-    {
-        netlib_unix_listen(unix_socket_path,proxy_serv_callback,NULL);
-    }
-
+	if(unix_socket_path)
+	{
+		netlib_unix_listen(unix_socket_path,proxy_serv_callback,NULL);
+	}
+	
 	printf("server start listen on: %s:%d\n", listen_ip,  listen_port);
 	printf("now enter the event loop...\n");
-    writePid();
+	writePid();
 	netlib_eventloop(10);
-
 	return 0;
 }
 

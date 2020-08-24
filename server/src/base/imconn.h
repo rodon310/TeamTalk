@@ -36,8 +36,7 @@ public:
 	virtual void OnWrite();
 	virtual void OnClose() {}
 	virtual void OnTimer(uint64_t curr_tick) {}
-    virtual void OnWriteCompelete() {};
-
+	virtual void OnWriteCompelete() {};
 	virtual void HandlePdu(CImPdu* pPdu) {}
 
 protected:

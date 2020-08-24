@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <assert.h>
+#include <stddef.h>
 
 
 #ifdef _WIN32

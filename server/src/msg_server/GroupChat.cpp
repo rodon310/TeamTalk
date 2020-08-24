@@ -303,8 +303,7 @@ void CGroupChat::HandleClientGroupCreateRequest(CImPdu* pPdu, CMsgConn* pFromCon
 	}
 	string group_avatar = msg.group_avatar();
 	uint32_t user_cnt = msg.member_id_list_size();
-	log("HandleClientGroupCreateRequest, req_id=%u, group_name=%s, avatar_url=%s, user_cnt=%u ",
-			req_user_id, group_name.c_str(), group_avatar.c_str(), user_cnt);
+	log("HandleClientGroupCreateRequest, req_id=%u, group_name=%s, avatar_url=%s, user_cnt=%u ",req_user_id, group_name.c_str(), group_avatar.c_str(), user_cnt);
 
 	CDBServConn* pDbConn = get_db_serv_conn();
 	if (pDbConn) {
@@ -544,14 +543,17 @@ void CGroupChat::HandleGroupGetShieldByGroupResponse(CImPdu *pPdu)
 			log("user_id: %u shield group, group id: %u. ", shield_status.user_id(), shield_status.group_id());
 		}
 	}
-	CImPdu pdu;
-	pdu.SetPBMsg(&msg2);
-	pdu.SetServiceId(SID_OTHER);
-	pdu.SetCommandId(CID_OTHER_GET_DEVICE_TOKEN_REQ);
-	CDBServConn* pDbConn = get_db_serv_conn();
-	if (pDbConn) {
-		pDbConn->SendPdu(&pdu);
+	if(msg2.user_id_size() > 0) {
+		CImPdu pdu;
+		pdu.SetPBMsg(&msg2);
+		pdu.SetServiceId(SID_OTHER);
+		pdu.SetCommandId(CID_OTHER_GET_DEVICE_TOKEN_REQ);
+		CDBServConn* pDbConn = get_db_serv_conn();
+		if (pDbConn) {
+			pDbConn->SendPdu(&pdu);
+		}
 	}
+	
 }
 
 void CGroupChat::_SendPduToUser(CImPdu* pPdu, uint32_t user_id, CMsgConn* pReqConn)

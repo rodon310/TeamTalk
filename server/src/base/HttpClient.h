@@ -20,15 +20,14 @@
 class CHttpClient
 {
 public:
-    CHttpClient(void);
-    ~CHttpClient(void);
-    
+	CHttpClient(void);
+	~CHttpClient(void);
 public:
-    CURLcode Post(const string & strUrl, const string & strPost, string & strResponse);
-    CURLcode PostJson(const string & strUrl, const string & strPost, string & strResponse);
-    CURLcode Get(const string & strUrl, string & strResponse);
-    string UploadByteFile(const string &url, void* data, int data_len);
-    bool DownloadByteFile(const string &url, AudioMsgInfo* pAudioMsg);
+	CURLcode Post(const string & strUrl, const string & strPost, string & strResponse);
+	CURLcode PostJson(const string & strUrl, const string & strPost, string & strResponse);
+	CURLcode Get(const string & strUrl, string & strResponse);
+	string UploadByteFile(const string &url, void* data, int data_len);
+	bool DownloadByteFile(const string &url, AudioMsgInfo* pAudioMsg);
 };
 
 #endif

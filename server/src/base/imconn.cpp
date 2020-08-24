@@ -139,26 +139,23 @@ void CImConn::OnRead()
 	CImPdu* pPdu = NULL;
 	try
 	{
-		while ( ( pPdu = CImPdu::ReadPdu(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset()) ) )
+		while((pPdu = CImPdu::ReadPdu(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset())))
 		{
 			uint32_t pdu_len = pPdu->GetLength();
-
 			HandlePdu(pPdu);
-
-			m_in_buf.Read(NULL, pdu_len);
 			delete pPdu;
 			pPdu = NULL;
+			m_in_buf.Read(NULL, pdu_len);
 			//++g_recv_pkt_cnt;
         }
     } catch (CPduException& ex) {
-        log("!!!catch exception, sid=%u, cid=%u, err_code=%u, err_msg=%s, close the connection ",
-                ex.GetServiceId(), ex.GetCommandId(), ex.GetErrorCode(), ex.GetErrorMsg());
-        if (pPdu) {
-            delete pPdu;
-            pPdu = NULL;
-        }
-        OnClose();
-    }
+		log("!!!catch exception, sid=%u, cid=%u, err_code=%u, err_msg=%s, close the connection ",ex.GetServiceId(), ex.GetCommandId(), ex.GetErrorCode(), ex.GetErrorMsg());
+		if (pPdu) {
+			delete pPdu;
+			pPdu = NULL;
+		}
+		OnClose();
+	}
 }
 
 void CImConn::OnWrite()

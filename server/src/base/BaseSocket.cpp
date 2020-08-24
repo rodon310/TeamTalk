@@ -139,18 +139,20 @@ int CBaseSocket::UnixListen(const char* unix_socket_path,callback_t	callback,voi
 		return NETLIB_INVALID_HANDLE;
 	}	
 	_SetNonblock(m_socket);
-	_SetNoDelay(m_socket);
+	//_SetNoDelay(m_socket);
     if(remove(unix_socket_path) == -1 && errno != ENOENT)
 	{
 		return NETLIB_INVALID_HANDLE;
 	}
+	unlink(unix_socket_path);
 	struct sockaddr_un addr;
 	memset(&addr, 0, sizeof(struct sockaddr_un));
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, unix_socket_path, sizeof(addr.sun_path) - 1);
    	int ret = bindAndListen((sockaddr*)&addr,sizeof(addr));
 	if(ret == NETLIB_OK){
-	   log("CBaseSocket::Listen on %s", unix_socket_path); 
+		chmod(unix_socket_path,S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+		log("CBaseSocket::Listen on %s", unix_socket_path); 
 	}
 	return ret;
 }
@@ -383,18 +385,28 @@ void CBaseSocket::_SetAddr(const char* ip, const uint16_t port, sockaddr_in* pAd
 void CBaseSocket::_AcceptNewSocket()
 {
 	SOCKET fd = 0;
-	sockaddr_in peer_addr;
-	socklen_t addr_len = sizeof(sockaddr_in);
-	char ip_str[64];
-	while ( (fd = accept(m_socket, (sockaddr*)&peer_addr, &addr_len)) != INVALID_SOCKET )
+
+	socklen_t addr_len = sizeof(sockaddr);
+	sockaddr accept_addr;
+	
+	while ( (fd = accept(m_socket, (sockaddr*)&accept_addr, &addr_len)) != INVALID_SOCKET )
 	{
+		char ip_str[64] = {0};
+		uint16_t port = 0;
 		CBaseSocket* pSocket = new CBaseSocket();
-		uint32_t ip = ntohl(peer_addr.sin_addr.s_addr);
-		uint16_t port = ntohs(peer_addr.sin_port);
-
-		snprintf(ip_str, sizeof(ip_str), "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-
-		log("AcceptNewSocket, socket=%d from %s:%d\n", fd, ip_str, port);
+		if(accept_addr.sa_family == AF_INET) {
+			sockaddr_in peer_addr = *((sockaddr_in*)&accept_addr);
+			uint32_t ip = ntohl(peer_addr.sin_addr.s_addr);
+			port = ntohs(peer_addr.sin_port);
+			snprintf(ip_str, sizeof(ip_str), "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+			log("AcceptNewSocket, socket=%d from %s:%d\n", fd, ip_str, port);
+			_SetNoDelay(fd);
+		}else if(accept_addr.sa_family == AF_UNIX) {
+			addr_len -= offsetof(struct sockaddr_un, sun_path);
+			sockaddr_un peer_addr = *((sockaddr_un*)&accept_addr);
+			memcpy(ip_str, peer_addr.sun_path, strlen(peer_addr.sun_path));
+			log("AcceptUnixSocket, socket=%d from %s:%d\n", fd, ip_str, port);
+		}
 
 		pSocket->SetSocket(fd);
 		pSocket->SetCallback(m_callback);
@@ -402,8 +414,6 @@ void CBaseSocket::_AcceptNewSocket()
 		pSocket->SetState(SOCKET_STATE_CONNECTED);
 		pSocket->SetRemoteIP(ip_str);
 		pSocket->SetRemotePort(port);
-
-		_SetNoDelay(fd);
 		_SetNonblock(fd);
 		AddBaseSocket(pSocket);
 		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);

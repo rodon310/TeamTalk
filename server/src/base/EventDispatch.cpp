@@ -368,6 +368,7 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 			CBaseSocket* pSocket = FindBaseSocket(ev_fd);
 			if (!pSocket)
 				continue;
+
 			if (events[i].events & EPOLLIN)
 			{
 				//log("OnRead, socket=%d\n", ev_fd);
@@ -379,19 +380,22 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 				//log("OnWrite, socket=%d\n", ev_fd);
 				pSocket->OnWrite();
 			}
+			bool closed=false;
 
 			if (events[i].events & (EPOLLPRI | EPOLLERR | EPOLLHUP))
 			{
 				//log("OnClose, socket=%d\n", ev_fd);
 				pSocket->OnClose();
+				closed = true;
 			}
-#ifdef EPOLLRDHUP
-			if (events[i].events & EPOLLRDHUP)
-			{
-				//log("On Peer Close, socket=%d, ev_fd);
-				pSocket->OnClose();
-			}
-#endif
+
+            #ifdef EPOLLRDHUP
+            if (!closed && (events[i].events & EPOLLRDHUP))
+            {
+                //log("On Peer Close, socket=%d, ev_fd);
+                pSocket->OnClose();
+            }
+			#endif
 			pSocket->ReleaseRef();
 		}
 
