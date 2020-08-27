@@ -19,16 +19,17 @@ bool CInterLoginStrategy::doLogin(const std::string &strName, const std::string 
 	CDBConn *pDBConn = pDBManger->GetDBConn("teamtalk_slave");
 	if (pDBConn)
 	{
-		string sql = "select * from IMUser where name=? and status=0";
-		CPrepareStatement *statement = new CPrepareStatement();
-		if (statement->Init(pDBConn->GetMysql(), sql))
-		{
-			string tmpName(pDBConn->EscapeString(strName.c_str(), strName.size()));
-			statement->SetParam(0, tmpName);
-			//string tmpName(pDBConn->EscapeString(strName.c_str(),strName.size()));
-			//string strSql = "select * from IMUser where name='" + tmpName + "' and status=0";
-			//CResultSet* pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
-			CResultSet *pResultSet = statement->ExecuteQuery();
+		// string sql = "select * from IMUser where name=? and status=0";
+		// CPrepareStatement *statement = new CPrepareStatement();
+		// if (statement->Init(pDBConn->GetMysql(), sql))
+		// {
+		// 	string tmpName(pDBConn->EscapeString(strName.c_str(), strName.size()));
+		// 	statement->SetParam(0, tmpName);
+		//CResultSet *pResultSet = statement->ExecuteQuery();
+			string tmpName(pDBConn->EscapeString(strName.c_str(),strName.size()));
+			string strSql = "select * from IMUser where name='" + tmpName + "' and status=0";
+			CResultSet* pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
+			
 			if (pResultSet)
 			{
 				string strResult, strSalt;
@@ -71,8 +72,8 @@ bool CInterLoginStrategy::doLogin(const std::string &strName, const std::string 
 				}
 				delete pResultSet;
 			}
-		}
-		delete statement;
+		//}
+		//delete statement;
 		pDBManger->RelDBConn(pDBConn);
 	}
 	return bRet;
