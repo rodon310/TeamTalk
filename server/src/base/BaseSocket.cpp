@@ -273,7 +273,7 @@ void CBaseSocket::OnWrite()
 			m_callback(m_callback_data, NETLIB_MSG_CONFIRM, (net_handle_t)m_socket, NULL);
 		}
 	}
-	else
+	else if(m_state != SOCKET_STATE_LISTENING)
 	{
 		m_callback(m_callback_data, NETLIB_MSG_WRITE, (net_handle_t)m_socket, NULL);
 	}
