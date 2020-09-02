@@ -331,6 +331,7 @@ void CEventDispatch::StopDispatch()
 
 void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
 {
+	(void)socket_event;
 	struct epoll_event ev;
 	ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLPRI | EPOLLERR | EPOLLHUP;
 	//#ifdef EPOLLRDHUP
@@ -345,6 +346,7 @@ void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
 
 void CEventDispatch::RemoveEvent(SOCKET fd, uint8_t socket_event)
 {
+	(void)socket_event;
 	if (epoll_ctl(m_epfd, EPOLL_CTL_DEL, fd, NULL) != 0)
 	{
 		log("epoll_ctl failed, errno=%d", errno);

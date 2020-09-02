@@ -13,7 +13,9 @@
 const std::string strLoginUrl = "http://xxxx";
 bool CExterLoginStrategy::doLogin(const std::string &strName, const std::string &strPass, IM::BaseDefine::UserInfo& user)
 {
+	(void)strName;
+	(void)strPass;
+	(void)user;
 	bool bRet = false;
-	
 	return bRet;
 }

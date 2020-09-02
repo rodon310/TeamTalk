@@ -35,9 +35,9 @@ public:
 	virtual void OnRead();
 	virtual void OnWrite();
 	virtual void OnClose() {}
-	virtual void OnTimer(uint64_t curr_tick) {}
+	virtual void OnTimer(uint64_t curr_tick){(void)curr_tick;};
 	virtual void OnWriteCompelete() {};
-	virtual void HandlePdu(CImPdu* pPdu) {}
+	virtual void HandlePdu(CImPdu* pPdu){(void)pPdu;};
 
 protected:
 	net_handle_t	m_handle;

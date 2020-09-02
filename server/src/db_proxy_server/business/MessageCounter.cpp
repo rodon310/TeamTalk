@@ -70,6 +70,7 @@ namespace DB_PROXY {
 
 	void clearUnreadMsgCounter(CImPdu* pPdu, uint32_t conn_uuid)
 	{
+		(void)conn_uuid;
 		IM::Message::IMMsgDataReadAck msg;
 		if(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()))
 		{

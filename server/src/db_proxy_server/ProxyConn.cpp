@@ -25,6 +25,10 @@ static CThreadPool g_thread_pool;
 
 void proxy_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	uint64_t cur_time = get_tick_count();
 	for (ConnMap_t::iterator it = g_proxy_conn_map.begin(); it != g_proxy_conn_map.end(); ) {
 		ConnMap_t::iterator it_old = it;
@@ -38,6 +42,10 @@ void proxy_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, voi
 //
 void proxy_loop_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	CProxyConn::SendResponsePduList();
 }
 
@@ -49,6 +57,10 @@ void proxy_loop_callback(void* callback_data, uint8_t msg, uint32_t handle, void
  */
 void exit_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	log("exit_callback...");
 	exit(0);
 }

@@ -123,8 +123,10 @@ CImPdu* CImPdu::ReadPdu(uchar_t *buf, uint32_t len)
 	if (!IsPduAvailable(buf, len, pdu_len))
 		return NULL;
 
-	uint16_t service_id = CByteStream::ReadUint16(buf + 8);
-	uint16_t command_id = CByteStream::ReadUint16(buf + 10);
+	//uint16_t service_id = CByteStream::ReadUint16(buf + 8);
+	//uint16_t command_id = CByteStream::ReadUint16(buf + 10);
+	CByteStream::ReadUint16(buf + 8);
+	CByteStream::ReadUint16(buf + 10);
 	CImPdu* pPdu = NULL;
 
     pPdu = new CImPdu();

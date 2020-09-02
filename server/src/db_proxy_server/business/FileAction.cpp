@@ -57,6 +57,7 @@ namespace DB_PROXY {
 	
 	void addOfflineFile(CImPdu* pPdu, uint32_t conn_uuid)
 	{
+		(void)conn_uuid;
 		IM::File::IMFileAddOfflineReq msg;
 		if(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()))
 		{
@@ -73,6 +74,7 @@ namespace DB_PROXY {
 	
 	void delOfflineFile(CImPdu* pPdu, uint32_t conn_uuid)
 	{
+		(void)conn_uuid;
 		IM::File::IMFileDelOfflineReq msg;
 		if(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()))
 		{

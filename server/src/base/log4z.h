@@ -610,6 +610,7 @@ inline zsummer::log4z::Log4zStream & zsummer::log4z::Log4zStream::writeWString(c
         }
     }
 #else
+	(void)t;
     //not support
 #endif
     return *this;

@@ -173,7 +173,7 @@ bool CMessageModel::sendMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t n
 		pDBManager->RelDBConn(pDBConn);
 		if (bRet)
 		{
-			uint32_t nNow = (uint32_t) time(NULL);
+			//uint32_t nNow = (uint32_t) time(NULL);
 			incMsgCount(nFromId, nToId);
 		}
 		else
@@ -303,6 +303,7 @@ uint32_t CMessageModel::getMsgId(uint32_t nRelateId)
  */
 void CMessageModel::getLastMsg(uint32_t nFromId, uint32_t nToId, uint32_t& nMsgId, string& strMsgData, IM::BaseDefine::MsgType& nMsgType, uint32_t nStatus)
 {
+	(void)nStatus;
 	uint32_t nRelateId = CRelationModel::getInstance()->getRelationId(nFromId, nToId, false);
 	
 	if (nRelateId != INVALID_VALUE)
@@ -456,7 +457,7 @@ void CMessageModel::getMsgByMsgId(uint32_t nUserId, uint32_t nPeerId, const list
 bool CMessageModel::resetMsgId(uint32_t nRelateId)
 {
 	bool bRet = false;
-	uint32_t nMsgId = 0;
+	//uint32_t nMsgId = 0;
 	CacheManager* pCacheManager = CacheManager::getInstance();
 	CacheConn* pCacheConn = pCacheManager->GetCacheConn("unread");
 	if(pCacheConn)

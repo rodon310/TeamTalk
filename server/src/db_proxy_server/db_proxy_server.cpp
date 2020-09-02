@@ -28,6 +28,8 @@ string strAudioEnc;
 // this callback will be replaced by imconn_callback() in OnConnect()
 void proxy_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)pParam;
 	if (msg == NETLIB_MSG_CONNECT)
 	{
 		CProxyConn* pConn = new CProxyConn();
@@ -98,7 +100,7 @@ int main(int argc, char* argv[])
 
 
 	
-	char *configName = "dbproxyserver.conf";
+	const char* configName = "dbproxyserver.conf";
 
 	if(argc == 3 && (strcmp(argv[1], "-c") == 0)) {
 		configName = argv[2];

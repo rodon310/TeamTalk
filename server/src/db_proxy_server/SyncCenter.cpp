@@ -206,6 +206,7 @@ void CSyncCenter::updateLastUpdateGroup(uint32_t nUpdated)
  */
 void* CSyncCenter::doSyncGroupChat(void* arg)
 {
+	(void)arg;
 	m_bSyncGroupChatRuning = true;
 	CDBManager* pDBManager = CDBManager::getInstance();
 	map<uint32_t, uint32_t> mapChangedGroup;

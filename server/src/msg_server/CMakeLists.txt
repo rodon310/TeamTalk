@@ -27,14 +27,14 @@ endif()
 
 ADD_DEFINITIONS( -g -W -Wall -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DAC_HAS_INFO
 -DAC_HAS_WARNING -DAC_HAS_ERROR -DAC_HAS_CRITICAL -DTIXML_USE_STL
--DAC_HAS_DEBUG -DLINUX_DAEMON -std=c++11)
+-DAC_HAS_DEBUG -DLINUX_DAEMON -std=c++11 -Wno-deprecated)
 
-INCLUDE_DIRECTORIES(./ ../base ../base/pb/protocol ${PB_INCLUDE_DIR} ../base/security ${OPENSSL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(./ ../base ../base/jsoncpp ../base/pb/protocol ${PB_INCLUDE_DIR} ../base/security ${OPENSSL_INCLUDE_DIR})
 LINK_DIRECTORIES(./ ../base ${PB_LIB_DIR} ${SLOG_LIB_DIR} ${SECURITY_LIB_DIR} ${OPENSSL_LIB_DIR})
 
 #ADD_XXXX必须在TARGET_LINK_LIBRARIES前面，否则会报错
 #ADD_LIBRARY(${PROJECTNAME} SHARED/STATIC ${SRC_LIST})
 ADD_EXECUTABLE(msg_server ${SRC_LIST})
 
-TARGET_LINK_LIBRARIES(msg_server base protobuf-lite slog ssl crypto pthread )
+TARGET_LINK_LIBRARIES(msg_server libbase.a protobuf-lite slog ssl crypto pthread )
  
