@@ -21,7 +21,7 @@ using namespace std;
 		"Cache-Control:no-cache\r\n"\
 		"Connection:close\r\n"\
 		"Content-Length:%d\r\n"\
-		"Content-Type:text/html;charset=utf-8\r\n\r\n%s"
+		"Content-Type:application/json;charset=utf-8\r\n\r\n%s"
 
 
 class ReConnectThread;
