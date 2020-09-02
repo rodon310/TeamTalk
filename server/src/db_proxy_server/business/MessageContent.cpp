@@ -278,7 +278,7 @@ namespace DB_PROXY {
 				{
 					CMessageModel::getInstance()->getMsgByMsgId(nUserId, nPeerId, lsMsgId, lsMsg);
 				}
-				else if(IM::BaseDefine::SESSION_TYPE_GROUP)
+				else if(IM::BaseDefine::SESSION_TYPE_GROUP == nType)
 				{
 					CGroupMessageModel::getInstance()->getMsgByMsgId(nUserId, nPeerId, lsMsgId, lsMsg);
 				}
