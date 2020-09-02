@@ -38,6 +38,10 @@ static bool checkValueIsNullForJson(Json::Value &json_obj, string key)
 
 void http_query_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	struct tm* tm;
 	time_t currTime;
 
@@ -147,6 +151,7 @@ void CHttpQuery::DispatchQuery(std::string& url, std::string& post_data, CHttpCo
 
 void CHttpQuery::_QueryCreateGroup(const string& strAppKey, Json::Value &post_json_obj, CHttpConn *pHttpConn)
 {
+	(void)strAppKey;
 	HTTP::CDBServConn *pConn = HTTP::get_db_serv_conn();
 	if (!pConn) {
 		log("no connection to DBProxy ");
@@ -217,6 +222,7 @@ void CHttpQuery::_QueryCreateGroup(const string& strAppKey, Json::Value &post_js
 
 void CHttpQuery::_SendMessage(const string& strAppKey,Json::Value& post_json_obj, CHttpConn* pHttpConn,int msg_type)
 {
+	(void)strAppKey;
 	HTTP::CDBServConn *pConn = HTTP::get_db_serv_conn();
 	if (!pConn) {
 		log("no connection to MsgServConn ");
@@ -297,6 +303,7 @@ void CHttpQuery::_SendGroupMessage(const string& strAppKey,Json::Value& post_jso
 
 void CHttpQuery::_QueryChangeMember(const string& strAppKey, Json::Value &post_json_obj, CHttpConn *pHttpConn)
 {
+	(void)strAppKey;
 	HTTP::CDBServConn *pConn = HTTP::get_db_serv_conn();
 	if (!pConn) {
 		log("no connection to dbServConn ");
@@ -371,11 +378,18 @@ void CHttpQuery::_QueryChangeMember(const string& strAppKey, Json::Value &post_j
 
 HTTP_ERROR_CODE CHttpQuery::_CheckAuth(const string& strAppKey, const uint32_t userId, const string& strInterface, const string& strIp)
 {
+	(void)strAppKey;
+	(void)userId;
+	(void)strInterface;
+	(void)strIp;
 	return HTTP_ERROR_SUCCESS;
 }
 
 HTTP_ERROR_CODE CHttpQuery::_CheckPermission(const string& strAppKey, uint8_t nType, const list<uint32_t>& lsToId, string strMsg)
 {
+	(void)strAppKey;
+	(void)nType;
+	(void)lsToId;
 	strMsg.clear();
 	return HTTP_ERROR_SUCCESS;
 }

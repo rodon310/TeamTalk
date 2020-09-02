@@ -42,6 +42,8 @@ void WorkHttpConn::HandleWork(){
 		return;
 	}
 
+	printf("%s",in_buf);
+
 	//log("OnRead, buf_len=%u, conn_handle=%u\n", buf_len, m_conn_handle); // for debug
 
 
@@ -65,6 +67,8 @@ void WorkHttpConn::HandleWork(){
 
 void WorkHttpConn::_HandleStatusReques(string& url, string& post_data)
 {
+	(void)url;
+	(void)post_data;
 	Json::Value value;
 	msg_serv_info_t* pMsgServInfo;
 	map<uint32_t, msg_serv_info_t*>::iterator it;
@@ -97,6 +101,8 @@ void WorkHttpConn::_HandleStatusReques(string& url, string& post_data)
 // Add By Lanhu 2014-12-19 通过登陆IP来优选电信还是联通IP
 void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 {
+	(void)url;
+	(void)post_data;
 	msg_serv_info_t* pMsgServInfo;
 	uint32_t min_user_cnt = (uint32_t)-1;
 	map<uint32_t, msg_serv_info_t*>::iterator it_min_conn = g_msg_serv_info.end();
@@ -108,7 +114,7 @@ void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 		value["msg"] = "没有msg_server";
 		string strContent = value.toStyledString();
 		char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
-		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, strContent.length(), strContent.c_str());
+		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, (int)strContent.length(), strContent.c_str());
 		Send((void*)szContent, strlen(szContent));
 		delete [] szContent;
 		return ;
@@ -130,7 +136,7 @@ void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 		value["msg"] = "负载过高";
 		string strContent = value.toStyledString();
 		char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
-		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, strContent.length(), strContent.c_str());
+		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, (int)strContent.length(), strContent.c_str());
 		Send((void*)szContent, strlen(szContent));
 		delete [] szContent;
 		return;
@@ -157,7 +163,7 @@ void WorkHttpConn::_HandleMsgServRequest(string& url, string& post_data)
 		value["port"] = int2string(it_min_conn->second->port);
 		string strContent = value.toStyledString();
 		char* szContent = new char[HTTP_RESPONSE_HTML_MAX];
-		uint32_t nLen = strContent.length();
+		int nLen = strContent.length();
 		snprintf(szContent, HTTP_RESPONSE_HTML_MAX, HTTP_RESPONSE_JSON, nLen, strContent.c_str());
 		Send((void*)szContent, strlen(szContent));
 		delete [] szContent;

@@ -13,6 +13,8 @@
 // this callback will be replaced by imconn_callback() in OnConnect()
 void route_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)pParam;
 	if (msg == NETLIB_MSG_CONNECT)
 	{
 		CRouteConn* pConn = new CRouteConn();

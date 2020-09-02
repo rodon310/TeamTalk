@@ -129,7 +129,7 @@ void CGroupChat::HandleGroupInfoResponse(CImPdu* pPdu)
 		log("GroupInfoRequest is send by server, group_id=%u ", group_id);
 		
 		std::set<uint32_t> group_member_set;
-		for (uint32_t i = 0; i < group_info.group_member_list_size(); i++)
+		for (int i = 0; i < group_info.group_member_list_size(); i++)
 		{
 			uint32_t member_user_id = group_info.group_member_list(i);
 			group_member_set.insert(member_user_id);
@@ -151,7 +151,7 @@ void CGroupChat::HandleGroupInfoResponse(CImPdu* pPdu)
 		IM::Server::IMGroupGetShieldReq msg3;
 		msg3.set_group_id(group_id);
 		msg3.set_attach_data(pdu.GetBodyData(), pdu.GetBodyLength());
-		for (uint32_t i = 0; i < group_info.group_member_list_size(); i++)
+		for (int i = 0; i < group_info.group_member_list_size(); i++)
 		{
 			uint32_t member_user_id = group_info.group_member_list(i);
 			
@@ -207,7 +207,7 @@ void CGroupChat::HandleGroupMessage(CImPdu* pPdu)
 		log("HandleGroupMsg, write db failed, %u->%u. ", from_user_id, to_group_id);
 		return;
 	}
-	uint8_t msg_type = msg.msg_type();
+	//uint8_t msg_type = msg.msg_type();
 	CDbAttachData attach_data((uchar_t*)msg.attach_data().c_str(), msg.attach_data().length());
 
 	log("HandleGroupMsg, %u->%u, msg id=%u. ", from_user_id, to_group_id, msg_id);

@@ -46,6 +46,10 @@ static void paramErrorOut(CHttpConn* pHttpConn)
 
 void http_query_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	struct tm* tm;
 	time_t currTime;
 
@@ -156,6 +160,7 @@ void CHttpQuery::DispatchGetQuery(std::string& url, CHttpConn* pHttpConn){
 }
 
 void CHttpQuery::_Login(const string&strAppKey, Json::Value& post_json_obj, CHttpConn* pHttpConn){
+	(void)strAppKey;
 	if(checkValueIsNullForJson(post_json_obj,"account")
 		||checkValueIsNullForJson(post_json_obj,"password")
 		||checkValueIsNullForJson(post_json_obj,"callbackurl")
@@ -181,6 +186,7 @@ void CHttpQuery::_Login(const string&strAppKey, Json::Value& post_json_obj, CHtt
 }
 
 void CHttpQuery::_TestCallBack(const string&strAppKey, Json::Value& post_json_obj, CHttpConn* pHttpConn){
+	(void)strAppKey;
 	if(checkValueIsNullForJson(post_json_obj,"text")
 		||checkValueIsNullForJson(post_json_obj,"fromId")
 		||checkValueIsNullForJson(post_json_obj,"toId")
@@ -208,6 +214,7 @@ void CHttpQuery::_TestCallBack(const string&strAppKey, Json::Value& post_json_ob
 
 
 void CHttpQuery::_SendMessage(const string&strAppKey, Json::Value& post_json_obj, CHttpConn* pHttpConn) {
+	(void)strAppKey;
 	if(checkValueIsNullForJson(post_json_obj,"senderId")
 		||checkValueIsNullForJson(post_json_obj,"toId")
 		||checkValueIsNullForJson(post_json_obj,"text")
@@ -261,11 +268,18 @@ void CHttpQuery::_Online(CHttpConn* pHttpConn) {
 
 HTTP_ERROR_CODE CHttpQuery::_CheckAuth(const string& strAppKey, const uint32_t userId, const string& strInterface, const string& strIp)
 {
+	(void)strAppKey;
+	(void)userId;
+	(void)strInterface;
+	(void)strIp;
 	return HTTP_ERROR_SUCCESS;
 }
 
 HTTP_ERROR_CODE CHttpQuery::_CheckPermission(const string& strAppKey, uint8_t nType, const list<uint32_t>& lsToId, string strMsg)
 {
+	(void)strAppKey;
+	(void)nType;
+	(void)lsToId;
 	strMsg.clear();
 	return HTTP_ERROR_SUCCESS;
 }

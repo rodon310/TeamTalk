@@ -43,6 +43,10 @@ static uint32_t		g_db_server_login_count = 0;	// 到进行登录处理的DBServe
     
 static void db_server_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	ConnMap_t::iterator it_old;
 	CDBServConn* pConn = NULL;
 	uint64_t cur_time = get_tick_count();
@@ -267,6 +271,7 @@ void CDBServConn::_HandleMsgClient(CImPdu *pPdu)
 
 void CDBServConn::_HandleStopReceivePacket(CImPdu* pPdu)
 {
+	(void)pPdu;
 	log("HandleStopReceivePacket, from %s:%d",
 			g_db_server_list[m_serv_idx].server_ip.c_str(), g_db_server_list[m_serv_idx].server_port);
 

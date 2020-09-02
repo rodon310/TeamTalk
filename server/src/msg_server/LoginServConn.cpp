@@ -27,6 +27,10 @@ static uint32_t g_max_conn_cnt;
 
 void login_server_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	ConnMap_t::iterator it_old;
 	CLoginServConn* pConn = NULL;
 	uint64_t cur_time = get_tick_count();
@@ -127,7 +131,7 @@ void CLoginServConn::OnConfirm()
 	g_login_server_list[m_serv_idx].reconnect_cnt = MIN_RECONNECT_CNT / 2;
 
 	uint32_t cur_conn_cnt = 0;
-	uint32_t shop_user_cnt = 0;
+	//uint32_t shop_user_cnt = 0;
 	list<user_conn_t> user_conn_list;
 	CImUserManager::GetInstance()->GetUserConnCnt(&user_conn_list, cur_conn_cnt);
 	char hostname[256] = {0};
@@ -171,5 +175,6 @@ void CLoginServConn::OnTimer(uint64_t curr_tick)
 
 void CLoginServConn::HandlePdu(CImPdu* pPdu)
 {
+	(void)pPdu;
 	//printf("recv pdu_type=%d ", pPdu->GetPduType());
 }

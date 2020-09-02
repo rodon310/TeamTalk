@@ -99,7 +99,7 @@ char* OnlineInfo(){
 	char *data = (char*)malloc(max_len);
 	memset(data,0,max_len);
 	//PackSendResult(data,max_len);
-	snprintf(data, max_len, HTTP_JSON_QUEYR_HEADER, content_len, result_str.c_str());
+	snprintf(data, max_len, HTTP_JSON_QUEYR_HEADER, (int)content_len, result_str.c_str());
 	return data;
 }
 
@@ -254,7 +254,7 @@ void AiClient::onClose(){
 }
 
 void AiClient::onRecvMsg(uint32_t nSeqNo, uint32_t nFromId, uint32_t nToId, uint32_t nMsgId, uint32_t nCreateTime, IM::BaseDefine::MsgType nMsgType, const string& strMsgData){
-	log("onRecvMsg  from:%d\n",nFromId);
+	log("onRecvMsg nSeqNo:%d  from:%d toId:%d msgId:%d createTime:%d nMsgType:%d \n",nSeqNo, nFromId,nToId,nMsgId, nCreateTime, nMsgType);
 	if(nMsgType == IM::BaseDefine::MSG_TYPE_GROUP_TEXT || nMsgType == IM::BaseDefine::MSG_TYPE_SINGLE_TEXT) {
 		char* msg_out = NULL;
 		uint32_t msg_out_len = 0;
@@ -277,6 +277,7 @@ void AiClient::onRecvMsg(uint32_t nSeqNo, uint32_t nFromId, uint32_t nToId, uint
 }
 
 void AiClient::onLogin(uint32_t nSeqNo, uint32_t nResultCode, string& strMsg, IM::BaseDefine::UserInfo* pUser){
+	(void)nSeqNo;
 	if(nResultCode != 0)
 	{
 		printf("login failed.errorCode=%u, msg=%s\n",nResultCode, strMsg.c_str());

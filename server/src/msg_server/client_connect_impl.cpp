@@ -9,6 +9,8 @@
 
 void msg_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)pParam;
 	if (msg == NETLIB_MSG_CONNECT)
 	{
 		CMsgConn* pConn = new CMsgConn();

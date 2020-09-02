@@ -41,6 +41,10 @@ extern CAes *pAes;
 
 static void db_server_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	ConnMap_t::iterator it_old;
 	CDBServConn* pConn = NULL;
 	uint64_t cur_time = get_tick_count();
@@ -511,9 +515,9 @@ void CDBServConn::_HandleMsgData(CImPdu *pPdu)
 	CDbAttachData attach_data((uchar_t*)msg.attach_data().c_str(), msg.attach_data().length());
 	uint32_t handle = attach_data.GetHandle();
 
-	log("HandleMsgData, from_user_id=%u, to_user_id=%u, msg_id=%u.", from_user_id, to_user_id, msg_id);
+	log("HandleMsgData, from_user_id=%u, to_user_id=%u, msg_id=%u. msg_type=%u", from_user_id, to_user_id, msg_id, msg_type);
 
-	CMsgConn* pMsgConn = CImUserManager::GetInstance()->GetMsgConnByHandle(from_user_id, attach_data.GetHandle());
+	CMsgConn* pMsgConn = CImUserManager::GetInstance()->GetMsgConnByHandle(from_user_id, handle);
 	if (pMsgConn)
 	{
 		IM::Message::IMMsgDataAck msg2;
@@ -625,6 +629,7 @@ void CDBServConn::_HandleUsersInfoResponse(CImPdu* pPdu)
 
 void CDBServConn::_HandleStopReceivePacket(CImPdu* pPdu)
 {
+	(void)pPdu;
 	log("HandleStopReceivePacket, from %s:%d.",
 			g_db_server_list[m_serv_idx].server_ip.c_str(), g_db_server_list[m_serv_idx].server_port);
 

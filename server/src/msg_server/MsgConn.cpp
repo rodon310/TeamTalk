@@ -48,6 +48,10 @@ static CThreadPool g_thread_pool;
 
 void msg_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	ConnMap_t::iterator it_old;
 	CMsgConn* pConn = NULL;
 	uint64_t cur_time = get_tick_count();
@@ -201,6 +205,7 @@ void CMsgConn::SendUserStatusUpdate(uint32_t user_status)
 
 void CMsgConn::Close(bool kick_user)
 {
+	(void)kick_user;
 	log("Close client, handle=%d, user_id=%u ", m_handle, GetUserId());
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		netlib_close(m_handle);

@@ -197,6 +197,7 @@ void CFileHandler::HandleClientFileAddOfflineReq(CMsgConn* pMsgConn, CImPdu* pPd
 
 void CFileHandler::HandleClientFileDelOfflineReq(CMsgConn* pMsgConn, CImPdu* pPdu)
 {
+	(void)pMsgConn;
 	IM::File::IMFileDelOfflineReq msg;
 	CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
 
@@ -260,8 +261,8 @@ void CFileHandler::HandleFileNotify(CImPdu* pPdu)
 	uint32_t ip_addr_cnt = msg.ip_addr_list_size();
 	uint32_t trans_mode = msg.trans_mode();
 	uint32_t offline_ready = msg.offline_ready();
-	log("HandleFileNotify, from_id: %u, to_id: %u, file_name: %s, task_id: %s, trans_mode: %u,\
-		offline_ready: %u. ", from_user_id, to_user_id, file_name.c_str(), task_id.c_str(),
+	log("HandleFileNotify, from_id: %u, to_id: %u, file_name: %s, file_size: %u, task_id: %s, ip_addr_cnt: %u ,  trans_mode: %u,\
+		offline_ready: %u. ", from_user_id, to_user_id, file_name.c_str(),file_size, task_id.c_str(), ip_addr_cnt,
 		trans_mode, offline_ready);
 	CImUser* pUser = CImUserManager::GetInstance()->GetImUserById(to_user_id);
 	if (pUser) {

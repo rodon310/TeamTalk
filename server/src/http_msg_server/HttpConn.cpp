@@ -27,8 +27,8 @@ CHttpConn* FindHttpConnByHandle(uint32_t conn_handle)
 
 void httpconn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
-	NOTUSED_ARG(pParam);
-
+	(void)handle;
+	(void)pParam;
 	// convert void* to uint32_t, oops
 	//uint32_t conn_handle = *((uint32_t*)(&callback_data));
 	//CHttpConn* pConn = FindHttpConnByHandle(conn_handle);
@@ -56,6 +56,10 @@ void httpconn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* 
 
 void http_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	CHttpConn* pConn = NULL;
 	HttpConnMap_t::iterator it, it_old;
 	uint64_t cur_time = get_tick_count();

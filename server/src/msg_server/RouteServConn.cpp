@@ -34,6 +34,10 @@ static CGroupChat* s_group_chat = NULL;
 
 void route_server_conn_timer_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)msg;
+	(void)handle;
+	(void)pParam;
 	ConnMap_t::iterator it_old;
 	CRouteServConn* pConn = NULL;
 	uint64_t cur_time = get_tick_count();

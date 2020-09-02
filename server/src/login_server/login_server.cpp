@@ -18,6 +18,8 @@ string strDiscovery;//发现获取地址
 string strBaseUrl;
 void client_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)pParam;
 	if (msg == NETLIB_MSG_CONNECT)
 	{
 		CLoginConn* pConn = new CLoginConn();
@@ -32,6 +34,8 @@ void client_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pP
 // this callback will be replaced by imconn_callback() in OnConnect()
 void msg_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)pParam;
 	log("msg_server come in");
 
 	if (msg == NETLIB_MSG_CONNECT)
@@ -48,6 +52,8 @@ void msg_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* 
 
 void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
 {
+	(void)callback_data;
+	(void)pParam;
 	if (msg == NETLIB_MSG_CONNECT)
 	{
 		CHttpConn* pConn = new WorkHttpConn();
