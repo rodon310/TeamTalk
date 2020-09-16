@@ -337,11 +337,11 @@ void CMsgConn::OnRead()
 		{
 			uint32_t pdu_len = pPdu->GetLength();
 			m_in_buf.Read(NULL, pdu_len);
-			PduTask *task = new PduTask(this,pPdu);
-			g_thread_pool.AddTask(task,this->m_user_id);
+			// PduTask *task = new PduTask(this,pPdu);
+			// g_thread_pool.AddTask(task,this->m_user_id);
 			//log("add task");
-			//HandlePdu(pPdu);
-			//delete pPdu;
+			HandlePdu(pPdu);
+			delete pPdu;
 			pPdu = NULL;
 			//++g_recv_pkt_cnt;
 		}
