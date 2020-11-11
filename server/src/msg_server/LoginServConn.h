@@ -16,12 +16,9 @@ class CLoginServConn : public CImConn
 public:
 	CLoginServConn();
 	virtual ~CLoginServConn();
-
 	bool IsOpen() { return m_bOpen; }
-
 	void Connect(const char* server_ip, uint16_t server_port, uint32_t serv_idx);
 	virtual void Close();
-
 	virtual void OnConfirm();
 	virtual void OnClose();
 	virtual void OnTimer(uint64_t curr_tick);

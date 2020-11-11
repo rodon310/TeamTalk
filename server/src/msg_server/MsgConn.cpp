@@ -141,7 +141,7 @@ void init_msg_conn()
 	netlib_register_timer(msg_conn_timer_callback, NULL, 1000);
 	s_file_handler = CFileHandler::getInstance();
 	s_group_chat = CGroupChat::GetInstance();
-	g_thread_pool.Init(8);
+	//g_thread_pool.Init(8);
 }
 
 ////////////////////////////
@@ -320,7 +320,7 @@ void CMsgConn::OnRead()
 			m_in_buf.Extend(READ_BUF_SIZE);
 
 		//int ret = netlib_recv(m_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
-		int ret = m_basesocket->Recv( m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
+		int ret = m_basesocket->Recv(m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
 		if (ret <= 0)
 			break;
 
@@ -333,7 +333,7 @@ void CMsgConn::OnRead()
 	CImPdu* pPdu = NULL;
 	try
 	{
-		while ( ( pPdu = CImPdu::ReadPdu(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset()) ) )
+		while ((pPdu = CImPdu::ReadPdu(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset()) ) )
 		{
 			uint32_t pdu_len = pPdu->GetLength();
 			m_in_buf.Read(NULL, pdu_len);
@@ -375,17 +375,15 @@ int CMsgConn::Send(void* data, int len)
 		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
 			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
 		}
-
 		//int ret = netlib_send(m_handle, (char*)data + offset , send_size);
 		int ret = m_basesocket->Send((char*)data + offset, send_size);
 		if (ret <= 0) {
 			ret = 0;
 			break;
 		}
-
 		offset += ret;
 		remain -= ret;
-    }
+	}
 
 	if (remain > 0)
 	{
@@ -396,7 +394,7 @@ int CMsgConn::Send(void* data, int len)
 	else
 	{
 		OnWriteCompelete();
-    }
+	}
 	return len;
 }
 
@@ -548,8 +546,8 @@ void CMsgConn::HandlePdu(CImPdu* pPdu)
 
 void CMsgConn::_HandleHeartBeat(CImPdu *pPdu)
 {
-    //响应
-    SendPdu(pPdu);
+	//响应
+	SendPdu(pPdu);
 }
 
 // process: send validate request to db server
@@ -658,63 +656,63 @@ void CMsgConn::_HandleLoginOutRequest(CImPdu *pPdu)
 
 void CMsgConn::_HandleKickPCClient(CImPdu *pPdu)
 {
-    IM::Login::IMKickPCClientReq msg;
-    CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
-    uint32_t user_id = GetUserId();
-    if (!CHECK_CLIENT_TYPE_MOBILE(GetClientType()))
-    {
-        log("HandleKickPCClient, user_id = %u, cmd must come from mobile client. ", user_id);
-        return;
-    }
-    log("HandleKickPCClient, user_id = %u. ", user_id);
-    
-    CImUser* pImUser = CImUserManager::GetInstance()->GetImUserById(user_id);
-    if (pImUser)
-    {
-        pImUser->KickOutSameClientType(CLIENT_TYPE_MAC, IM::BaseDefine::KICK_REASON_MOBILE_KICK,this);
-    }
-    
-    CRouteServConn* pRouteConn = get_route_serv_conn();
-    if (pRouteConn) {
-        IM::Server::IMServerKickUser msg2;
-        msg2.set_user_id(user_id);
-        msg2.set_client_type(::IM::BaseDefine::CLIENT_TYPE_MAC);
-        msg2.set_reason(IM::BaseDefine::KICK_REASON_MOBILE_KICK);
-        CImPdu pdu;
-        pdu.SetPBMsg(&msg2);
-        pdu.SetServiceId(SID_OTHER);
-        pdu.SetCommandId(CID_OTHER_SERVER_KICK_USER);
-        pRouteConn->SendPdu(&pdu);
-    }
-    
-    IM::Login::IMKickPCClientRsp msg2;
-    msg2.set_user_id(user_id);
-    msg2.set_result_code(0);
-    CImPdu pdu;
-    pdu.SetPBMsg(&msg2);
-    pdu.SetServiceId(SID_LOGIN);
-    pdu.SetCommandId(CID_LOGIN_RES_KICKPCCLIENT);
-    pdu.SetSeqNum(pPdu->GetSeqNum());
-    SendPdu(&pdu);
+	IM::Login::IMKickPCClientReq msg;
+	CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
+	uint32_t user_id = GetUserId();
+	if (!CHECK_CLIENT_TYPE_MOBILE(GetClientType()))
+	{
+		log("HandleKickPCClient, user_id = %u, cmd must come from mobile client. ", user_id);
+		return;
+	}
+	log("HandleKickPCClient, user_id = %u. ", user_id);
+		
+	CImUser* pImUser = CImUserManager::GetInstance()->GetImUserById(user_id);
+	if (pImUser)
+	{
+		pImUser->KickOutSameClientType(CLIENT_TYPE_MAC, IM::BaseDefine::KICK_REASON_MOBILE_KICK,this);
+	}
+
+	CRouteServConn* pRouteConn = get_route_serv_conn();
+	if (pRouteConn) {
+		IM::Server::IMServerKickUser msg2;
+		msg2.set_user_id(user_id);
+		msg2.set_client_type(::IM::BaseDefine::CLIENT_TYPE_MAC);
+		msg2.set_reason(IM::BaseDefine::KICK_REASON_MOBILE_KICK);
+		CImPdu pdu;
+		pdu.SetPBMsg(&msg2);
+		pdu.SetServiceId(SID_OTHER);
+		pdu.SetCommandId(CID_OTHER_SERVER_KICK_USER);
+		pRouteConn->SendPdu(&pdu);
+	}
+		
+	IM::Login::IMKickPCClientRsp msg2;
+	msg2.set_user_id(user_id);
+	msg2.set_result_code(0);
+	CImPdu pdu;
+	pdu.SetPBMsg(&msg2);
+	pdu.SetServiceId(SID_LOGIN);
+	pdu.SetCommandId(CID_LOGIN_RES_KICKPCCLIENT);
+	pdu.SetSeqNum(pPdu->GetSeqNum());
+	SendPdu(&pdu);
 }
 
 void CMsgConn::_HandleClientRecentContactSessionRequest(CImPdu *pPdu)
 {
-    CDBServConn* pConn = get_db_serv_conn_for_login();
-    if (!pConn) {
-        return;
-    }
-    
-    IM::Buddy::IMRecentContactSessionReq msg;
-    CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
-    log("HandleClientRecentContactSessionRequest, user_id=%u, latest_update_time=%u. ", GetUserId(), msg.latest_update_time());
+	CDBServConn* pConn = get_db_serv_conn_for_login();
+	if (!pConn) {
+		return;
+	}
+		
+	IM::Buddy::IMRecentContactSessionReq msg;
+	CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()));
+	log("HandleClientRecentContactSessionRequest, user_id=%u, latest_update_time=%u. ", GetUserId(), msg.latest_update_time());
 
-    msg.set_user_id(GetUserId());
-    // 请求最近联系会话列表
-    CDbAttachData attach_data(ATTACH_TYPE_HANDLE, m_handle, 0);
-    msg.set_attach_data(attach_data.GetBuffer(), attach_data.GetLength());
-    pPdu->SetPBMsg(&msg);
-    pConn->SendPdu(pPdu);
+	msg.set_user_id(GetUserId());
+	// 请求最近联系会话列表
+	CDbAttachData attach_data(ATTACH_TYPE_HANDLE, m_handle, 0);
+	msg.set_attach_data(attach_data.GetBuffer(), attach_data.GetLength());
+	pPdu->SetPBMsg(&msg);
+	pConn->SendPdu(pPdu);
 }
 
 void CMsgConn::_HandleClientMsgData(CImPdu* pPdu)
@@ -1151,7 +1149,6 @@ void CMsgConn::_HandleQueryPushShieldRequest(CImPdu* pPdu) {
 		msg.set_user_id(GetUserId());
 		CPduAttachData attach(ATTACH_TYPE_HANDLE, m_handle,0, NULL);
 		msg.set_attach_data(attach.GetBuffer(), attach.GetLength());
-
 		pPdu->SetPBMsg(&msg);
 		pDBConn->SendPdu(pPdu);
 	}
