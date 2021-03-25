@@ -245,7 +245,7 @@ void CHttpQuery::_SendMessage(const string& strAppKey,Json::Value& post_json_obj
 	try
 	{
 		uint32_t user_id = post_json_obj["from_user_id"].asUInt();
-		uint32_t to_id = post_json_obj["to_user_id"].asUInt();
+		uint32_t to_id = post_json_obj["session_id"].asUInt();
 		uint32_t create_time = time(NULL);
 		string msgContent;
 		if(post_json_obj["msg"].isString())
