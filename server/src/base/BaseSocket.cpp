@@ -63,7 +63,11 @@ int CBaseSocket::bindAndListen(sockaddr* serv_addr,int size)
 	}
 	m_state = SOCKET_STATE_LISTENING;
 	AddBaseSocket(this);
+#if ((defined _WIN32) || (defined __APPLE__))
 	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP);
+#else
+	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP,this);
+#endif
 	return NETLIB_OK;
 
 }
@@ -183,7 +187,12 @@ net_handle_t CBaseSocket::UnixConnect(const char* unix_socket_path,callback_t ca
 	}
 	m_state = SOCKET_STATE_CONNECTING;
 	AddBaseSocket(this);
+#if ((defined _WIN32) || (defined __APPLE__))
 	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL);
+#else
+	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL,this);
+#endif
+	
 	
 	return (net_handle_t)m_socket;	
 }
@@ -416,12 +425,11 @@ void CBaseSocket::_AcceptNewSocket()
 		pSocket->SetRemotePort(port);
 		_SetNonblock(fd);
 		AddBaseSocket(pSocket);
-		#ifdef _WIN32
-		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
-		#elif __APPLE__
-		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
+		
+		#if ((defined _WIN32) || (defined __APPLE__))
+		CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP);
 		#else
-		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP, pSocket);
+		CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP,pSocket);
 		#endif
 		//CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
 		m_callback(m_callback_data, NETLIB_MSG_CONNECT, (net_handle_t)fd, pSocket);
