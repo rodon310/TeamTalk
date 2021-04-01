@@ -49,6 +49,7 @@ public:
 	virtual void Close(bool kick_user = false);
 
 	virtual void OnConnect(net_handle_t handle);
+    virtual void OnConnect(net_handle_t handle, void *data);
 	virtual void OnClose();
     virtual void OnRead();
 

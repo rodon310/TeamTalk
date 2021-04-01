@@ -259,6 +259,22 @@ void CMsgConn::OnConnect(net_handle_t handle)
 	
 }
 
+void CMsgConn::OnConnect(net_handle_t handle, void *data){
+	m_handle = handle;
+	m_login_time = get_tick_count();
+	g_msg_conn_map.insert(make_pair(handle, this));
+	if(data){
+		m_basesocket = (CBaseSocket*)data;
+	}else {
+		m_basesocket = FindBaseSocket(m_handle);
+	}
+	this->AddRef();
+	m_basesocket->SetCallback(immsgconn_callback);
+	m_basesocket->SetCallbackData(this);
+	m_peer_ip = m_basesocket->GetRemoteIP();
+	m_peer_port = m_basesocket->GetRemotePort();
+}
+
 void CMsgConn::OnClose()
 {
 	log("Warning: peer closed. ");

@@ -14,7 +14,11 @@ void msg_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* 
 	if (msg == NETLIB_MSG_CONNECT)
 	{
 		CMsgConn* pConn = new CMsgConn();
-		pConn->OnConnect(handle);
+		if(pParam){
+			pConn->OnConnect(handle,pParam);
+		}else {
+			pConn->OnConnect(handle);
+		}
 	}
 	else
 	{

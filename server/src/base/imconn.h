@@ -31,6 +31,7 @@ public:
 	virtual  int Send(void* data, int len);
 
 	virtual void OnConnect(net_handle_t handle) { m_handle = handle; }
+	virtual void OnConnect(net_handle_t handle,void *data) { m_handle = handle; }
 	virtual void OnConfirm() {}
 	virtual void OnRead();
 	virtual void OnWrite();

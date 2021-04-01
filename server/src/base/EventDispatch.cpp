@@ -344,6 +344,21 @@ void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
 	}
 }
 
+void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr)
+{
+	(void)socket_event;
+	struct epoll_event ev;
+	ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLPRI | EPOLLERR | EPOLLHUP;
+	//#ifdef EPOLLRDHUP
+	//ev.events = ev.events | EPOLLRDHUP;
+	//#endif
+	ev.data.ptr = data_ptr;
+	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev) != 0)
+	{
+		log("epoll_ctl() failed, errno=%d", errno);
+	}
+}
+
 void CEventDispatch::RemoveEvent(SOCKET fd, uint8_t socket_event)
 {
 	(void)socket_event;
@@ -366,8 +381,9 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 		nfds = epoll_wait(m_epfd, events, 1024, wait_timeout);
 		for (int i = 0; i < nfds; i++)
 		{
-			int ev_fd = events[i].data.fd;
-			CBaseSocket* pSocket = FindBaseSocket(ev_fd);
+			//int ev_fd = events[i].data.fd;
+			//CBaseSocket* pSocket = FindBaseSocket(ev_fd);
+			CBaseSocket* pSocket = (CBaseSocket*)events[i].data.ptr;
 			if (!pSocket)
 				continue;
 

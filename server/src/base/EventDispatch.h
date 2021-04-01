@@ -26,6 +26,11 @@ public:
 	void AddEvent(SOCKET fd, uint8_t socket_event);
 	void RemoveEvent(SOCKET fd, uint8_t socket_event);
 
+#ifdef _WIN32
+#elif __APPLE__
+#else
+	void AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr); //for epoll
+#endif
 	void AddTimer(callback_t callback, void* user_data, uint64_t interval);
 	void RemoveTimer(callback_t callback, void* user_data);
     
