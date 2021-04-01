@@ -414,7 +414,7 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
                 pSocket->OnClose();
             }
 			#endif
-			pSocket->ReleaseRef();
+			//pSocket->ReleaseRef();
 		}
 
 		_CheckTimer();
