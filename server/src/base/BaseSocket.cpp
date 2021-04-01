@@ -430,9 +430,9 @@ void CBaseSocket::_AcceptNewSocket()
 		_SetNonblock(fd);
 		AddBaseSocket(pSocket);
 		#if ((defined _WIN32) || (defined __APPLE__))
-		CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP);
+		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
 		#else
-		CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP,pSocket);
+		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP,pSocket);
 		#endif
 		//CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
 		m_callback(m_callback_data, NETLIB_MSG_CONNECT, (net_handle_t)fd, pSocket);
