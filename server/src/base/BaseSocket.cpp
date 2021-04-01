@@ -63,6 +63,7 @@ int CBaseSocket::bindAndListen(sockaddr* serv_addr,int size)
 	}
 	m_state = SOCKET_STATE_LISTENING;
 	AddBaseSocket(this);
+	
 #if ((defined _WIN32) || (defined __APPLE__))
 	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP);
 #else
@@ -127,8 +128,11 @@ net_handle_t CBaseSocket::Connect(const char* server_ip, uint16_t port, callback
 	}
 	m_state = SOCKET_STATE_CONNECTING;
 	AddBaseSocket(this);
+	#if ((defined _WIN32) || (defined __APPLE__))
 	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL);
-	
+	#else
+	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL,this);
+	#endif
 	return (net_handle_t)m_socket;
 }
 
@@ -425,7 +429,6 @@ void CBaseSocket::_AcceptNewSocket()
 		pSocket->SetRemotePort(port);
 		_SetNonblock(fd);
 		AddBaseSocket(pSocket);
-		
 		#if ((defined _WIN32) || (defined __APPLE__))
 		CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP);
 		#else
