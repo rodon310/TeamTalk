@@ -329,20 +329,20 @@ void CEventDispatch::StopDispatch()
 
 #else
 
-void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
-{
-	(void)socket_event;
-	struct epoll_event ev;
-	ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLPRI | EPOLLERR | EPOLLHUP;
-	//#ifdef EPOLLRDHUP
-	//ev.events = ev.events | EPOLLRDHUP;
-	//#endif
-	ev.data.fd = fd;
-	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev) != 0)
-	{
-		log("epoll_ctl() failed, errno=%d", errno);
-	}
-}
+// void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
+// {
+// 	(void)socket_event;
+// 	struct epoll_event ev;
+// 	ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLPRI | EPOLLERR | EPOLLHUP;
+// 	//#ifdef EPOLLRDHUP
+// 	//ev.events = ev.events | EPOLLRDHUP;
+// 	//#endif
+// 	ev.data.fd = fd;
+// 	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev) != 0)
+// 	{
+// 		log("epoll_ctl() failed, errno=%d", errno);
+// 	}
+// }
 
 void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr)
 {
@@ -386,6 +386,16 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 			CBaseSocket* pSocket = (CBaseSocket*)events[i].data.ptr;
 			if (!pSocket)
 				continue;
+       pSocket->AddRef();
+
+     #ifdef EPOLLRDHUP
+      if (events[i].events & EPOLLRDHUP)
+      {
+                //log("On Peer Close, socket=%d, ev_fd);
+          pSocket->OnClose();
+			//		continue;
+      }
+			#endif
 
 			if (events[i].events & EPOLLIN)
 			{
@@ -398,23 +408,15 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 				//log("OnWrite, socket=%d\n", ev_fd);
 				pSocket->OnWrite();
 			}
-			bool closed=false;
 
 			if (events[i].events & (EPOLLPRI | EPOLLERR | EPOLLHUP))
 			{
 				//log("OnClose, socket=%d\n", ev_fd);
 				pSocket->OnClose();
-				closed = true;
 			}
 
-            #ifdef EPOLLRDHUP
-            if (!closed && (events[i].events & EPOLLRDHUP))
-            {
-                //log("On Peer Close, socket=%d, ev_fd);
-                pSocket->OnClose();
-            }
-			#endif
-			//pSocket->ReleaseRef();
+            
+			pSocket->ReleaseRef();
 		}
 
 		_CheckTimer();

@@ -23,11 +23,11 @@ class CEventDispatch
 public:
 	virtual ~CEventDispatch();
 
-	void AddEvent(SOCKET fd, uint8_t socket_event);
+	
 	void RemoveEvent(SOCKET fd, uint8_t socket_event);
 
-#ifdef _WIN32
-#elif __APPLE__
+#if ((defined _WIN32) || (defined __APPLE__))
+	void AddEvent(SOCKET fd, uint8_t socket_event);
 #else
 	void AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr); //for epoll
 #endif
