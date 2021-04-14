@@ -87,7 +87,11 @@ void CSSLSocket::_AcceptNewSocket()
         _SetNoDelay(fd);
         _SetNonblock(fd);
         AddBaseSocket(pSocket);
-        CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
+        #if ((defined _WIN32) || (defined __APPLE__))
+		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
+		#else
+		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP,pSocket);
+		#endif
         m_callback(m_callback_data, NETLIB_MSG_CONNECT, (net_handle_t)fd, NULL);
     }
 }
