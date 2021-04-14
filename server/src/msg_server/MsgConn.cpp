@@ -208,10 +208,10 @@ void CMsgConn::Close(bool kick_user)
 	(void)kick_user;
 	log("Close client, handle=%d, user_id=%u ", m_handle, GetUserId());
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		m_basesocket->SetCallbackData(NULL);
 		netlib_close(m_handle);
 		g_msg_conn_map.erase(m_handle);
-		if(m_basesocket) {
+		if(m_basesocket) {	
+			m_basesocket->SetCallbackData(NULL);
 			m_basesocket->ReleaseRef();
 			m_basesocket = NULL;
 		}
