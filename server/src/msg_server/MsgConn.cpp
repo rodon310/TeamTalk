@@ -208,6 +208,7 @@ void CMsgConn::Close(bool kick_user)
 	(void)kick_user;
 	log("Close client, handle=%d, user_id=%u ", m_handle, GetUserId());
 	if (m_handle != NETLIB_INVALID_HANDLE) {
+		m_basesocket->SetCallbackData(this);
 		netlib_close(m_handle);
 		g_msg_conn_map.erase(m_handle);
 	}
@@ -244,8 +245,7 @@ void CMsgConn::OnConnect(net_handle_t handle)
 
 	g_msg_conn_map.insert(make_pair(handle, this));
 	m_basesocket = FindBaseSocket(m_handle);
-	this->AddRef();
-
+	//this->AddRef();
 	m_basesocket->SetCallback(immsgconn_callback);
 	m_basesocket->SetCallbackData(this);
 	m_peer_ip = m_basesocket->GetRemoteIP();
@@ -265,10 +265,10 @@ void CMsgConn::OnConnect(net_handle_t handle, void *data){
 	g_msg_conn_map.insert(make_pair(handle, this));
 	if(data){
 		m_basesocket = (CBaseSocket*)data;
+		m_basesocket->AddRef();
 	}else {
 		m_basesocket = FindBaseSocket(m_handle);
 	}
-	this->AddRef();
 	m_basesocket->SetCallback(immsgconn_callback);
 	m_basesocket->SetCallbackData(this);
 	m_peer_ip = m_basesocket->GetRemoteIP();

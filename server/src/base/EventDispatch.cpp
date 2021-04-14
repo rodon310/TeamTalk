@@ -386,17 +386,15 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 			CBaseSocket* pSocket = (CBaseSocket*)events[i].data.ptr;
 			if (!pSocket)
 				continue;
-       pSocket->AddRef();
+			pSocket->AddRef();
 
-     #ifdef EPOLLRDHUP
-      if (events[i].events & EPOLLRDHUP)
-      {
+			#ifdef EPOLLRDHUP
+			if (events[i].events & EPOLLRDHUP)
+			{
                 //log("On Peer Close, socket=%d, ev_fd);
-          pSocket->OnClose();
-			//		continue;
-      }
+				pSocket->OnClose();
+			}
 			#endif
-
 			if (events[i].events & EPOLLIN)
 			{
 				//log("OnRead, socket=%d\n", ev_fd);
@@ -414,8 +412,6 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 				//log("OnClose, socket=%d\n", ev_fd);
 				pSocket->OnClose();
 			}
-
-            
 			pSocket->ReleaseRef();
 		}
 
