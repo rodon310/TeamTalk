@@ -182,7 +182,7 @@ void CMsgConn::SendUserStatusUpdate(uint32_t user_status)
 	}else {
 		return;
 	}
-	msg.set_user_action(USER_CNT_INC);
+	//msg.set_user_action(USER_CNT_INC);
 	msg.set_user_id(pImUser->GetUserId());
 	CImPdu pdu;
 	pdu.SetPBMsg(&msg);
