@@ -103,16 +103,16 @@ BOOL CPushApp::Start()
         
         m_io.Start();
         CSessionManager::GetInstance()->StartCheckPushSession();
-        if (pAPNSClient)
+        if (pPushServer)
         {
-            if (pAPNSClient->Start() == FALSE)
+            if (pPushServer->Start() == FALSE)
             {
                 return FALSE;
             }
         }
-        if (pPushServer)
+        if (pAPNSClient)
         {
-            if (pPushServer->Start() == FALSE)
+            if (pAPNSClient->Start() == FALSE)
             {
                 return FALSE;
             }
