@@ -137,7 +137,7 @@ int CAudioModel::saveAudioInfo(uint32_t nFromId, uint32_t nToId, uint32_t nCreat
 	string strPath = httpClient.UploadByteFile(m_strFileSite, pRealData, nRealLen);
 	if (!strPath.empty())
 	{
-		DBCONNN_MASTER(pDBConn,
+		DBCONN_MASTER(pDBConn,
 		{
 			uint32_t nStartPos = 0;
 			string strSql = "insert into IMAudio(`fromId`, `toId`, `path`, `size`, `duration`, `created`) "\
