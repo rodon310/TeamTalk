@@ -113,7 +113,7 @@ bool CSessionModel::removeSession(uint32_t nSessionId)
 		uint32_t nNow = (uint32_t) time(NULL);
 		string strSql = "update IMRecentSession set status = 1, updated="+int2string(nNow)+" where id=" + int2string(nSessionId);
 		bRet = pDBConn->ExecuteUpdate(strSql.c_str());
-	}
+	});
 	return bRet;
 }
 
