@@ -18,6 +18,7 @@
 #include "AudioModel.h"
 #include "SessionModel.h"
 #include "RelationModel.h"
+#include "Common.h"
 
 using namespace std;
 
@@ -72,10 +73,8 @@ void CMessageModel::getMessage(uint32_t nUserId, uint32_t nPeerId, uint32_t nMsg
 {
 	uint32_t nRelateId = CRelationModel::getInstance()->getRelationId(nUserId, nPeerId, false);
 	if (nRelateId != INVALID_VALUE)
-	{
-		CDBManager* pDBManager = CDBManager::getInstance();
-		CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-		if (pDBConn)
+	{	
+		DBCONN_SLAVE(pDBConn,
 		{
 			string strTableName = "IMMessage_" + int2string(nRelateId % 8);
 			string strSql;
@@ -113,15 +112,10 @@ void CMessageModel::getMessage(uint32_t nUserId, uint32_t nPeerId, uint32_t nMsg
 			{
 				log("no result set: %s", strSql.c_str());
 			}
-			pDBManager->RelDBConn(pDBConn);
-			if (!lsMsg.empty())
-			{
-				CAudioModel::getInstance()->readAudios(lsMsg);
-			}
-		}
-		else
-		{
-			log("no db connection for teamtalk_slave");
+		});
+
+		if (!lsMsg.empty()){
+			CAudioModel::getInstance()->readAudios(lsMsg);
 		}
 	}
 	else
@@ -145,9 +139,7 @@ bool CMessageModel::sendMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t n
 		return bRet;
 	}
 
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		string strTableName = "IMMessage_" + int2string(nRelateId % 8);
 		string strSql = "insert into " + strTableName + " (`relateId`, `fromId`, `toId`, `msgId`, `content`, `status`, `type`, `created`, `updated`) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -170,21 +162,14 @@ bool CMessageModel::sendMessage(uint32_t nRelateId, uint32_t nFromId, uint32_t n
 			bRet = pStmt->ExecuteUpdate();
 		}
 		delete pStmt;
-		pDBManager->RelDBConn(pDBConn);
 		if (bRet)
 		{
-			//uint32_t nNow = (uint32_t) time(NULL);
 			incMsgCount(nFromId, nToId);
-		}
-		else
+		}else
 		{
 			log("insert message failed: %s", strSql.c_str());
 		}
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 	return bRet;
 }
 
@@ -308,10 +293,7 @@ void CMessageModel::getLastMsg(uint32_t nFromId, uint32_t nToId, uint32_t& nMsgI
 	
 	if (nRelateId != INVALID_VALUE)
 	{
-
-		CDBManager* pDBManager = CDBManager::getInstance();
-		CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-		if (pDBConn)
+		DBCONN_SLAVE(pDBConn,
 		{
 			string strTableName = "IMMessage_" + int2string(nRelateId % 8);
 			string strSql = "select msgId,type,content from " + strTableName + " force index (idx_relateId_status_created) where relateId= " + int2string(nRelateId) + " and status = 0 order by created desc, id desc limit 1";
@@ -339,12 +321,7 @@ void CMessageModel::getLastMsg(uint32_t nFromId, uint32_t nToId, uint32_t& nMsgI
 			{
 				log("no result set: %s", strSql.c_str());
 			}
-			pDBManager->RelDBConn(pDBConn);
-		}
-		else
-		{
-			log("no db connection_slave");
-		}
+		});
 	}
 	else
 	{
@@ -395,9 +372,7 @@ void CMessageModel::getMsgByMsgId(uint32_t nUserId, uint32_t nPeerId, const list
 		return;
 	}
 
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strTableName = "IMMessage_" + int2string(nRelateId % 8);
 		string strClause ;
@@ -442,15 +417,11 @@ void CMessageModel::getMsgByMsgId(uint32_t nUserId, uint32_t nPeerId, const list
 		{
 			log("no result set for sql:%s", strSql.c_str());
 		}
-		pDBManager->RelDBConn(pDBConn);
-		if(!lsMsg.empty())
-		{
-			CAudioModel::getInstance()->readAudios(lsMsg);
-		}
-	}
-	else
+	});
+
+	if(!lsMsg.empty())
 	{
-		log("no db connection for teamtalk_slave");
+		CAudioModel::getInstance()->readAudios(lsMsg);
 	}
 }
 

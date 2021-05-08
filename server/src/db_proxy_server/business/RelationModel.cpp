@@ -15,6 +15,7 @@
 #include "RelationModel.h"
 #include "MessageModel.h"
 #include "GroupMessageModel.h"
+#include "Common.h"
 using namespace std;
 
 CRelationModel* CRelationModel::m_pInstance = NULL;
@@ -54,9 +55,7 @@ uint32_t CRelationModel::getRelationId(uint32_t nUserAId, uint32_t nUserBId, boo
 		log("invalied user id:%u->%u", nUserAId, nUserBId);
 		return nRelationId;
 	}
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		uint32_t nBigId = nUserAId > nUserBId ? nUserAId : nUserBId;
 		uint32_t nSmallId = nUserAId > nUserBId ? nUserBId : nUserAId;
@@ -75,25 +74,19 @@ uint32_t CRelationModel::getRelationId(uint32_t nUserAId, uint32_t nUserBId, boo
 		{
 			log("there is no result for sql:%s", strSql.c_str());
 		}
-		pDBManager->RelDBConn(pDBConn);
+
 		if (nRelationId == INVALID_VALUE && bAdd)
 		{
 			nRelationId = addRelation(nSmallId, nBigId);
 		}
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave");
-	}
+	});
 	return nRelationId;
 }
 
 uint32_t CRelationModel::addRelation(uint32_t nSmallId, uint32_t nBigId)
 {
 	uint32_t nRelationId = INVALID_VALUE;
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		uint32_t nTimeNow = (uint32_t)time(NULL);
 		string strSql = "select id from IMRelationShip where smallId=" + int2string(nSmallId) + " and bigId="+ int2string(nBigId);
@@ -144,48 +137,29 @@ uint32_t CRelationModel::addRelation(uint32_t nSmallId, uint32_t nBigId)
 			}
 			delete stmt;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 	return nRelationId;
 }
 
 bool CRelationModel::updateRelation(uint32_t nRelationId, uint32_t nUpdateTime)
 {
 	bool bRet = false;
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		string strSql = "update IMRelationShip set `updated`="+int2string(nUpdateTime) + " where id="+int2string(nRelationId);
 		bRet = pDBConn->ExecuteUpdate(strSql.c_str());
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 	return bRet;
 }
 
 bool CRelationModel::removeRelation(uint32_t nRelationId)
 {
 	bool bRet = false;
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		uint32_t nNow = (uint32_t) time(NULL);
 		string strSql = "update IMRelationShip set status = 1, updated="+int2string(nNow)+" where id=" + int2string(nRelationId);
 		bRet = pDBConn->ExecuteUpdate(strSql.c_str());
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 	return bRet;
 }

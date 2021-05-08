@@ -74,9 +74,7 @@ bool CGroupMessageModel::sendMessage(uint32_t nFromId, uint32_t nGroupId, IM::Ba
 	bool bRet = false;
 	if (CGroupModel::getInstance()->isInGroup(nFromId, nGroupId))
 	{
-		CDBManager *pDBManager = CDBManager::getInstance();
-		CDBConn *pDBConn = pDBManager->GetDBConn("teamtalk_master");
-		if (pDBConn)
+		DBCONN_MASTER(pDBConn,
 		{
 			string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 			string strSql = "insert into " + strTableName + " (`groupId`, `userId`, `msgId`, `content`, `type`, `status`, `updated`, `created`) "
@@ -111,12 +109,7 @@ bool CGroupMessageModel::sendMessage(uint32_t nFromId, uint32_t nGroupId, IM::Ba
 				}
 			}
 			delete pStmt;
-			pDBManager->RelDBConn(pDBConn);
-		}
-		else
-		{
-			log("no db connection for teamtalk_master");
-		}
+		});
 	}
 	else
 	{
@@ -272,9 +265,7 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 	//根据 count 和 lastId 获取信息
 	string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 
-	CDBManager *pDBManager = CDBManager::getInstance();
-	CDBConn *pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		uint32_t nUpdated = CGroupModel::getInstance()->getUserJoinTime(nGroupId, nUserId);
 		//如果nMsgId 为0 表示客户端想拉取最新的nMsgCnt条消息
@@ -315,16 +306,11 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 		else
 		{
 			log("no result set for sql: %s", strSql.c_str());
-		}
-		pDBManager->RelDBConn(pDBConn);
-		if (!lsMsg.empty())
-		{
-			CAudioModel::getInstance()->readAudios(lsMsg);
-		}
-	}
-	else
+		}	
+	});
+	if (!lsMsg.empty())
 	{
-		log("no db connection for teamtalk_slave");
+		CAudioModel::getInstance()->readAudios(lsMsg);
 	}
 }
 
@@ -352,7 +338,7 @@ void CGroupMessageModel::getUnreadMsgCount(uint32_t nUserId, uint32_t &nTotalCnt
 			string strGroupCnt = pCacheConn->hget(strGroupKey, GROUP_COUNTER_SUBKEY_COUNTER_FIELD);
 			if (strGroupCnt.empty())
 			{
-				//				log("hget %s : count failed !", strGroupKey.c_str());
+				//log("hget %s : count failed !", strGroupKey.c_str());
 				continue;
 			}
 			uint32_t nGroupCnt = (uint32_t)(atoi(strGroupCnt.c_str()));
@@ -403,9 +389,7 @@ uint32_t CGroupMessageModel::getMsgIdFromDb(uint32_t nGroupId)
 {
 	uint32_t maxMsgId = 0;
 	string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
-	CDBManager *pDBManager = CDBManager::getInstance();
-	CDBConn *pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strSql = "select max(msgId) from " + strTableName + " where groupId=" + int2string(nGroupId);
 		CResultSet *pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
@@ -417,8 +401,7 @@ uint32_t CGroupMessageModel::getMsgIdFromDb(uint32_t nGroupId)
 			}
 			delete pResultSet;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
+	});
 	return maxMsgId;
 }
 
@@ -466,12 +449,11 @@ uint32_t CGroupMessageModel::getMsgId(uint32_t nGroupId)
  */
 void CGroupMessageModel::getLastMsg(uint32_t nGroupId, uint32_t &nMsgId, string &strMsgData, IM::BaseDefine::MsgType &nMsgType, uint32_t &nFromId)
 {
-	string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
+	
 
-	CDBManager *pDBManager = CDBManager::getInstance();
-	CDBConn *pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
+		string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 		string strSql = "select msgId, type,userId, content from " + strTableName + " where groupId = " + int2string(nGroupId) + " and status = 0 order by created desc, id desc limit 1";
 
 		CResultSet *pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
@@ -498,12 +480,7 @@ void CGroupMessageModel::getLastMsg(uint32_t nGroupId, uint32_t &nMsgId, string 
 		{
 			log("no result set for sql: %s", strSql.c_str());
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave");
-	}
+	});
 }
 
 /**
@@ -561,9 +538,7 @@ void CGroupMessageModel::getMsgByMsgId(uint32_t nUserId, uint32_t nGroupId, cons
 	{
 		if (CGroupModel::getInstance()->isInGroup(nUserId, nGroupId))
 		{
-			CDBManager *pDBManager = CDBManager::getInstance();
-			CDBConn *pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-			if (pDBConn)
+			DBCONN_SLAVE(pDBConn,
 			{
 				string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 				uint32_t nUpdated = CGroupModel::getInstance()->getUserJoinTime(nGroupId, nUserId);
@@ -610,16 +585,11 @@ void CGroupMessageModel::getMsgByMsgId(uint32_t nUserId, uint32_t nGroupId, cons
 				{
 					log("no result set for sql:%s", strSql.c_str());
 				}
-				pDBManager->RelDBConn(pDBConn);
 				if (!lsMsg.empty())
 				{
 					CAudioModel::getInstance()->readAudios(lsMsg);
 				}
-			}
-			else
-			{
-				log("no db connection for teamtalk_slave");
-			}
+			});
 		}
 		else
 		{

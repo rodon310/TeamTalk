@@ -12,6 +12,7 @@
 #include "DBPool.h"
 #include "MessageModel.h"
 #include "GroupMessageModel.h"
+#include "Common.h"
 
 
 CSessionModel* CSessionModel::m_pInstance = NULL;
@@ -28,8 +29,7 @@ CSessionModel* CSessionModel::getInstance()
 void CSessionModel::getRecentSession(uint32_t nUserId, uint32_t lastTime, list<IM::BaseDefine::ContactSessionInfo>& lsContact)
 {
 	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strSql = "select * from IMRecentSession where userId = " + int2string(nUserId) + " and status = 0 and updated >" + int2string(lastTime) + " order by updated desc limit 100";
 		
@@ -61,24 +61,17 @@ void CSessionModel::getRecentSession(uint32_t nUserId, uint32_t lastTime, list<I
 		{
 			log("no result set for sql: %s", strSql.c_str());
 		}
-		pDBManager->RelDBConn(pDBConn);
-		if(!lsContact.empty())
-		{
-			fillSessionMsg(nUserId, lsContact);
-		}
-	}
-	else
+	});
+	if(!lsContact.empty())
 	{
-		log("no db connection for teamtalk_slave");
+		fillSessionMsg(nUserId, lsContact);
 	}
 }
 
 uint32_t CSessionModel::getSessionId(uint32_t nUserId, uint32_t nPeerId, uint32_t nType, bool isAll)
 {
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
 	uint32_t nSessionId = INVALID_VALUE;
-	if(pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strSql;
 		if (isAll) {
@@ -97,48 +90,29 @@ uint32_t CSessionModel::getSessionId(uint32_t nUserId, uint32_t nPeerId, uint32_
 			}
 			delete pResultSet;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave");
-	}
+	});
 	return nSessionId;
 }
 
 bool CSessionModel::updateSession(uint32_t nSessionId, uint32_t nUpdateTime)
 {
 	bool bRet = false;
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		string strSql = "update IMRecentSession set `updated`="+int2string(nUpdateTime) + " where id="+int2string(nSessionId);
 		bRet = pDBConn->ExecuteUpdate(strSql.c_str());
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 	return bRet;
 }
 
 bool CSessionModel::removeSession(uint32_t nSessionId)
 {
 	bool bRet = false;
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		uint32_t nNow = (uint32_t) time(NULL);
 		string strSql = "update IMRecentSession set status = 1, updated="+int2string(nNow)+" where id=" + int2string(nSessionId);
 		bRet = pDBConn->ExecuteUpdate(strSql.c_str());
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
 	}
 	return bRet;
 }
@@ -149,9 +123,7 @@ uint32_t CSessionModel::addSession(uint32_t nUserId, uint32_t nPeerId, uint32_t 
 	
 	nSessionId = getSessionId(nUserId, nPeerId, nType, true);
 	uint32_t nTimeNow = time(NULL);
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		if(INVALID_VALUE != nSessionId)
 		{
@@ -190,12 +162,7 @@ uint32_t CSessionModel::addSession(uint32_t nUserId, uint32_t nPeerId, uint32_t 
 			}
 			delete stmt;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 	return nSessionId;
 }
 
