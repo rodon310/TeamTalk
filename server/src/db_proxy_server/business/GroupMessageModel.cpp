@@ -263,12 +263,17 @@ bool CGroupMessageModel::incMessageCount(uint32_t nUserId, uint32_t nGroupId)
 void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_t nMsgId, uint32_t nMsgCnt, list<IM::BaseDefine::MsgInfo> &lsMsg)
 {
 	//根据 count 和 lastId 获取信息
+	// CDBManager* pDBManager = CDBManager::getInstance();
+	// CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
+	// if (pDBConn)
 	DBCONN_SLAVE(pDBConn,
 	{
+		
 		string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 		uint32_t nUpdated = CGroupModel::getInstance()->getUserJoinTime(nGroupId, nUserId);
 		//如果nMsgId 为0 表示客户端想拉取最新的nMsgCnt条消息
 		string strSql;
+		
 		if (nMsgId == 0)
 		{
 			strSql = "select * from " + strTableName + " where groupId = " + int2string(nGroupId) + " and status = 0 and created>=" + int2string(nUpdated) + " order by created desc, id desc limit " + int2string(nMsgCnt);
@@ -277,11 +282,10 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 		{
 			strSql = "select * from " + strTableName + " where groupId = " + int2string(nGroupId) + " and msgId<=" + int2string(nMsgId) + " and status = 0 and created>=" + int2string(nUpdated) + " order by created desc, id desc limit " + int2string(nMsgCnt);
 		}
-
+		
 		CResultSet *pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
 		if (pResultSet)
 		{
-			map<uint32_t, IM::BaseDefine::MsgInfo> mapAudioMsg;
 			while (pResultSet->Next())
 			{
 				IM::BaseDefine::MsgInfo msg;
@@ -289,6 +293,7 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 				msg.set_from_session_id(pResultSet->GetInt("userId"));
 				msg.set_create_time(pResultSet->GetInt("created"));
 				IM::BaseDefine::MsgType nMsgType = IM::BaseDefine::MsgType(pResultSet->GetInt("type"));
+				
 				if (IM::BaseDefine::MsgType_IsValid(nMsgType))
 				{
 					msg.set_msg_type(nMsgType);
@@ -299,8 +304,11 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 				{
 					log("invalid msgType. userId=%u, groupId=%u, msgType=%u", nUserId, nGroupId, nMsgType);
 				}
+				
 			}
+			
 			delete pResultSet;
+			
 		}
 		else
 		{
