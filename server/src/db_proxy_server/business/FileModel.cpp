@@ -10,6 +10,7 @@
 ================================================================*/
 #include "FileModel.h"
 #include "../DBPool.h"
+#include "Common.h"
 
 CFileModel* CFileModel::m_pInstance = NULL;
 
@@ -33,9 +34,7 @@ CFileModel* CFileModel::getInstance()
 
 void CFileModel::getOfflineFile(uint32_t userId, list<IM::BaseDefine::OfflineFileInfo>& lsOffline)
 {
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strSql = "select * from IMTransmitFile where toId="+int2string(userId) + " and status=0 order by created";
 		CResultSet* pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
@@ -56,19 +55,12 @@ void CFileModel::getOfflineFile(uint32_t userId, list<IM::BaseDefine::OfflineFil
 		{
 			log("no result for:%s", strSql.c_str());
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave");
-	}
+	});
 }
 
 void CFileModel::addOfflineFile(uint32_t fromId, uint32_t toId, string& taskId, string& fileName, uint32_t fileSize)
 {
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		string strSql = "insert into IMTransmitFile (`fromId`,`toId`,`fileName`,`size`,`taskId`,`status`,`created`,`updated`) values(?,?,?,?,?,?,?,?)";
 		
@@ -97,19 +89,12 @@ void CFileModel::addOfflineFile(uint32_t fromId, uint32_t toId, string& taskId, 
 			}
 		}
 		delete pStmt;
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 }
 
 void CFileModel::delOfflineFile(uint32_t fromId, uint32_t toId, string& taskId)
 {
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-	if (pDBConn)
+	DBCONN_MASTER(pDBConn,
 	{
 		string strSql = "delete from IMTransmitFile where  fromId=" + int2string(fromId) + " and toId="+int2string(toId) + " and taskId='" + taskId + "'";
 		if(pDBConn->ExecuteUpdate(strSql.c_str()))
@@ -120,10 +105,5 @@ void CFileModel::delOfflineFile(uint32_t fromId, uint32_t toId, string& taskId)
 		{
 			log("delete offline file failed.%d->%d:%s", fromId, toId, taskId.c_str());
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_master");
-	}
+	});
 }

@@ -10,6 +10,7 @@
 ================================================================*/
 #include "DepartModel.h"
 #include "../DBPool.h"
+#include "Common.h"
 
 CDepartModel* CDepartModel::m_pInstance = NULL;
 
@@ -24,9 +25,7 @@ CDepartModel* CDepartModel::getInstance()
 
 void CDepartModel::getChgedDeptId(uint32_t& nLastTime, list<uint32_t>& lsChangedIds)
 {
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strSql = "select id, updated from IMDepart where updated > " + int2string(nLastTime);
 		CResultSet* pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
@@ -43,12 +42,7 @@ void CDepartModel::getChgedDeptId(uint32_t& nLastTime, list<uint32_t>& lsChanged
 			}
 			delete  pResultSet;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave.");
-	}
+	});
 }
 
 void CDepartModel::getDepts(list<uint32_t>& lsDeptIds, list<IM::BaseDefine::DepartInfo>& lsDepts)
@@ -58,9 +52,8 @@ void CDepartModel::getDepts(list<uint32_t>& lsDeptIds, list<IM::BaseDefine::Depa
 		log("list is empty");
 		return;
 	}
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strClause;
 		bool bFirst = true;
@@ -98,19 +91,12 @@ void CDepartModel::getDepts(list<uint32_t>& lsDeptIds, list<IM::BaseDefine::Depa
 			}
 			delete  pResultSet;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave");
-	}
+	});
 }
 
 void CDepartModel::getDept(uint32_t nDeptId, IM::BaseDefine::DepartInfo& cDept)
 {
-	CDBManager* pDBManager = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		string strSql = "select * from IMDepart where id = " + int2string(nDeptId);
 		CResultSet* pResultSet = pDBConn->ExecuteQuery(strSql.c_str());
@@ -133,10 +119,5 @@ void CDepartModel::getDept(uint32_t nDeptId, IM::BaseDefine::DepartInfo& cDept)
 			}
 			delete  pResultSet;
 		}
-		pDBManager->RelDBConn(pDBConn);
-	}
-	else
-	{
-		log("no db connection for teamtalk_slave");
-	}
+	});
 }

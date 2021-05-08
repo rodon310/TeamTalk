@@ -77,9 +77,7 @@ bool CAudioModel::readAudios(list<IM::BaseDefine::MsgInfo>& lsMsg)
 		return true;
 	}
 	bool bRet = false;
-	CDBManager* pDBManger = CDBManager::getInstance();
-	CDBConn* pDBConn = pDBManger->GetDBConn("teamtalk_slave");
-	if (pDBConn)
+	DBCONN_SLAVE(pDBConn,
 	{
 		for (auto it=lsMsg.begin(); it!=lsMsg.end(); )
 		{
@@ -110,13 +108,8 @@ bool CAudioModel::readAudios(list<IM::BaseDefine::MsgInfo>& lsMsg)
 				++it;
 			}
 		}
-		pDBManger->RelDBConn(pDBConn);
 		bRet = true;
-	}
-	else
-	{
-		log("no connection for teamtalk_slave");
-	}
+	});
 	return bRet;
 }
 
@@ -143,9 +136,7 @@ int CAudioModel::saveAudioInfo(uint32_t nFromId, uint32_t nToId, uint32_t nCreat
 	string strPath = httpClient.UploadByteFile(m_strFileSite, pRealData, nRealLen);
 	if (!strPath.empty())
 	{
-		CDBManager* pDBManager = CDBManager::getInstance();
-		CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_master");
-		if (pDBConn)
+		DBCONNN_MASTER(pDBConn,
 		{
 			uint32_t nStartPos = 0;
 			string strSql = "insert into IMAudio(`fromId`, `toId`, `path`, `size`, `duration`, `created`) "\
@@ -164,12 +155,7 @@ int CAudioModel::saveAudioInfo(uint32_t nFromId, uint32_t nToId, uint32_t nCreat
 			{
 				log("sql failed: %s", strSql.c_str());
 			}
-			pDBManager->RelDBConn(pDBConn);
-		}
-		else
-		{
-			log("no db connection for teamtalk_master");
-		}
+		});
 	}
 	else
 	{
