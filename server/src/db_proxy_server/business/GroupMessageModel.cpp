@@ -263,7 +263,9 @@ bool CGroupMessageModel::incMessageCount(uint32_t nUserId, uint32_t nGroupId)
 void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_t nMsgId, uint32_t nMsgCnt, list<IM::BaseDefine::MsgInfo> &lsMsg)
 {
 	//根据 count 和 lastId 获取信息
-	DBCONN_SLAVE(pDBConn,
+	CDBManager* pDBManager = CDBManager::getInstance();
+	CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
+	if (pDBConn)
 	{
 		string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 		uint32_t nUpdated = CGroupModel::getInstance()->getUserJoinTime(nGroupId, nUserId);
@@ -305,8 +307,9 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 		else
 		{
 			log("no result set for sql: %s", strSql.c_str());
-		}	
-	});
+		}
+		pDBManager->RelDBConn(pDBConn);
+	}
 
 	if (!lsMsg.empty())
 	{
