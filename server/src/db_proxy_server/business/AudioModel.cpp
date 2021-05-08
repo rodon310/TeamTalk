@@ -12,6 +12,7 @@
 #include "../DBPool.h"
 #include "../HttpClient.h"
 #include "AudioModel.h"
+#include "Common.h"
 
 using namespace std;
 
