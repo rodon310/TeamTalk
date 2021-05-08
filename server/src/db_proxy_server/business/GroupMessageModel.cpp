@@ -263,10 +263,9 @@ bool CGroupMessageModel::incMessageCount(uint32_t nUserId, uint32_t nGroupId)
 void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_t nMsgId, uint32_t nMsgCnt, list<IM::BaseDefine::MsgInfo> &lsMsg)
 {
 	//根据 count 和 lastId 获取信息
-	string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
-
 	DBCONN_SLAVE(pDBConn,
 	{
+		string strTableName = "IMGroupMessage_" + int2string(nGroupId % 8);
 		uint32_t nUpdated = CGroupModel::getInstance()->getUserJoinTime(nGroupId, nUserId);
 		//如果nMsgId 为0 表示客户端想拉取最新的nMsgCnt条消息
 		string strSql;
@@ -308,6 +307,7 @@ void CGroupMessageModel::getMessage(uint32_t nUserId, uint32_t nGroupId, uint32_
 			log("no result set for sql: %s", strSql.c_str());
 		}	
 	});
+
 	if (!lsMsg.empty())
 	{
 		CAudioModel::getInstance()->readAudios(lsMsg);
