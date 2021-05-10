@@ -48,9 +48,7 @@ CMessageModel* CMessageModel::getInstance()
 uint32_t CMessageModel::getMsgIdFromDb(uint32_t nRelateId){
 	int maxMsgId = 0;
 	if (nRelateId != INVALID_VALUE){
-		CDBManager* pDBManager = CDBManager::getInstance();
-		CDBConn* pDBConn = pDBManager->GetDBConn("teamtalk_slave");
-		if (pDBConn)
+		DBCONN_SLAVE(pDBConn,
 		{
 			string strTableName = "IMMessage_" + int2string(nRelateId % 8);
 			string strSql = "select max(msgId) from " + strTableName +  " where relateId="  + int2string(nRelateId);
@@ -62,8 +60,7 @@ uint32_t CMessageModel::getMsgIdFromDb(uint32_t nRelateId){
 				}
 				delete pResultSet;
 			}
-			pDBManager->RelDBConn(pDBConn);
-		}
+		});
 	}
 	return maxMsgId;
 }
