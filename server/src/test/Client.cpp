@@ -191,7 +191,7 @@ void CClient::onGetChangedUser(uint32_t nSeqNo, const list<IM::BaseDefine::UserI
 			}
 			else
 			{
-				delete it1->second;
+				delete it2->second;
 				m_mapNick2UserInfo[strNick] = pUserInfo;
 			}
 		}

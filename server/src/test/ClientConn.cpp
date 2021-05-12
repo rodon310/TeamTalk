@@ -266,19 +266,19 @@ void ClientConn::HandlePdu(CImPdu* pPdu)
 	switch (pPdu->GetCommandId()) {
 		case IM::BaseDefine::CID_OTHER_HEARTBEAT:
 //		printf("Heartbeat\n");
-		break;
+			break;
 		case IM::BaseDefine::CID_LOGIN_RES_USERLOGIN:
 			_HandleLoginResponse(pPdu);
-		break;
+			break;
 		case IM::BaseDefine::CID_BUDDY_LIST_ALL_USER_RESPONSE:
 			_HandleUser(pPdu);
-		break;
+			break;
 		case IM::BaseDefine::CID_BUDDY_LIST_USER_INFO_RESPONSE:
 			_HandleUserInfo(pPdu);
-		break;
+			break;
 		case IM::BaseDefine::CID_MSG_DATA_ACK:
 			_HandleSendMsg(pPdu);
-		break;
+			break;
 		case IM::BaseDefine::CID_MSG_UNREAD_CNT_RESPONSE:
 			_HandleUnreadCnt(pPdu);
 			break;
@@ -296,7 +296,7 @@ void ClientConn::HandlePdu(CImPdu* pPdu)
 			break;
 		default:
 		log("wrong msg_type=%d\n", pPdu->GetCommandId());
-		break;
+			break;
 	}
 }
 void ClientConn::_HandleLoginResponse(CImPdu* pPdu)
