@@ -91,6 +91,9 @@ int CImConn::Send(void* data, int len)
 		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
 			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
 		}
+		if(m_socket == NULL){
+			break;
+		}
 		int ret = m_socket->Send((char*)data + offset , send_size);
 		if (ret <= 0) {
 			ret = 0;
@@ -175,7 +178,9 @@ void CImConn::WriteData(){
 		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
 			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
 		}
-
+		if(m_socket == NULL){
+			return;
+		}
 		int ret = m_socket->Send(m_out_buf.GetBuffer(), send_size);
 		if (ret <= 0) {
 			ret = 0;
