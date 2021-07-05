@@ -54,13 +54,13 @@ int tcp_client_unix_conn(
 	const char*	unix_path, 
 	CImConn* conn){
 	IMConnEventConnFactory *factory = new IMConnEventConnFactory(conn);
-	EventSocket *conn = new EventSocket(factory);
-	if (!conn)
+	EventSocket *eSocket = new EventSocket(factory);
+	if (!eSocket)
 		return NETLIB_INVALID_HANDLE;
-	net_handle_t handle = conn->UnixConnect(unix_path, NULL, NULL);
+	net_handle_t handle = eSocket->UnixConnect(unix_path, NULL, NULL);
 	delete factory;
 	if (handle == NETLIB_INVALID_HANDLE)
-		delete conn;
+		delete eSocket;
 	return handle;		
 }
 
