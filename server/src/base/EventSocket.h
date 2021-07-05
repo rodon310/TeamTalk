@@ -23,6 +23,20 @@ template <class T> class IMConnEventDefaultFactory: public EventFactoryInterface
 };
 
 
+class IMConnEventConnFactory: public EventFactoryInterface{
+	public:
+		IMConnEventConnFactory(CImConn* t){m_instance = t;};
+		CEventInterface* createEvent(CBaseSocket *socket){
+			if(m_instance != NULL){
+				m_instance->OnConnect(socket);
+			}
+			return m_instance;
+		}
+	private:
+		CImConn* m_instance;
+};
+
+
 class EventSocket:public CBaseSocket{
 	public:
 		EventSocket(EventFactoryInterface *_factory):factory(_factory){};
@@ -45,10 +59,10 @@ int tcp_server_unix_listen(
 int tcp_client_conn(
 	const char*	server_ip, 
 	uint16_t	port,
-	EventFactoryInterface* factory);
+	CImConn* conn);
 
 int tcp_client_unix_conn(
 	const char*	unix_path, 
-	EventFactoryInterface* factory);
+	CImConn* conn);
 
 #endif /* !EVENTSOCKET_H */

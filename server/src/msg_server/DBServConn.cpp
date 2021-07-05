@@ -152,13 +152,15 @@ void CDBServConn::Connect(const char* server_ip, uint16_t server_port, uint32_t 
 	log("Connecting to DB Storage Server %s:%d ", server_ip, server_port);
 	m_serv_idx = serv_idx;
 	const char *prefix="unixsocket:";   
+
 	if(strncmp(prefix,server_ip,strlen(prefix)) == 0) {
 		//m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CRouteServConn>());
-		m_handle = tcp_client_unix_conn((char*)server_ip + strlen(prefix),new IMConnEventDefaultFactory<CDBServConn>());
+		m_handle = tcp_client_unix_conn((char*)server_ip + strlen(prefix),this);
 		//m_handle = netlib_unix_connect((char*)server_ip + strlen(prefix), imconn_callback, (void*)&g_db_server_conn_map);
 	}else {
-		m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CDBServConn>());  
+		m_handle = tcp_client_conn(server_ip,server_port,this);  
 	}
+	
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_db_server_conn_map.insert(make_pair(m_handle, this));

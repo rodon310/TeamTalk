@@ -145,7 +145,7 @@ void CRouteServConn::Connect(const char* server_ip, uint16_t server_port, uint32
 	log("Connecting to RouteServer %s:%d ", server_ip, server_port);
 
 	m_serv_idx = idx;
-	m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CRouteServConn>());
+	m_handle = tcp_client_conn(server_ip,server_port,this);
 	//m_handle = netlib_connect(server_ip, server_port, imconn_callback, (void*)&g_route_server_conn_map);
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {

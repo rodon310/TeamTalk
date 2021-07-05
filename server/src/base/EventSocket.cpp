@@ -37,25 +37,28 @@ int tcp_server_unix_listen(
 int tcp_client_conn(
 	const char*	server_ip, 
 	uint16_t	port,
-	EventFactoryInterface* factory){
-	EventSocket *conn = new EventSocket(factory);
-	if (!conn)
+	CImConn* conn){
+	IMConnEventConnFactory *factory = new IMConnEventConnFactory(conn);
+	EventSocket *eSocket = new EventSocket(factory);
+	if (!eSocket)
 		return NETLIB_INVALID_HANDLE;
 
-	net_handle_t handle = conn->Connect(server_ip, port, NULL, NULL);
+	net_handle_t handle = eSocket->Connect(server_ip, port, NULL, NULL);
+	delete factory;
 	if (handle == NETLIB_INVALID_HANDLE)
-		delete conn;
+		delete eSocket;
 	return handle;
 }
 
 int tcp_client_unix_conn(
 	const char*	unix_path, 
-	EventFactoryInterface* factory){
+	CImConn* conn){
+	IMConnEventConnFactory *factory = new IMConnEventConnFactory(conn);
 	EventSocket *conn = new EventSocket(factory);
 	if (!conn)
 		return NETLIB_INVALID_HANDLE;
-
 	net_handle_t handle = conn->UnixConnect(unix_path, NULL, NULL);
+	delete factory;
 	if (handle == NETLIB_INVALID_HANDLE)
 		delete conn;
 	return handle;		

@@ -117,6 +117,7 @@ int CImConn::Send(void* data, int len)
 void CImConn::OnRead()
 {
 	if(m_socket == NULL || (!m_socket->Readable())){
+		log("read failed maybe m_socket is null");
 		OnClose();
 		return;
 	}

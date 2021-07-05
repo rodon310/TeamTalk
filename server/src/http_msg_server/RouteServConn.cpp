@@ -130,8 +130,7 @@ void CRouteServConn::Connect(const char* server_ip, uint16_t server_port, uint32
 {
 	log("Connecting to RouteServer %s:%d ", server_ip, server_port);
 	m_serv_idx = idx;
-	m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CRouteServConn>());
-
+	m_handle = tcp_client_conn(server_ip,server_port,this);
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_route_server_conn_map.insert(make_pair(m_handle, this));
 	}

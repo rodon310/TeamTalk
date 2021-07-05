@@ -19,20 +19,7 @@ string strDiscovery;//发现获取地址
 string strBaseUrl;
 
 
-// void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-// {
-// 	(void)callback_data;
-// 	(void)pParam;
-// 	if (msg == NETLIB_MSG_CONNECT)
-// 	{
-// 		CHttpConn* pConn = new WorkHttpConn();
-// 		pConn->OnConnect(handle);
-// 	}
-// 	else
-// 	{
-// 		log("!!!error msg: %d ", msg);
-// 	}
-// }
+
 
 
 class CONNTypeEventFactory: public EventFactoryInterface{
@@ -51,11 +38,7 @@ class CONNTypeEventFactory: public EventFactoryInterface{
 
 int main(int argc, char* argv[])
 {
-	if ((argc == 2) && (strcmp(argv[1], "-v") == 0)) {
-		printf("Server Version: LoginServer/%s\n", VERSION);
-		printf("Server Build: %s %s\n", __DATE__, __TIME__);
-		return 0;
-	}
+	PRINTSERVERVERSION()
 
 	signal(SIGPIPE, SIG_IGN);
 
