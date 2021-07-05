@@ -16,11 +16,11 @@ cd log4cxx
 
 if [ ! -f ${LOG4CXX}.tar.gz ];then
 	echo "download file:"${LOG4CXX_PATH}
-	wget ${LOG4CXX_PATH} || echo "download failed"; exit 1
+	wget ${LOG4CXX_PATH}
 fi
 
 if [ ! -d $LOG4CXX ];then
-    tar -xf $LOG4CXX.tar.gz  || echo "tar failed, please remove file and download again"; exit 1
+    tar -xf $LOG4CXX.tar.gz
 fi
 
 APR_DIR=/usr
