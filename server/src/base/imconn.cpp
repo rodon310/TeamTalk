@@ -91,7 +91,7 @@ int CImConn::Send(void* data, int len)
 		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
 			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
 		}
-		int ret = m_socket->Recv((char*)data + offset , send_size);
+		int ret = m_socket->Send((char*)data + offset , send_size);
 		if (ret <= 0) {
 			ret = 0;
 			break;
