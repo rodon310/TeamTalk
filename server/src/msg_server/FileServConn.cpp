@@ -118,8 +118,7 @@ void CFileServConn::Connect(const char* server_ip, uint16_t server_port, uint32_
 
 	m_serv_idx = idx;
 	
-	m_handle = tcp_client_conn(server_ip,server_port,this);  
-	delete factory;
+	m_handle = tcp_client_conn(server_ip,server_port,this);
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_file_server_conn_map.insert(make_pair(m_handle, this));
 	}
