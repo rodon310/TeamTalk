@@ -167,6 +167,7 @@ void CDBServConn::Connect(const char* server_ip, uint16_t server_port, uint32_t 
 
 void CDBServConn::Close()
 {
+	log("close db server");
 	// reset server information for the next connect
 	serv_reset<CDBServConn>(g_db_server_list, g_db_server_count, m_serv_idx);
 
