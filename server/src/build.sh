@@ -70,7 +70,7 @@ build() {
 	done
 
 	cp tools/daeml ../run/
-    
+
     build_version=im-server-$1
 	build_name=${build_version}.tar.gz
     if [ -f ../${build_name} ];then
@@ -95,7 +95,7 @@ clean() {
 	base_deps="slog base"
 	for dep in ${base_deps}
 	do
-		rm -rf ${project}/build
+		rm -rf ${dep}/build
 	done
 
 	projects="http_msg_server login_server route_server msg_server msfs websocket_server http_aiclient_server push_server"

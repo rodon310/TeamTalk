@@ -24,11 +24,7 @@ CAes* pAes;
 
 int main(int argc, char* argv[])
 {
-	if ((argc == 2) && (strcmp(argv[1], "-v") == 0)) {
-		printf("Server Version: HttpAiClientServer/%s\n", VERSION);
-		printf("Server Build: %s %s\n", __DATE__, __TIME__);
-		return 0;
-	}
+	PRINTSERVERVERSION()
 	
 	signal(SIGPIPE, SIG_IGN);
 	srand(time(NULL));
