@@ -25,6 +25,8 @@
 #include "IM.Server.pb.h"
 #include "ImPduBase.h"
 #include "public_define.h"
+#include "EventSocket.h"
+
 using namespace std;
 using namespace IM::BaseDefine;
 
@@ -151,9 +153,11 @@ void CDBServConn::Connect(const char* server_ip, uint16_t server_port, uint32_t 
 	m_serv_idx = serv_idx;
 	const char *prefix="unixsocket:";   
 	if(strncmp(prefix,server_ip,strlen(prefix)) == 0) {
-		m_handle = netlib_unix_connect((char*)server_ip + strlen(prefix), imconn_callback, (void*)&g_db_server_conn_map);
+		//m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CRouteServConn>());
+		m_handle = tcp_client_unix_conn((char*)server_ip + strlen(prefix),new IMConnEventDefaultFactory<CDBServConn>());
+		//m_handle = netlib_unix_connect((char*)server_ip + strlen(prefix), imconn_callback, (void*)&g_db_server_conn_map);
 	}else {
-		m_handle = netlib_connect(server_ip, server_port, imconn_callback, (void*)&g_db_server_conn_map);  
+		m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CDBServConn>());  
 	}
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
@@ -167,7 +171,7 @@ void CDBServConn::Close()
 	serv_reset<CDBServConn>(g_db_server_list, g_db_server_count, m_serv_idx);
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_db_server_conn_map.erase(m_handle);
 	}
 
@@ -734,20 +738,10 @@ void CDBServConn::_HandleGetDeviceTokenResponse(CImPdu *pPdu)
 	}
 
 	build_ios_push_flash(msg_data, msg2.msg_type(), from_id);
-	//{
-	//    "msg_type": 1,
-	//    "from_id": "1345232",
-	//    "group_type": "12353",
-	//}
-
 	Json::Value json_obj;
 	json_obj["msg_type"] = (uint32_t)msg2.msg_type();
 	json_obj["from_id"] = from_id;
-	//jsonxx::Object json_obj;
-	//json_obj << "msg_type" << (uint32_t)msg2.msg_type();
-	//json_obj << "from_id" << from_id;
 	if (CHECK_MSG_TYPE_GROUP(msg2.msg_type())) {
-		//json_obj << "group_id" << to_id;
 		json_obj["group_id"] = to_id;
 	}
 

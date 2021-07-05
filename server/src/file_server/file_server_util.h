@@ -15,7 +15,6 @@
 
 #include <pthread.h>
 #include <uuid/uuid.h>
-
 #include <imconn.h>
 
 typedef struct file_header_t

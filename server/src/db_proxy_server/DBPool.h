@@ -17,6 +17,8 @@
 
 #define MAX_ESCAPE_STRING_LEN	10240
 
+#define my_bool bool
+
 class CResultSet {
 public:
 	CResultSet(MYSQL_RES* res);

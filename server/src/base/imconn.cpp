@@ -62,12 +62,10 @@ void imconn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pP
 //////////////////////////
 CImConn::CImConn()
 {
-    //log("CImConn::CImConn ");
-
+	m_socket = NULL;
 	m_busy = false;
 	m_handle = NETLIB_INVALID_HANDLE;
 	m_recv_bytes = 0;
-
 	m_last_send_tick = m_last_recv_tick = get_tick_count();
 }
 
@@ -80,7 +78,6 @@ int CImConn::Send(void* data, int len)
 {
 	m_last_send_tick = get_tick_count();
 	//	++g_send_pkt_cnt;
-
 	if (m_busy)
 	{
 		m_out_buf.Write(data, len);
@@ -94,8 +91,7 @@ int CImConn::Send(void* data, int len)
 		if (send_size > NETLIB_MAX_SOCKET_BUF_SIZE) {
 			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
 		}
-
-		int ret = netlib_send(m_handle, (char*)data + offset , send_size);
+		int ret = m_socket->Recv((char*)data + offset , send_size);
 		if (ret <= 0) {
 			ret = 0;
 			break;
@@ -120,46 +116,56 @@ int CImConn::Send(void* data, int len)
 
 void CImConn::OnRead()
 {
+	if(m_socket == NULL || (!m_socket->Readable())){
+		OnClose();
+		return;
+	}
+
+	ReadData();
+	HandleData();
+}
+
+
+void CImConn::ReadData(){
 	for (;;)
 	{
 		uint32_t free_buf_len = m_in_buf.GetAllocSize() - m_in_buf.GetWriteOffset();
 		if (free_buf_len < READ_BUF_SIZE)
 			m_in_buf.Extend(READ_BUF_SIZE);
 
-		int ret = netlib_recv(m_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
+		int ret = m_socket->Recv(m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
 		if (ret <= 0)
 			break;
-
 		m_recv_bytes += ret;
 		m_in_buf.IncWriteOffset(ret);
-
 		m_last_recv_tick = get_tick_count();
-	}
-
-	CImPdu* pPdu = NULL;
-	try
-	{
-		while((pPdu = CImPdu::ReadPdu(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset())))
-		{
-			uint32_t pdu_len = pPdu->GetLength();
-			HandlePdu(pPdu);
-			delete pPdu;
-			pPdu = NULL;
-			m_in_buf.Read(NULL, pdu_len);
-			//++g_recv_pkt_cnt;
-        }
-    } catch (CPduException& ex) {
-		log("!!!catch exception, sid=%u, cid=%u, err_code=%u, err_msg=%s, close the connection ",ex.GetServiceId(), ex.GetCommandId(), ex.GetErrorCode(), ex.GetErrorMsg());
-		if (pPdu) {
-			delete pPdu;
-			pPdu = NULL;
-		}
-		OnClose();
 	}
 }
 
+
+
 void CImConn::OnWrite()
 {
+	if(m_socket !=NULL){
+		int state = m_socket->CheckWriteState();
+		switch (state)
+		{
+		case NETLIB_MSG_CLOSE:
+			OnClose();
+			break;
+		case NETLIB_MSG_CONFIRM:
+			OnConfirm();
+			break;
+		case NETLIB_MSG_WRITE:
+			WriteData();
+			break;	
+		default:
+			break;
+		}
+	}
+}
+
+void CImConn::WriteData(){
 	if (!m_busy)
 		return;
 
@@ -169,7 +175,7 @@ void CImConn::OnWrite()
 			send_size = NETLIB_MAX_SOCKET_BUF_SIZE;
 		}
 
-		int ret = netlib_send(m_handle, m_out_buf.GetBuffer(), send_size);
+		int ret = m_socket->Send(m_out_buf.GetBuffer(), send_size);
 		if (ret <= 0) {
 			ret = 0;
 			break;
@@ -180,28 +186,19 @@ void CImConn::OnWrite()
 	if (m_out_buf.GetWriteOffset() == 0) {
 		m_busy = false;
 	}
-
 	log("onWrite, remain=%d ", m_out_buf.GetWriteOffset());
 }
 
-
-
-PduTask::PduTask(CImConn * conn, CImPdu* pPdu){
-    m_conn = conn;
-    m_conn->AddRef();
-    m_pPdu = pPdu;
+void CImConn::Close(){
+	if(m_socket != NULL){
+		m_socket->Close();
+		m_socket->ReleaseRef();
+		m_socket = NULL;
+	}
+	m_handle = NETLIB_INVALID_HANDLE;
 }
 
-PduTask::~PduTask(){
-    delete m_pPdu;
-    m_conn->ReleaseRef();
-}
 
-void PduTask::run(){
-    if(m_conn) {
-        m_conn->HandlePdu(m_pPdu);    
-    }
-}
 
 
 

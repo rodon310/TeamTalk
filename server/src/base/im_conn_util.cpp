@@ -1,17 +1,16 @@
-//
-//  im_conn_util.cpp
-//  TeamTalk
-//
-//  Created by benqi on 15/8/5.
-//  Copyright (c) 2015年 benqi. All rights reserved.
-//
+/* @File: im_conn_util.cpp
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
+ */
+
 
 #include "im_conn_util.h"
 
-#include "base/imconn.h"
-#include "base/ImPduBase.h"
+#include "ImPduConn.h"
+#include "ImPduBase.h"
 
-int SendMessageLite(CImConn* conn, uint16_t sid, uint16_t cid, const ::google::protobuf::MessageLite* message) {
+int SendMessageLite(CImPduConn* conn, uint16_t sid, uint16_t cid, const ::google::protobuf::MessageLite* message) {
     CImPdu pdu;
     
     pdu.SetPBMsg(message);
@@ -21,7 +20,7 @@ int SendMessageLite(CImConn* conn, uint16_t sid, uint16_t cid, const ::google::p
     return conn->SendPdu(&pdu);
 }
 
-int SendMessageLite(CImConn* conn, uint16_t sid, uint16_t cid, uint16_t seq_num, const ::google::protobuf::MessageLite* message) {
+int SendMessageLite(CImPduConn* conn, uint16_t sid, uint16_t cid, uint16_t seq_num, const ::google::protobuf::MessageLite* message) {
     CImPdu pdu;
     
     pdu.SetPBMsg(message);
@@ -32,7 +31,7 @@ int SendMessageLite(CImConn* conn, uint16_t sid, uint16_t cid, uint16_t seq_num,
     return conn->SendPdu(&pdu);
 }
 
-int SendMessageLite(CImConn* conn, uint16_t sid, uint16_t cid, uint16_t seq_num, uint16_t error, const ::google::protobuf::MessageLite* message) {
+int SendMessageLite(CImPduConn* conn, uint16_t sid, uint16_t cid, uint16_t seq_num, uint16_t error, const ::google::protobuf::MessageLite* message) {
     CImPdu pdu;
     
     pdu.SetPBMsg(message);

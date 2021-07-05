@@ -1,20 +1,18 @@
-//
-//  PushServConn.h
-//  im-server-TT
-//
-//  Created by luoning on 14-9-15.
-//  Copyright (c) 2014年 luoning. All rights reserved.
-//
+/*
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
+ */
 
 #ifndef PushServConn_H
 #define PushServConn_H
 
 #include <iostream>
 
-#include "imconn.h"
+#include "ImPduConn.h"
 #include "ServInfo.h"
 
-class CPushServConn : public CImConn
+class CPushServConn : public CImPduConn
 {
 public:
 	CPushServConn();

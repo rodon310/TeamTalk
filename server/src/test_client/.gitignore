@@ -1,0 +1,4 @@
+*.o
+log
+test_client
+*.dylib

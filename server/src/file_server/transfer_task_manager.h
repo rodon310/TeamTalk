@@ -1,17 +1,17 @@
-//
-//  transfer_task_manager.h
-//  im-server-mac-new
-//
-//  Created by wubenqi on 15/7/16.
-//  Copyright (c) 2015年 benqi. All rights reserved.
-//
+/*
+ * @File: transfer_task_manager.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
+ */
+
 
 #ifndef FILE_SERVER_TRANSFER_TASK_MANAGER_H_
 #define FILE_SERVER_TRANSFER_TASK_MANAGER_H_
 
-#include "base/singleton.h"
+#include "singleton.h"
 
-#include "file_server/transfer_task.h"
+#include "transfer_task.h"
 
 class TransferTaskManager : public Singleton<TransferTaskManager> {
 public:

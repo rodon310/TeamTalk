@@ -12,11 +12,12 @@
 
 #include <iostream>
 #include <signal.h>
-#include "netlib.h"
+
 #include "ConfigFileReader.h"
-#include "HttpConn.h"
+#include "HttpTaskConn.h"
 #include "FileManager.h"
 #include "ThreadPool.h"
+#include "EventSocket.h"
 
 using namespace std;
 using namespace msfs;
@@ -73,23 +74,6 @@ int daemon(int nochdir, int noclose, int asroot)
 	return 0;
 }
 
-// for client connect in
-void http_callback(void* callback_data, uint8_t msg, uint32_t handle,
-		void* pParam)
-{
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CHttpConn* pConn = new CHttpConn();
-		//        CHttpTask* pTask = new CHttpTask(handle, pConn);
-		//        g_ThreadPool.AddTask(pTask);
-		pConn->OnConnect(handle);
-	} else
-	{
-		log("!!!error msg: %d", msg);
-	}
-}
 
 void doQuitJob()
 {
@@ -177,8 +161,7 @@ int main(int argc, char* argv[])
 	CStrExplode listen_ip_list(listen_ip, ';');
 	for (uint32_t i = 0; i < listen_ip_list.GetItemCnt(); i++)
 	{
-		ret = netlib_listen(listen_ip_list.GetItem(i), listen_port,
-				http_callback, NULL);
+		ret = tcp_server_listen(listen_ip_list.GetItem(i), listen_port,new IMConnEventDefaultFactory<CHttpTaskConn>());
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}
@@ -190,7 +173,7 @@ int main(int argc, char* argv[])
 	signal (SIGHUP, SIG_IGN);
 
 	printf("server start listen on: %s:%d\n", listen_ip, listen_port);
-	init_http_conn();
+	init_http_task_conn();
 	printf("now enter the event loop...\n");
 
 	netlib_eventloop();

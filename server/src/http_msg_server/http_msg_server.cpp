@@ -17,35 +17,15 @@
 #include "util.h"
 #include "EncDec.h"
 #include "QueryHttpConn.h"
-
+#include "EventSocket.h"
 CAes* pAes;
 
 #define DEFAULT_CONCURRENT_DB_CONN_CNT  2
 
-// for client connect in
-void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-{
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CHttpConn* pConn = new QueryHttpConn();
-		pConn->OnConnect(handle);
-	}
-	else
-	{
-		log("!!!error msg: %d ", msg);
-	}
-}
-
 
 int main(int argc, char* argv[])
 {
-	if ((argc == 2) && (strcmp(argv[1], "-v") == 0)) {
-		printf("Server Version: HttpMsgServer/%s\n", VERSION);
-		printf("Server Build: %s %s\n", __DATE__, __TIME__);
-		return 0;
-	}
+	PRINTSERVERVERSION()
     
 	signal(SIGPIPE, SIG_IGN);
 	srand(time(NULL));
@@ -103,7 +83,7 @@ int main(int argc, char* argv[])
     
 	CStrExplode listen_ip_list(listen_ip, ';');
 	for (uint32_t i = 0; i < listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(listen_ip_list.GetItem(i), listen_port, http_callback, NULL);
+		ret = tcp_server_listen(listen_ip_list.GetItem(i), listen_port, new IMConnEventDefaultFactory<QueryHttpConn>());
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}

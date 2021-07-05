@@ -1,31 +1,31 @@
 #include "BaseSocket.h"
 #include "EventDispatch.h"
 
-typedef hash_map<net_handle_t, CBaseSocket*> SocketMap;
-SocketMap	g_socket_map;
+typedef hash_map<net_handle_t, CEventInterface*> EventMap;
+EventMap	g_event_map;
 
-void AddBaseSocket(CBaseSocket* pSocket)
+void AddEvent(net_handle_t fd, CEventInterface* event)
 {
-	g_socket_map.insert(make_pair((net_handle_t)pSocket->GetSocket(), pSocket));
+	g_event_map.insert(make_pair(fd, event));
 }
 
-void RemoveBaseSocket(CBaseSocket* pSocket)
+void RemoveEvent(net_handle_t fd)
 {
-	g_socket_map.erase((net_handle_t)pSocket->GetSocket());
+	g_event_map.erase(fd);
 }
 
-CBaseSocket* FindBaseSocket(net_handle_t fd)
+CEventInterface* FindEvent(net_handle_t fd)
 {
-	CBaseSocket* pSocket = NULL;
-	SocketMap::iterator iter = g_socket_map.find(fd);
-	if (iter != g_socket_map.end())
+	CEventInterface* event = NULL;
+	EventMap::iterator iter = g_event_map.find(fd);
+	if (iter != g_event_map.end())
 	{
-		pSocket = iter->second;
-		pSocket->AddRef();
+		event = iter->second;
+		event->AddRef();
 	}
-
-	return pSocket;
+	return event;
 }
+
 
 //////////////////////////////
 
@@ -46,7 +46,7 @@ int CBaseSocket::bindAndListen(sockaddr* serv_addr,int size)
 {
 	_SetReuseAddr(m_socket);
 	_SetNonblock(m_socket);
-    int ret = ::bind(m_socket, serv_addr, size);
+	int ret = ::bind(m_socket, serv_addr, size);
 	if (ret == SOCKET_ERROR)
 	{
 		log("bind failed, err_code=%d", _GetErrorCode());
@@ -62,12 +62,11 @@ int CBaseSocket::bindAndListen(sockaddr* serv_addr,int size)
 		return NETLIB_ERROR;
 	}
 	m_state = SOCKET_STATE_LISTENING;
-	AddBaseSocket(this);
-	
-#if ((defined _WIN32) || (defined __APPLE__))
+	AddEvent(m_socket,this);
+#if (defined _WIN32)
 	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP);
 #else
-	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_READ | SOCKET_EXCEP,this);
+	CEventDispatch::Instance()->AddEventInterface(m_socket, SOCKET_READ | SOCKET_EXCEP,this);
 #endif
 	return NETLIB_OK;
 
@@ -101,13 +100,12 @@ int CBaseSocket::Listen(const char* server_ip, uint16_t port, callback_t callbac
 
 net_handle_t CBaseSocket::Connect(const char* server_ip, uint16_t port, callback_t callback, void* callback_data)
 {
-    log("CBaseSocket::Connect, server_ip=%s, port=%d", server_ip, port);
+	log("CBaseSocket::Connect, server_ip=%s, port=%d", server_ip, port);
 
 	m_remote_ip = server_ip;
 	m_remote_port = port;
 	m_callback = callback;
 	m_callback_data = callback_data;
-
 	m_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_socket == INVALID_SOCKET)
 	{
@@ -127,28 +125,23 @@ net_handle_t CBaseSocket::Connect(const char* server_ip, uint16_t port, callback
 		return NETLIB_INVALID_HANDLE;
 	}
 	m_state = SOCKET_STATE_CONNECTING;
-	AddBaseSocket(this);
-	#if ((defined _WIN32) || (defined __APPLE__))
-	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL);
-	#else
-	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL,this);
-	#endif
+	BindEvent(this,SOCKET_ALL);
 	return (net_handle_t)m_socket;
 }
 
 int CBaseSocket::UnixListen(const char* unix_socket_path,callback_t	callback,void*	callback_data)
 {
-    m_callback = callback;
-    m_callback_data = callback_data;
-    m_socket = socket(AF_UNIX,SOCK_STREAM,0);
-    if (m_socket == INVALID_SOCKET)
+	m_callback = callback;
+	m_callback_data = callback_data;
+	m_socket = socket(AF_UNIX,SOCK_STREAM,0);
+	if (m_socket == INVALID_SOCKET)
 	{
 		log("unix socket failed, err_code=%d", _GetErrorCode());
 		return NETLIB_INVALID_HANDLE;
 	}	
 	_SetNonblock(m_socket);
 	//_SetNoDelay(m_socket);
-    if(remove(unix_socket_path) == -1 && errno != ENOENT)
+	if(remove(unix_socket_path) == -1 && errno != ENOENT)
 	{
 		return NETLIB_INVALID_HANDLE;
 	}
@@ -167,22 +160,22 @@ int CBaseSocket::UnixListen(const char* unix_socket_path,callback_t	callback,voi
 
 net_handle_t CBaseSocket::UnixConnect(const char* unix_socket_path,callback_t callback,void* callback_data)
 {
-    m_callback = callback;
-    m_callback_data = callback_data;
-    m_socket = socket(AF_UNIX,SOCK_STREAM,0);
-    if (m_socket == INVALID_SOCKET)
+	m_callback = callback;
+	m_callback_data = callback_data;
+	m_socket = socket(AF_UNIX,SOCK_STREAM,0);
+	if (m_socket == INVALID_SOCKET)
 	{
 		log("unix socket failed, err_code=%d", _GetErrorCode());
 		return NETLIB_INVALID_HANDLE;
 	}
-    _SetNonblock(m_socket);
+	_SetNonblock(m_socket);
 	//_SetNoDelay(m_socket);	
 	struct sockaddr_un addr;
 	memset(&addr, 0, sizeof(struct sockaddr_un));
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, unix_socket_path, sizeof(addr.sun_path) - 1);
-    
-    int ret = connect(m_socket, (sockaddr*)&addr, sizeof(addr));
+	
+	int ret = connect(m_socket, (sockaddr*)&addr, sizeof(addr));
 	if ( (ret == SOCKET_ERROR) && (!_IsBlock(_GetErrorCode())) )
 	{	
 		log("connect failed, err_code=%d", _GetErrorCode());
@@ -190,14 +183,7 @@ net_handle_t CBaseSocket::UnixConnect(const char* unix_socket_path,callback_t ca
 		return NETLIB_INVALID_HANDLE;
 	}
 	m_state = SOCKET_STATE_CONNECTING;
-	AddBaseSocket(this);
-#if ((defined _WIN32) || (defined __APPLE__))
-	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL);
-#else
-	CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_ALL,this);
-#endif
-	
-	
+	BindEvent(this,SOCKET_ALL);
 	return (net_handle_t)m_socket;	
 }
 
@@ -213,18 +199,21 @@ int CBaseSocket::Send(void* buf, int len)
 		int err_code = _GetErrorCode();
 		if (_IsBlock(err_code))
 		{
-#if ((defined _WIN32) || (defined __APPLE__))
+#if (defined _WIN32)
 			CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_WRITE);
+#elif (defined __APPLE__)
+			CEventInterface* envet = FindEvent(m_socket);
+			if(event != NULL){
+				CEventDispatch::Instance()->AddEventInterface(m_socket, SOCKET_WRITE,envet);
+			}
 #endif
 			ret = 0;
-			//log("socket send block fd=%d", m_socket);
 		}
 		else
 		{
 			log("!!!send failed, error code: %d", err_code);
 		}
 	}
-
 	return ret;
 }
 
@@ -233,10 +222,46 @@ int CBaseSocket::Recv(void* buf, int len)
 	return recv(m_socket, (char*)buf, len, 0);
 }
 
+bool CBaseSocket::Readable(){
+	u_long avail = 0;
+	return !(ioctlsocket(m_socket, FIONREAD, &avail) == SOCKET_ERROR) || (avail == 0);
+}
+
+int CBaseSocket::CheckWriteState(){
+	#if ((defined _WIN32) || (defined __APPLE__))
+	CEventDispatch::Instance()->RemoveEvent(m_socket, SOCKET_WRITE);
+#endif
+
+	if (m_state == SOCKET_STATE_CONNECTING)
+	{
+		int error = 0;
+		socklen_t len = sizeof(error);
+#ifdef _WIN32
+		getsockopt(m_socket, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+#else
+		getsockopt(m_socket, SOL_SOCKET, SO_ERROR, (void*)&error, &len);
+#endif
+		if (error) {
+			//m_callback(m_callback_data, NETLIB_MSG_CLOSE, (net_handle_t)m_socket, NULL);
+			return NETLIB_MSG_CLOSE;
+		} else {
+			m_state = SOCKET_STATE_CONNECTED;
+			return NETLIB_MSG_CONFIRM;
+			//m_callback(m_callback_data, NETLIB_MSG_CONFIRM, (net_handle_t)m_socket, NULL);
+		}
+	}
+	else if(m_state != SOCKET_STATE_LISTENING)
+	{
+		return NETLIB_MSG_WRITE;
+		//m_callback(m_callback_data, NETLIB_MSG_WRITE, (net_handle_t)m_socket, NULL);
+	}
+}
+
 int CBaseSocket::Close()
 {
 	CEventDispatch::Instance()->RemoveEvent(m_socket, SOCKET_ALL);
-	RemoveBaseSocket(this);
+	//RemoveBaseSocket(this);
+	RemoveEvent(m_socket);
 	closesocket(m_socket);
 	ReleaseRef();
 
@@ -265,31 +290,8 @@ void CBaseSocket::OnRead()
 
 void CBaseSocket::OnWrite()
 {
-#if ((defined _WIN32) || (defined __APPLE__))
-	CEventDispatch::Instance()->RemoveEvent(m_socket, SOCKET_WRITE);
-#endif
-
-	if (m_state == SOCKET_STATE_CONNECTING)
-	{
-		int error = 0;
-		socklen_t len = sizeof(error);
-#ifdef _WIN32
-
-		getsockopt(m_socket, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
-#else
-		getsockopt(m_socket, SOL_SOCKET, SO_ERROR, (void*)&error, &len);
-#endif
-		if (error) {
-			m_callback(m_callback_data, NETLIB_MSG_CLOSE, (net_handle_t)m_socket, NULL);
-		} else {
-			m_state = SOCKET_STATE_CONNECTED;
-			m_callback(m_callback_data, NETLIB_MSG_CONFIRM, (net_handle_t)m_socket, NULL);
-		}
-	}
-	else if(m_state != SOCKET_STATE_LISTENING)
-	{
-		m_callback(m_callback_data, NETLIB_MSG_WRITE, (net_handle_t)m_socket, NULL);
-	}
+	int state = CheckWriteState();
+	m_callback(m_callback_data, state, (net_handle_t)m_socket, NULL);
 }
 
 void CBaseSocket::OnClose()
@@ -390,7 +392,6 @@ void CBaseSocket::_SetAddr(const char* ip, const uint16_t port, sockaddr_in* pAd
 			log("gethostbyname failed, ip=%s", ip);
 			return;
 		}
-
 		pAddr->sin_addr.s_addr = *(uint32_t*)host->h_addr;
 	}
 }
@@ -420,7 +421,6 @@ void CBaseSocket::_AcceptNewSocket()
 			memcpy(ip_str, peer_addr.sun_path, strlen(peer_addr.sun_path));
 			log("AcceptUnixSocket, socket=%d from %s:%d\n", fd, ip_str, port);
 		}
-
 		pSocket->SetSocket(fd);
 		pSocket->SetCallback(m_callback);
 		pSocket->SetCallbackData(m_callback_data);
@@ -428,14 +428,20 @@ void CBaseSocket::_AcceptNewSocket()
 		pSocket->SetRemoteIP(ip_str);
 		pSocket->SetRemotePort(port);
 		_SetNonblock(fd);
-		AddBaseSocket(pSocket);
-		#if ((defined _WIN32) || (defined __APPLE__))
-		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
-		#else
-		CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP,pSocket);
-		#endif
-		//CEventDispatch::Instance()->AddEvent(fd, SOCKET_READ | SOCKET_EXCEP);
-		m_callback(m_callback_data, NETLIB_MSG_CONNECT, (net_handle_t)fd, pSocket);
+		BindEvent(pSocket,SOCKET_READ | SOCKET_EXCEP);
+		if(m_callback != NULL){
+			m_callback(m_callback_data, NETLIB_MSG_CONNECT, (net_handle_t)fd, pSocket);
+		}
 	}
 }
 
+
+void CBaseSocket::BindEvent(CBaseSocket* pSocket,uint8_t socket_event){
+	int fd = pSocket->GetSocket();
+	AddEvent(fd,pSocket);
+#if (defined _WIN32)
+	CEventDispatch::Instance()->AddEvent(fd, socket_event);
+#else
+	CEventDispatch::Instance()->AddEventInterface(fd, socket_event,pSocket);
+#endif
+}

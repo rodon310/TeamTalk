@@ -1,17 +1,18 @@
 /*
- * RouteServConn.h
- *
- *  Created on: 2013-7-8
- *      Author: ziteng@mogujie.com
+ * @File: RouteServConn.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
  */
+
 
 #ifndef ROUTESERVCONN_H_
 #define ROUTESERVCONN_H_
 
-#include "imconn.h"
+#include "ImPduConn.h"
 #include "ServInfo.h"
 
-class CRouteServConn : public CImConn
+class CRouteServConn : public CImPduConn
 {
 public:
 	CRouteServConn();
@@ -26,7 +27,6 @@ public:
 	virtual void OnConfirm();
 	virtual void OnClose();
 	virtual void OnTimer(uint64_t curr_tick);
-
 	virtual void HandlePdu(CImPdu* pPdu);
 private:
 	void _HandleKickUser(CImPdu* pPdu);

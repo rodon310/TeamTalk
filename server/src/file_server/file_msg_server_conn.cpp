@@ -6,31 +6,22 @@
 //  Copyright (c) 2015年 benqi. All rights reserved.
 //
 
-#include "file_server/file_msg_server_conn.h"
+#include "file_msg_server_conn.h"
 
-#include "base/pb/protocol/IM.Server.pb.h"
-#include "base/pb/protocol/IM.Other.pb.h"
+#include "IM.Server.pb.h"
+#include "IM.Other.pb.h"
 
-#include "base/im_conn_util.h"
+#include "im_conn_util.h"
 
-#include "file_server/config_util.h"
-#include "file_server/transfer_task.h"
-#include "file_server/transfer_task_manager.h"
+#include "config_util.h"
+#include "transfer_task.h"
+#include "transfer_task_manager.h"
 
 using namespace IM::BaseDefine;
 
 static ConnMap_t g_file_msg_server_conn_map; // connection with others, on connect insert...
 
-void FileMsgServerConnCallback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam) {
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT) {
-		FileMsgServerConn* conn = new FileMsgServerConn();
-		conn->OnConnect(handle);
-	} else {
-		log("!!!error msg: %d ", msg);
-	}
-}
+
 
 void FileMsgServerConnTimerCallback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam) {
 	(void)callback_data;
@@ -64,19 +55,16 @@ void FileMsgServerConn::Close() {
 	connected_ = false;
 	
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_file_msg_server_conn_map.erase(m_handle);
 	}
 	
 	ReleaseRef();
 }
 
-void FileMsgServerConn::OnConnect(net_handle_t handle) {
-	m_handle = handle;
-	
-	g_file_msg_server_conn_map.insert(make_pair(handle, this));
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_file_msg_server_conn_map);
+void FileMsgServerConn::OnConnect(CBaseSocket* socket) {
+	CImConn::OnConnect(socket);
+	g_file_msg_server_conn_map.insert(make_pair(m_handle, this));
 }
 
 void FileMsgServerConn::OnClose() {

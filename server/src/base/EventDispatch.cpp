@@ -7,7 +7,7 @@ CEventDispatch* CEventDispatch::m_pEventDispatch = NULL;
 
 CEventDispatch::CEventDispatch()
 {
-    running = false;
+	running = false;
 #ifdef _WIN32
 	FD_ZERO(&m_read_set);
 	FD_ZERO(&m_write_set);
@@ -95,18 +95,18 @@ void CEventDispatch::_CheckTimer()
 
 void CEventDispatch::AddLoop(callback_t callback, void* user_data)
 {
-    TimerItem* pItem = new TimerItem;
-    pItem->callback = callback;
-    pItem->user_data = user_data;
-    m_loop_list.push_back(pItem);
+	TimerItem* pItem = new TimerItem;
+	pItem->callback = callback;
+	pItem->user_data = user_data;
+	m_loop_list.push_back(pItem);
 }
 
 void CEventDispatch::_CheckLoop()
 {
-    for (list<TimerItem*>::iterator it = m_loop_list.begin(); it != m_loop_list.end(); it++) {
-        TimerItem* pItem = *it;
-        pItem->callback(pItem->user_data, NETLIB_MSG_LOOP, 0, NULL);
-    }
+	for (list<TimerItem*>::iterator it = m_loop_list.begin(); it != m_loop_list.end(); it++) {
+		TimerItem* pItem = *it;
+		pItem->callback(pItem->user_data, NETLIB_MSG_LOOP, 0, NULL);
+	}
 }
 
 CEventDispatch* CEventDispatch::Instance()
@@ -241,11 +241,27 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 
 void CEventDispatch::StopDispatch()
 {
-    running = false;
+	running = false;
 }
 
 #elif __APPLE__
 
+void CEventDispatch::AddEventInterface(SOCKET fd, uint8_t socket_event,CEventInterface* interface){
+	struct kevent ke;
+	ke.udata = interface;
+	if ((socket_event & SOCKET_READ) != 0)
+	{
+		EV_SET(&ke, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+		kevent(m_kqfd, &ke, 1, NULL, 0, NULL);
+	}
+
+	if ((socket_event & SOCKET_WRITE) != 0)
+	{
+		EV_SET(&ke, fd, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+		kevent(m_kqfd, &ke, 1, NULL, 0, NULL);
+	}
+}
+/*
 void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
 {
 	struct kevent ke;
@@ -262,7 +278,7 @@ void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event)
 		kevent(m_kqfd, &ke, 1, NULL, 0, NULL);
 	}
 }
-
+*/
 void CEventDispatch::RemoveEvent(SOCKET fd, uint8_t socket_event)
 {
 	struct kevent ke;
@@ -298,23 +314,25 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 		for (int i = 0; i < nfds; i++)
 		{
 			int ev_fd = events[i].ident;
-			CBaseSocket* pSocket = FindBaseSocket(ev_fd);
-			if (!pSocket)
+			CEventInterface* eventInf = (CEventInterface*)events[i].udata;
+			//CBaseSocket* pSocket = FindBaseSocket(ev_fd);
+			if (!eventInf)
 				continue;
+			eventInf->AddRef();
 
 			if (events[i].filter == EVFILT_READ)
 			{
 				//log("OnRead, socket=%d\n", ev_fd);
-				pSocket->OnRead();
+				eventInf->OnRead();
 			}
 
 			if (events[i].filter == EVFILT_WRITE)
 			{
 				//log("OnWrite, socket=%d\n", ev_fd);
-				pSocket->OnWrite();
+				eventInf->OnWrite();
 			}
 
-			pSocket->ReleaseRef();
+			eventInf->ReleaseRef();
 		}
 
 		_CheckTimer();
@@ -324,7 +342,7 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 
 void CEventDispatch::StopDispatch()
 {
-    running = false;
+	running = false;
 }
 
 #else
@@ -344,15 +362,29 @@ void CEventDispatch::StopDispatch()
 // 	}
 // }
 
-void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr)
-{
+// void CEventDispatch::AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr)
+// {
+// 	(void)socket_event;
+// 	struct epoll_event ev;
+// 	ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLPRI | EPOLLERR | EPOLLHUP;
+// 	//#ifdef EPOLLRDHUP
+// 	//ev.events = ev.events | EPOLLRDHUP;
+// 	//#endif
+// 	ev.data.ptr = data_ptr;
+// 	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev) != 0)
+// 	{
+// 		log("epoll_ctl() failed, errno=%d", errno);
+// 	}
+// }
+
+void CEventDispatch::AddEventInterface(SOCKET fd, uint8_t socket_event,CEventInterface* interface){
 	(void)socket_event;
 	struct epoll_event ev;
 	ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLPRI | EPOLLERR | EPOLLHUP;
 	//#ifdef EPOLLRDHUP
 	//ev.events = ev.events | EPOLLRDHUP;
 	//#endif
-	ev.data.ptr = data_ptr;
+	ev.data.ptr = interface;
 	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev) != 0)
 	{
 		log("epoll_ctl() failed, errno=%d", errno);
@@ -381,48 +413,41 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 		nfds = epoll_wait(m_epfd, events, 1024, wait_timeout);
 		for (int i = 0; i < nfds; i++)
 		{
-			//int ev_fd = events[i].data.fd;
-			//CBaseSocket* pSocket = FindBaseSocket(ev_fd);
-			CBaseSocket* pSocket = (CBaseSocket*)events[i].data.ptr;
-			if (!pSocket)
+			CEventInterface* eventInf = (CEventInterface*)events[i].data.ptr;
+			if (!eventInf)
 				continue;
-			pSocket->AddRef();
-
+			eventInf->AddRef();
 			#ifdef EPOLLRDHUP
 			if (events[i].events & EPOLLRDHUP)
 			{
-                //log("On Peer Close, socket=%d, ev_fd);
-				pSocket->OnClose();
+				eventInf->OnClose();
 			}
 			#endif
 			if (events[i].events & EPOLLIN)
 			{
-				//log("OnRead, socket=%d\n", ev_fd);
-				pSocket->OnRead();
+				eventInf->OnRead();
 			}
 
 			if (events[i].events & EPOLLOUT)
 			{
-				//log("OnWrite, socket=%d\n", ev_fd);
-				pSocket->OnWrite();
+				eventInf->OnWrite();
 			}
 
 			if (events[i].events & (EPOLLPRI | EPOLLERR | EPOLLHUP))
 			{
-				//log("OnClose, socket=%d\n", ev_fd);
-				pSocket->OnClose();
+				eventInf->OnClose();
 			}
-			pSocket->ReleaseRef();
+			eventInf->ReleaseRef();
 		}
 
 		_CheckTimer();
-        _CheckLoop();
+		_CheckLoop();
 	}
 }
 
 void CEventDispatch::StopDispatch()
 {
-    running = false;
+	running = false;
 }
 
 

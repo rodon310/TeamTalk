@@ -67,7 +67,7 @@ CRouteConn::~CRouteConn()
 void CRouteConn::Close()
 {
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_route_conn_map.erase(m_handle);
 	}
 
@@ -92,14 +92,10 @@ void CRouteConn::Close()
 	ReleaseRef();
 }
 
-void CRouteConn::OnConnect(net_handle_t handle)
+void CRouteConn::OnConnect(CBaseSocket* socket)
 {
-	m_handle = handle;
-
-	g_route_conn_map.insert(make_pair(handle, this));
-
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_route_conn_map);
+	CImConn::OnConnect(socket);
+	g_route_conn_map.insert(make_pair(m_handle, this));
 }
 
 void CRouteConn::OnClose()

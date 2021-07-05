@@ -7,7 +7,7 @@
 
 #include "ostype.h"
 #include "util.h"
-
+#include "EventInterface.h"
 
 enum
 {
@@ -18,7 +18,7 @@ enum
 	SOCKET_STATE_CLOSING
 };
 
-class CBaseSocket : public CRefObject
+class CBaseSocket : public CEventInterface
 {
 public:
 	CBaseSocket();
@@ -47,8 +47,6 @@ public:
 		callback_t		callback,
 		void*			callback_data);
 
-	
-
 	net_handle_t Connect(
 		const char*		server_ip, 
 		uint16_t		port,
@@ -63,23 +61,24 @@ public:
 
 	net_handle_t UnixConnect(
 		const char* unix_socket_path,
-	    callback_t		callback,
+		callback_t		callback,
 		void*			callback_data);
-
 	
 	int Close();
 	
 	virtual int Send(void* buf, int len);
 	virtual int Recv(void* buf, int len);
 	virtual void _AcceptNewSocket();
-	
+	virtual void BindEvent(CBaseSocket* pSocket,uint8_t socket_event);//关联 EventInterface
+	bool Readable();
+	int CheckWriteState();
 private:
 	int bindAndListen(sockaddr* serv_addr, int size);
 	
 public:	
-	void OnRead();
-	void OnWrite();
-	void OnClose();
+	virtual void OnRead();
+	virtual void OnWrite();
+	virtual void OnClose();
 
 public:	
 	int _GetErrorCode();
@@ -101,13 +100,14 @@ private:
 	uint16_t		m_remote_port;
 	string			m_local_ip;
 	uint16_t		m_local_port;
-
-	
-
 	uint8_t			m_state;
 	SOCKET			m_socket;
 };
-void AddBaseSocket(CBaseSocket* pSocket);
-CBaseSocket* FindBaseSocket(net_handle_t fd);
+//void AddBaseSocket(CBaseSocket* pSocket);
+//CBaseSocket* FindBaseSocket(net_handle_t fd);
+
+void AddEvent(net_handle_t fd, CEventInterface* event);
+void RemoveEvent(net_handle_t fd);
+CEventInterface* FindEvent(net_handle_t fd);
 
 #endif

@@ -6,30 +6,20 @@
 //  Copyright (c) 2015年 benqi. All rights reserved.
 //
 
-#include "file_server/file_client_conn.h"
+#include "file_client_conn.h"
 
-#include "base/pb/protocol/IM.Other.pb.h"
-#include "base/pb/protocol/IM.File.pb.h"
+#include "IM.Other.pb.h"
+#include "IM.File.pb.h"
 
-#include "base/im_conn_util.h"
+#include "im_conn_util.h"
 
-#include "file_server/config_util.h"
-#include "file_server/transfer_task_manager.h"
+#include "config_util.h"
+#include "transfer_task_manager.h"
 
 using namespace IM::BaseDefine;
 
 static ConnMap_t g_file_client_conn_map; // connection with others, on connect insert...
 
-void FileClientConnCallback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam) {
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT) {
-		FileClientConn* conn = new FileClientConn();
-		conn->OnConnect(handle);
-	} else {
-		log("!!!error msg: %d ", msg);
-	}
-}
 
 void FileClientConnTimerCallback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam) {
 	(void)callback_data;
@@ -107,7 +97,7 @@ void FileClientConn::Close() {
 	auth_ = false;
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_file_client_conn_map.erase(m_handle);
 	}
 
@@ -161,17 +151,13 @@ void FileClientConn::Close2() {
 }
 #endif
 
-void FileClientConn::OnConnect(net_handle_t handle) {
+void FileClientConn::OnConnect(CBaseSocket* socket){
 	/// yunfan modify 2014.8.7
-	m_handle = handle;
-	
-	g_file_client_conn_map.insert(make_pair(handle, this));
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_file_client_conn_map);
-	
+	CImConn::OnConnect(socket);
+	g_file_client_conn_map.insert(make_pair(m_handle, this));
 	uint32_t socket_buf_size = NETLIB_MAX_SOCKET_BUF_SIZE;
-	netlib_option(handle, NETLIB_OPT_SET_SEND_BUF_SIZE, &socket_buf_size);
-	netlib_option(handle, NETLIB_OPT_SET_RECV_BUF_SIZE, &socket_buf_size);
+	m_socket->SetSendBufSize(socket_buf_size);
+	m_socket->SetRecvBufSize(socket_buf_size);
 	/// yunfan modify end
 }
 
@@ -290,7 +276,7 @@ void FileClientConn::_HandleClientFileLoginReq(CImPdu* pdu) {
 	if (rv) {
 		if (transfer_task->GetTransMode() == FILE_TYPE_ONLINE) {
 			if (transfer_task->state() == kTransferTaskStateWaitingTransfer) {
-				CImConn* conn = transfer_task_->GetToConn();
+				CImPduConn* conn = transfer_task_->GetToConn();
 				if (conn) {
 					_StatesNotify(CLIENT_FILE_PEER_READY, task_id, transfer_task_->from_user_id(), conn);
 				} else {
@@ -357,7 +343,7 @@ void FileClientConn::_HandleClientFileStates(CImPdu* pdu) {
 			case CLIENT_FILE_DONE:
 			case CLIENT_FILE_REFUSE:
 			{
-				CImConn* im_conn = transfer_task_->GetOpponentConn(user_id);
+				CImPduConn* im_conn = transfer_task_->GetOpponentConn(user_id);
 				if (im_conn) {
 					im_conn->SendPdu(pdu);
 					log("Task %s %d by user_id %d notify %d, erased", task_id.c_str(), file_stat, user_id, transfer_task_->GetOpponent(user_id));
@@ -479,7 +465,7 @@ void FileClientConn::_HandleClientFilePullFileReq(CImPdu *pdu) {
 		if (transfer_task_->GetTransMode() == FILE_TYPE_ONLINE) {
 			OnlineTransferTask* online = reinterpret_cast<OnlineTransferTask*>(transfer_task_);
 			online->SetSeqNum(pdu->GetSeqNum());
-			CImConn* conn = transfer_task_->GetOpponentConn(user_id);
+			CImPduConn* conn = transfer_task_->GetOpponentConn(user_id);
 			if (conn) {
 				conn->SendPdu(pdu);
 				// SendMessageLite(conn, SID_FILE, CID_FILE_PULL_DATA_RSP, pdu->GetSeqNum(), &pull_data_rsp);
@@ -548,7 +534,7 @@ void FileClientConn::_HandleClientFilePullFileRsp(CImPdu *pdu) {
 			pdu->SetSeqNum(online->GetSeqNum());
 			// online->SetSeqNum(pdu->GetSeqNum());
 
-			CImConn* conn = transfer_task_->GetToConn();
+			CImPduConn* conn = transfer_task_->GetToConn();
 			if (conn) {
 				conn->SendPdu(pdu);
 			}
@@ -582,7 +568,7 @@ void FileClientConn::_HandleClientFilePullFileRsp(CImPdu *pdu) {
 	}
 }
 
-int FileClientConn::_StatesNotify(int state, const std::string& task_id, uint32_t user_id, CImConn* conn) {
+int FileClientConn::_StatesNotify(int state, const std::string& task_id, uint32_t user_id, CImPduConn* conn) {
 	//FileClientConn* file_client_conn = reinterpret_cast<FileClientConn*>(conn);
 	
 	IM::File::IMFileState file_msg;

@@ -1,36 +1,34 @@
 /*
- * ProxyConn.h
- *
- *	Connection from IM MsgServer
- *  Created on: 2014年7月25日
- *      Author: ziteng
+ * @File ProxyConn.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: listen for msgserver connection
  */
+
 
 #ifndef PROXYCONN_H_
 #define PROXYCONN_H_
 
 #include <curl/curl.h>
 #include "../base/util.h"
-#include "imconn.h"
+#include "ImPduConn.h"
 
 typedef struct {
 	uint32_t	conn_uuid;
 	CImPdu*		pPdu;
 } ResponsePdu_t;
 
-class CProxyConn : public CImConn {
+class CProxyConn : public CImPduConn {
 public:
 	CProxyConn();
 	virtual ~CProxyConn();
-
 	virtual void Close();
-
-	virtual void OnConnect(net_handle_t handle);
-	virtual void OnRead();
+	virtual void OnConnect(CBaseSocket* socket);
 	virtual void OnClose();
 	virtual void OnTimer(uint64_t curr_tick);
 
-	void HandlePduBuf(uchar_t* pdu_buf, uint32_t pdu_len);
+	virtual void HandleData();
+	virtual void HandlePdu(CImPdu* pPdu);
 
 	static void AddResponsePdu(uint32_t conn_uuid, CImPdu* pPdu);	// 工作线程调用
 	static void SendResponsePduList();	// 主线程调用

@@ -9,17 +9,17 @@
 class CSSLSocket : public CBaseSocket 
 {
 public:
-    virtual int Send(void* buf, int len);
-    virtual int Recv(void* buf, int len);
-    virtual void _AcceptNewSocket();
-    void setSSL(SSL *ssl){m_ssl = ssl;}
-    SSL *getSSL(){return m_ssl;}
+	virtual int Send(void* buf, int len);
+	virtual int Recv(void* buf, int len);
+	virtual void _AcceptNewSocket();
+	void setSSL(SSL *ssl){m_ssl = ssl;}
+	SSL *getSSL(){return m_ssl;}
 
 public:
-    BIO  *buf_io;
-    BIO  *ssl_bio;
+	BIO  *buf_io;
+	BIO  *ssl_bio;
 private:
-    SSL *m_ssl;
+	SSL *m_ssl;
 
 };
 

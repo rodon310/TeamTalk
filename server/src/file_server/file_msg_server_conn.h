@@ -1,27 +1,27 @@
-//
-//  file_conn.h
-//  im-server-mac-new
-//
-//  Created by wubenqi on 15/7/16.
-//  Copyright (c) 2015年 benqi. All rights reserved.
-//
+/*
+ * @File : file_conn.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
+ */
+
 
 #ifndef FILE_SERVER_FILE_MSG_SERVER_CONN_H_
 #define FILE_SERVER_FILE_MSG_SERVER_CONN_H_
 
-#include "base/imconn.h"
-#include "file_server/file_server_util.h"
+#include "ImPduConn.h"
+#include "file_server_util.h"
 
 typedef map<std::string, transfer_task_t*> TaskMap_t; // on client connect
 
-class FileMsgServerConn : public CImConn {
+class FileMsgServerConn : public CImPduConn {
 public:
     FileMsgServerConn();
     virtual ~FileMsgServerConn();
     
     virtual void Close();
     
-    virtual void OnConnect(net_handle_t handle);
+    virtual void OnConnect(CBaseSocket* socket);
     
     virtual void OnClose();
     virtual void OnTimer(uint64_t curr_tick);
@@ -39,7 +39,6 @@ private:
 
 
 void InitializeFileMsgServerConn();
-void FileMsgServerConnCallback(void* callback_data, uint8_t msg, uint32_t handle, void* param);
 
 
 

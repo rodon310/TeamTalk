@@ -1,3 +1,8 @@
+/*
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: control net work;
+ */
 #ifndef __NETLIB_H__
 #define __NETLIB_H__
 
@@ -52,13 +57,13 @@ net_handle_t netlib_connect(
 		callback_t	callback,
 		void*		callback_data);
 
-int netlib_send(net_handle_t handle, void* buf, int len);
+// int netlib_send(net_handle_t handle, void* buf, int len);
 
-int netlib_recv(net_handle_t handle, void* buf, int len);
+// int netlib_recv(net_handle_t handle, void* buf, int len);
 
-int netlib_close(net_handle_t handle);
+// int netlib_close(net_handle_t handle);
 
-int netlib_option(net_handle_t handle, int opt, void* optval);
+//int netlib_option(net_handle_t handle, int opt, void* optval);
 
 int netlib_register_timer(callback_t callback, void* user_data, uint64_t interval);
 

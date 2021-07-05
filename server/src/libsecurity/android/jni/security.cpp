@@ -17,6 +17,7 @@
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
 #endif
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -124,10 +125,59 @@ extern "C" {
         
         if(nOutLen > nLen)
         {
-            free(pTmp);
-            jbyteArray carr = env->NewByteArray(0);
-            return carr;
-        }
+		int mark=0;
+		int i =0;
+		int last_mark;
+		for(; i < nLen; i ++) {
+			if(pTmp[i] == 0) {
+				break;
+			}else {
+				if(pTmp[i] > 0) {
+					continue;
+				}else {
+					int intv = 128 + pTmp[i];
+					if(intv > 64){
+						if(mark > 0) {
+							i = i - mark;
+							mark = 0;
+							break;
+						}
+						mark = 1;
+						intv = intv-64;
+						for(int j = 1; j < 6; j++){
+							intv = intv - (int)pow(2,(6-j));
+							if(intv >= 0) {
+								mark++;
+							}else {
+								break;
+							}
+						}
+						last_mark = mark;
+					}else {
+						if(intv < 64){
+							if(mark >0){
+								mark--;
+							}else{
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if(mark > 0) {
+			i = i + mark - last_mark - 1;
+		}
+		nOutLen = i;
+            //free(pTmp);
+            //jbyteArray carr = env->NewByteArray(0);
+            //return carr;
+        }else {
+			while(nOutLen > 1 && pTmp[nOutLen-1] == 0){
+				nOutLen--;
+			}
+		}
         pTmp[nOutLen] = 0;
         jbyteArray carr = env->NewByteArray(nOutLen);
         env->SetByteArrayRegion(carr,0,nOutLen,(jbyte*)pTmp);
@@ -239,9 +289,58 @@ extern "C" {
 //        printf("%u\n", nOutLen);
         if(nOutLen > nLen)
         {
-            free(pTmp);
-            return -4;
-        }
+		int mark=0;
+		int i =0;
+		int last_mark;
+		for(; i < nLen; i ++) {
+			if(pTmp[i] == 0) {
+				break;
+			}else {
+				if(pTmp[i] > 0) {
+					continue;
+				}else {
+					int intv = 128 + pTmp[i];
+					if(intv > 64){
+						if(mark > 0) {
+							i = i - mark;
+							mark = 0;
+							break;
+						}
+						mark = 1;
+						intv = intv-64;
+						for(int j = 1; j < 6; j++){
+							intv = intv - (int)pow(2,(6-j));
+							if(intv >= 0) {
+								mark++;
+							}else {
+								break;
+							}
+						}
+						last_mark = mark;
+					}else {
+						if(intv < 64){
+							if(mark >0){
+								mark--;
+							}else{
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if(mark > 0) {
+			i = i + mark - last_mark - 1;
+		}
+		nOutLen = i;
+            //free(pTmp);
+            //return -4;
+        }else {
+			while(nOutLen > 1 && pTmp[nOutLen-1] == 0){
+			nOutLen--;
+			}
+		}
         pTmp[nOutLen] = 0;
         *ppOutData = pTmp;
         return 0;

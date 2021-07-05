@@ -9,11 +9,11 @@
 #ifndef FILE_SERVER_TRANSFER_TASK_H_
 #define FILE_SERVER_TRANSFER_TASK_H_
 
-#include "base/util.h"
+#include "util.h"
 
-#include "file_server/offline_file_util.h"
+#include "offline_file_util.h"
 
-class CImConn;
+class CImPduConn;
 
 
 // 状态机
@@ -129,19 +129,19 @@ public:
 		return (user_id == from_user_id_ ? user_id : from_user_id_);
 	}
 	
-	 CImConn* GetOpponentConn(uint32_t user_id) const {
+	 CImPduConn* GetOpponentConn(uint32_t user_id) const {
 		return (user_id == from_user_id_ ? to_conn_ : from_conn_);
 	 }
 
 	
-	 CImConn* GetFromConn() {
+	 CImPduConn* GetFromConn() {
 		return from_conn_;
 	 }
-	 CImConn* GetToConn() {
+	 CImPduConn* GetToConn() {
 		return to_conn_;
 	 }
 
-	 CImConn* GetConnByUserID(uint32_t user_id) const {
+	 CImPduConn* GetConnByUserID(uint32_t user_id) const {
 		if (from_user_id_ == user_id) {
 			return from_conn_;
 		} else if (to_user_id_ == user_id) {
@@ -151,7 +151,7 @@ public:
 		}
 	 }
 	
-	 void SetConnByUserID(uint32_t user_id, CImConn* conn) {
+	 void SetConnByUserID(uint32_t user_id, CImPduConn* conn) {
 		if (from_user_id_ == user_id) {
 			from_conn_ = conn;
 		} else if (to_user_id_ == user_id) {
@@ -224,14 +224,14 @@ protected:
 
 	int		 state_;		 // 传输状态
 
-	CImConn*	from_conn_;
-	CImConn*	to_conn_;
+	CImPduConn*	from_conn_;
+	CImPduConn*	to_conn_;
 	
 	// uint64_t	last_update_time_;
 };
 
 typedef map<std::string, BaseTransferTask*> TransferTaskMap;
-typedef map<CImConn*, BaseTransferTask*> TransferTaskConnkMap;
+typedef map<CImPduConn*, BaseTransferTask*> TransferTaskConnkMap;
 
 //----------------------------------------------------------------------------
 class OnlineTransferTask : public BaseTransferTask {

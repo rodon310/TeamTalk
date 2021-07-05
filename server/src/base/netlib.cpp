@@ -81,28 +81,25 @@ net_handle_t netlib_connect(
 }
 
 int netlib_unix_listen(
-	    char * unix_socket_path,
-		callback_t  callback,
-        void*       callback_data)
+		char* unix_socket_path,
+		callback_t	callback,
+		void*	callback_data)
 {
 	CBaseSocket* pSocket = new CBaseSocket();
 	if (!pSocket)
 		return NETLIB_ERROR;
-
 	int ret =  pSocket->UnixListen(unix_socket_path, callback, callback_data);
 	if (ret == NETLIB_ERROR)
 		delete pSocket;
 	return ret;
-
-
 }
 
 int netlib_unix_connect(
-	    char * unix_socket_path,
-		callback_t  callback,
-        void*       callback_data)
+		char*	unix_socket_path,
+		callback_t	callback,
+		void*	callback_data)
 {
-    CBaseSocket* pSocket = new CBaseSocket();
+	CBaseSocket* pSocket = new CBaseSocket();
 	if (!pSocket)
 		return NETLIB_INVALID_HANDLE;
 
@@ -114,81 +111,57 @@ int netlib_unix_connect(
 }
 
 
+// int netlib_close(net_handle_t handle)
+// {
+// 	CBaseSocket* pSocket = FindBaseSocket(handle);
+// 	if (!pSocket)
+// 		return NETLIB_ERROR;
 
+// 	int ret = pSocket->Close();
+// 	pSocket->ReleaseRef();
+// 	return ret;
+// }
 
-int netlib_send(net_handle_t handle, void* buf, int len)
-{
-	CBaseSocket* pSocket = FindBaseSocket(handle);
-	if (!pSocket)
-	{
-		return NETLIB_ERROR;
-	}
-	int ret = pSocket->Send(buf, len);
-	pSocket->ReleaseRef();
-	return ret;
-}
+// int netlib_option(net_handle_t handle, int opt, void* optval)
+// {
+// 	CBaseSocket* pSocket = FindBaseSocket(handle);
+// 	if (!pSocket)
+// 		return NETLIB_ERROR;
 
-int netlib_recv(net_handle_t handle, void* buf, int len)
-{
-	CBaseSocket* pSocket = FindBaseSocket(handle);
-	if (!pSocket)
-		return NETLIB_ERROR;
-	int ret = pSocket->Recv(buf, len);
-	pSocket->ReleaseRef();
-	return ret;
-}
+// 	if ((opt >= NETLIB_OPT_GET_REMOTE_IP) && !optval)
+// 		return NETLIB_ERROR;
 
-int netlib_close(net_handle_t handle)
-{
-	CBaseSocket* pSocket = FindBaseSocket(handle);
-	if (!pSocket)
-		return NETLIB_ERROR;
+// 	switch (opt)
+// 	{
+// 	case NETLIB_OPT_SET_CALLBACK:
+// 		pSocket->SetCallback((callback_t)optval);
+// 		break;
+// 	case NETLIB_OPT_SET_CALLBACK_DATA:
+// 		pSocket->SetCallbackData(optval);
+// 		break;
+// 	case NETLIB_OPT_GET_REMOTE_IP:
+// 		*(string*)optval = pSocket->GetRemoteIP();
+// 		break;
+// 	case NETLIB_OPT_GET_REMOTE_PORT:
+// 		*(uint16_t*)optval = pSocket->GetRemotePort();
+// 		break;
+// 	case NETLIB_OPT_GET_LOCAL_IP:
+// 		*(string*)optval = pSocket->GetLocalIP();
+// 		break;
+// 	case NETLIB_OPT_GET_LOCAL_PORT:
+// 		*(uint16_t*)optval = pSocket->GetLocalPort();
+// 		break;
+// 	case NETLIB_OPT_SET_SEND_BUF_SIZE:
+// 		pSocket->SetSendBufSize(*(uint32_t*)optval);
+// 		break;
+// 	case NETLIB_OPT_SET_RECV_BUF_SIZE:
+// 		pSocket->SetRecvBufSize(*(uint32_t*)optval);
+// 		break;
+// 	}
 
-	int ret = pSocket->Close();
-	pSocket->ReleaseRef();
-	return ret;
-}
-
-int netlib_option(net_handle_t handle, int opt, void* optval)
-{
-	CBaseSocket* pSocket = FindBaseSocket(handle);
-	if (!pSocket)
-		return NETLIB_ERROR;
-
-	if ((opt >= NETLIB_OPT_GET_REMOTE_IP) && !optval)
-		return NETLIB_ERROR;
-
-	switch (opt)
-	{
-	case NETLIB_OPT_SET_CALLBACK:
-		pSocket->SetCallback((callback_t)optval);
-		break;
-	case NETLIB_OPT_SET_CALLBACK_DATA:
-		pSocket->SetCallbackData(optval);
-		break;
-	case NETLIB_OPT_GET_REMOTE_IP:
-		*(string*)optval = pSocket->GetRemoteIP();
-		break;
-	case NETLIB_OPT_GET_REMOTE_PORT:
-		*(uint16_t*)optval = pSocket->GetRemotePort();
-		break;
-	case NETLIB_OPT_GET_LOCAL_IP:
-		*(string*)optval = pSocket->GetLocalIP();
-		break;
-	case NETLIB_OPT_GET_LOCAL_PORT:
-		*(uint16_t*)optval = pSocket->GetLocalPort();
-		break;
-	case NETLIB_OPT_SET_SEND_BUF_SIZE:
-		pSocket->SetSendBufSize(*(uint32_t*)optval);
-		break;
-	case NETLIB_OPT_SET_RECV_BUF_SIZE:
-		pSocket->SetRecvBufSize(*(uint32_t*)optval);
-		break;
-	}
-
-	pSocket->ReleaseRef();
-	return NETLIB_OK;
-}
+// 	pSocket->ReleaseRef();
+// 	return NETLIB_OK;
+// }
 
 int netlib_register_timer(callback_t callback, void* user_data, uint64_t interval)
 {
@@ -215,10 +188,10 @@ void netlib_eventloop(uint32_t wait_timeout)
 
 void netlib_stop_event()
 {
-    CEventDispatch::Instance()->StopDispatch();
+	CEventDispatch::Instance()->StopDispatch();
 }
 
 bool netlib_is_running()
 {
-    return CEventDispatch::Instance()->isRunning();
+	return CEventDispatch::Instance()->isRunning();
 }

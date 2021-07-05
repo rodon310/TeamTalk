@@ -1,38 +1,19 @@
 /*
- * route_server.cpp
- *
- *  Created on: 2013-7-4
- *      Author: ziteng@mogujie.com
+ * @Author: xiaominfc
+ * @Date: 2020-09-02 17:10:06
+ * @Description: main run for routeserver
  */
 
 #include "RouteConn.h"
 #include "netlib.h"
 #include "ConfigFileReader.h"
 #include "version.h"
+#include "EventSocket.h"
 
-// this callback will be replaced by imconn_callback() in OnConnect()
-void route_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-{
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CRouteConn* pConn = new CRouteConn();
-		pConn->OnConnect(handle);
-	}
-	else
-	{
-		log("!!!error msg: %d ", msg);
-	}
-}
 
 int main(int argc, char* argv[])
 {
-	if ((argc == 2) && (strcmp(argv[1], "-v") == 0)) {
-		printf("Server Version: RouteServer/%s\n", VERSION);
-		printf("Server Build: %s %s\n", __DATE__, __TIME__);
-		return 0;
-	}
+	PRINTSERVERVERSION()
 
 	signal(SIGPIPE, SIG_IGN);
 	srand(time(NULL));
@@ -56,7 +37,8 @@ int main(int argc, char* argv[])
 
 	CStrExplode listen_ip_list(listen_ip, ';');
 	for (uint32_t i = 0; i < listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(listen_ip_list.GetItem(i), listen_msg_port, route_serv_callback, NULL);
+		//ret = netlib_listen(listen_ip_list.GetItem(i), listen_msg_port, route_serv_callback, NULL);
+		ret = tcp_server_listen(listen_ip_list.GetItem(i), listen_msg_port,new IMConnEventDefaultFactory<CRouteConn>());
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}

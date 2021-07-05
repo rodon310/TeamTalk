@@ -11,6 +11,8 @@
 #include "IM.Server.pb.h"
 #include "IM.Other.pb.h"
 #include "IM.BaseDefine.pb.h"
+#include "EventSocket.h"
+
 using namespace IM::BaseDefine;
 
 #define IOS_PUSH_FLASH_MAX_LENGTH	40
@@ -132,7 +134,7 @@ void CPushServConn::Connect(const char* server_ip, uint16_t server_port, uint32_
 	log("Connecting to Push Server %s:%d ", server_ip, server_port);
 	
 	m_serv_idx = serv_idx;
-	m_handle = netlib_connect(server_ip, server_port, imconn_callback, (void*)&g_push_server_conn_map);
+	m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CPushServConn>());
 	
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_push_server_conn_map.insert(make_pair(m_handle, this));
@@ -147,7 +149,7 @@ void CPushServConn::Close()
 	m_bOpen = false;
 	g_master_push_conn = NULL;
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_push_server_conn_map.erase(m_handle);
 	}
 	

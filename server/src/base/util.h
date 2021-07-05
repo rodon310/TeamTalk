@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "slog/slog_api.h"
+#include "slog_api.h"
+#include "version.h"
 #ifndef _WIN32
 #include <strings.h>
 #endif
@@ -29,20 +30,19 @@
 #include <sys/time.h>
 #endif
 
+
 #define NOTUSED_ARG(v) ((void)v)		// used this to remove warning C4100, unreferenced parameter
 
-/// yunfan modify end 
 class CRefObject
 {
 public:
 	CRefObject();
 	virtual ~CRefObject();
-
 	void SetLock(CLock* lock) { m_lock = lock; }
 	void AddRef();
 	void ReleaseRef();
 private:
-	int				m_refCount;
+	int	m_refCount;
 	CLock*	m_lock;
 };
 
@@ -95,5 +95,12 @@ string URLDecode(const string &sIn);
 int64_t get_file_size(const char *path);
 const char*  memfind(const char *src_str,size_t src_len, const char *sub_str, size_t sub_len, bool flag = true);
 
+
+#define PRINTSERVERVERSION() \
+	if ((argc == 2) && (strcmp(argv[1], "-v") == 0)) { \
+		printf("Server Version: %s\n", VERSION); \
+		printf("Server Build: %s %s\n", __DATE__, __TIME__); \
+		return 0; \
+	}
 
 #endif

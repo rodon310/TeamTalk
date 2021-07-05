@@ -130,59 +130,26 @@ CProxyConn::~CProxyConn()
 void CProxyConn::Close()
 {
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_proxy_conn_map.erase(m_handle);
-
 		g_uuid_conn_map.erase(m_uuid);
 	}
-
 	ReleaseRef();
 }
 
-void CProxyConn::OnConnect(net_handle_t handle)
+void CProxyConn::OnConnect(CBaseSocket* socket)
 {
-	m_handle = handle;
+	//m_handle = handle;
+	CImConn::OnConnect(socket);
+	g_proxy_conn_map.insert(make_pair(m_handle, this));
 
-	g_proxy_conn_map.insert(make_pair(handle, this));
+	// netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
+	// netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_proxy_conn_map);
+	// netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
+	// netlib_option(handle, NETLIB_OPT_GET_REMOTE_PORT, (void*)&m_peer_port);
 
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
-	netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_proxy_conn_map);
-	netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
-	netlib_option(handle, NETLIB_OPT_GET_REMOTE_PORT, (void*)&m_peer_port);
-
-	log("connect from %s:%d, handle=%d", m_peer_ip.c_str(), m_peer_port, m_handle);
+	// log("connect from %s:%d, handle=%d", m_peer_ip.c_str(), m_peer_port, m_handle);
 }
-
-// 由于数据包是在另一个线程处理的，所以不能在主线程delete数据包，所以需要Override这个方法
-void CProxyConn::OnRead()
-{
-	for (;;) {
-		uint32_t free_buf_len = m_in_buf.GetAllocSize() - m_in_buf.GetWriteOffset();
-		if (free_buf_len < READ_BUF_SIZE)
-			m_in_buf.Extend(READ_BUF_SIZE);
-
-		int ret = netlib_recv(m_handle, m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
-		if (ret <= 0)
-			break;
-
-		m_recv_bytes += ret;
-		m_in_buf.IncWriteOffset(ret);
-		m_last_recv_tick = get_tick_count();
-	}
-
-	uint32_t pdu_len = 0;
-	try {
-		while ( CImPdu::IsPduAvailable(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset(), pdu_len) ) {
-			HandlePduBuf(m_in_buf.GetBuffer(), pdu_len);
-			m_in_buf.Read(NULL, pdu_len);
-		}
-    } catch (CPduException& ex) {
-		log("!!!catch exception, err_code=%u, err_msg=%s, close the connection ",ex.GetErrorCode(), ex.GetErrorMsg());
-		OnClose();
-	}
-	
-}
-
 
 void CProxyConn::OnClose()
 {
@@ -207,11 +174,32 @@ void CProxyConn::OnTimer(uint64_t curr_tick)
 	}
 }
 
-void CProxyConn::HandlePduBuf(uchar_t* pdu_buf, uint32_t pdu_len)
-{
+
+//由于数据包是在另一个线程处理的，所以不能在主线程delete数据包，所以需要Override这个方法
+void CProxyConn::HandleData(){
 	CImPdu* pPdu = NULL;
-	pPdu = CImPdu::ReadPdu(pdu_buf, pdu_len);
+	try
+	{
+		while((pPdu = CImPdu::ReadPdu(m_in_buf.GetBuffer(), m_in_buf.GetWriteOffset())))
+		{
+			uint32_t pdu_len = pPdu->GetLength();
+			HandlePdu(pPdu);
+			pPdu = NULL;
+			m_in_buf.Read(NULL, pdu_len);
+		}
+	} catch (CPduException& ex) {
+		log("!!!catch exception, sid=%u, cid=%u, err_code=%u, err_msg=%s, close the connection ",ex.GetServiceId(), ex.GetCommandId(), ex.GetErrorCode(), ex.GetErrorMsg());
+		if (pPdu) {
+			delete pPdu;
+			pPdu = NULL;
+		}
+		OnClose();
+	}
+}
+
+void CProxyConn::HandlePdu(CImPdu* pPdu){
 	if (pPdu->GetCommandId() == IM::BaseDefine::CID_OTHER_HEARTBEAT) {
+		delete pPdu;
 		return;
 	}
 	
@@ -224,6 +212,8 @@ void CProxyConn::HandlePduBuf(uchar_t* pdu_buf, uint32_t pdu_len)
 		log("no handler for packet type: %d", pPdu->GetCommandId());
 	}
 }
+
+
 
 /*
  * static method

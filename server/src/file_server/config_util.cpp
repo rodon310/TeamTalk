@@ -1,3 +1,9 @@
+/*
+ * @File: 
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
+ */
 //
 //  config_util.cpp
 //  im-server-mac-new
@@ -6,7 +12,7 @@
 //  Copyright (c) 2015年 benqi. All rights reserved.
 //
 
-#include "file_server/config_util.h"
+#include "config_util.h"
 
 void ConfigUtil::AddAddress(const char* ip, uint16_t port) {
     IM::BaseDefine::IpAddr addr;

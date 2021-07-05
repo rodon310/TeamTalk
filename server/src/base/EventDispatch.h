@@ -1,4 +1,4 @@
-/*
+/**
  * A socket event dispatcher, features include: 
  * 1. portable: worked both on Windows, MAC OS X,  LINUX platform
  * 2. a singleton pattern: only one instance of this class can exist
@@ -10,6 +10,9 @@
 #include "util.h"
 
 #include "Lock.h"
+#if !((defined _WIN32) || (defined __APPLE__))
+#include "EventInterface.h"
+#endif
 
 enum {
 	SOCKET_READ		= 0x1,
@@ -22,24 +25,23 @@ class CEventDispatch
 {
 public:
 	virtual ~CEventDispatch();
-
-	
 	void RemoveEvent(SOCKET fd, uint8_t socket_event);
-
-#if ((defined _WIN32) || (defined __APPLE__))
+	
+#if (defined _WIN32)
 	void AddEvent(SOCKET fd, uint8_t socket_event);
 #else
-	void AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr); //for epoll
+	void AddEventInterface(SOCKET fd, uint8_t socket_event,CEventInterface* interface);
+	//void AddEvent(SOCKET fd, uint8_t socket_event, void* data_ptr); //for epoll
 #endif
 	void AddTimer(callback_t callback, void* user_data, uint64_t interval);
 	void RemoveTimer(callback_t callback, void* user_data);
-    
-    void AddLoop(callback_t callback, void* user_data);
+	
+	void AddLoop(callback_t callback, void* user_data);
 
 	void StartDispatch(uint32_t wait_timeout = 100);
-    void StopDispatch();
-    
-    bool isRunning() {return running;}
+	void StopDispatch();
+	
+	bool isRunning() {return running;}
 
 	static CEventDispatch* Instance();
 protected:
@@ -47,7 +49,7 @@ protected:
 
 private:
 	void _CheckTimer();
-    void _CheckLoop();
+	void _CheckLoop();
 
 	typedef struct {
 		callback_t	callback;
@@ -71,8 +73,8 @@ private:
 	list<TimerItem*>	m_loop_list;
 
 	static CEventDispatch* m_pEventDispatch;
-    
-    bool running;
+	
+	bool running;
 };
 
 #endif

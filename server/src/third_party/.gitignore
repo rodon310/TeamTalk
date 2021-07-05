@@ -1,0 +1,10 @@
+#macos
+*.DS_Store
+*/lib/
+*/include/
+*/bin/
+
+
+hiredis
+log4cxx
+protobuf

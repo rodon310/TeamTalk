@@ -11,59 +11,43 @@
 #include "version.h"
 #include "WorkHttpConn.h"
 #include "ipparser.h"
+#include "EventSocket.h"
 
 IpParser* pIpParser = NULL;
 string strMsfsUrl;
 string strDiscovery;//发现获取地址
 string strBaseUrl;
-void client_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-{
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CLoginConn* pConn = new CLoginConn();
-		pConn->OnConnect2(handle, LOGIN_CONN_TYPE_CLIENT);
-	}
-	else
-	{
-		log("!!!error msg: %d ", msg);
-	}
-}
-
-// this callback will be replaced by imconn_callback() in OnConnect()
-void msg_serv_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-{
-	(void)callback_data;
-	(void)pParam;
-	log("msg_server come in");
-
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CLoginConn* pConn = new CLoginConn();
-		pConn->OnConnect2(handle, LOGIN_CONN_TYPE_MSG_SERV);
-	}
-	else
-	{
-		log("!!!error msg: %d ", msg);
-	}
-}
 
 
-void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-{
-	(void)callback_data;
-	(void)pParam;
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CHttpConn* pConn = new WorkHttpConn();
-		pConn->OnConnect(handle);
-	}
-	else
-	{
-		log("!!!error msg: %d ", msg);
-	}
-}
+// void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
+// {
+// 	(void)callback_data;
+// 	(void)pParam;
+// 	if (msg == NETLIB_MSG_CONNECT)
+// 	{
+// 		CHttpConn* pConn = new WorkHttpConn();
+// 		pConn->OnConnect(handle);
+// 	}
+// 	else
+// 	{
+// 		log("!!!error msg: %d ", msg);
+// 	}
+// }
+
+
+class CONNTypeEventFactory: public EventFactoryInterface{
+	public:
+		CONNTypeEventFactory(int _type):conn_type(_type){};
+		virtual CEventInterface* createEvent(CBaseSocket* socket){
+			CLoginConn* conn = new CLoginConn();
+			conn->OnConnect(socket,conn_type);
+			return conn;
+		}		
+	private:
+		int conn_type;
+
+};
+
 
 int main(int argc, char* argv[])
 {
@@ -107,21 +91,21 @@ int main(int argc, char* argv[])
 		return ret;
 	CStrExplode client_listen_ip_list(client_listen_ip, ';');
 	for (uint32_t i = 0; i < client_listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(client_listen_ip_list.GetItem(i), client_port, client_callback, NULL);
+		ret = tcp_server_listen(client_listen_ip_list.GetItem(i), client_port, new CONNTypeEventFactory(LOGIN_CONN_TYPE_CLIENT));
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}
 
 	CStrExplode msg_server_listen_ip_list(msg_server_listen_ip, ';');
 	for (uint32_t i = 0; i < msg_server_listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(msg_server_listen_ip_list.GetItem(i), msg_server_port, msg_serv_callback, NULL);
+		ret = tcp_server_listen(msg_server_listen_ip_list.GetItem(i), msg_server_port, new CONNTypeEventFactory(LOGIN_CONN_TYPE_MSG_SERV));
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}
 
 	CStrExplode http_listen_ip_list(http_listen_ip, ';');
 	for (uint32_t i = 0; i < http_listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(http_listen_ip_list.GetItem(i), http_port, http_callback, NULL);
+		ret = tcp_server_listen(http_listen_ip_list.GetItem(i), http_port,new IMConnEventDefaultFactory<WorkHttpConn>());
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}

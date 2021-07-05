@@ -289,7 +289,7 @@ void AiClient::onLogin(uint32_t nSeqNo, uint32_t nResultCode, string& strMsg, IM
 		printf("%s%s\n", "login ok for:",pUser->user_real_name().c_str());
 		m_cSelfInfo = *pUser;
 		g_bLogined = true;
-		CClient::getChangedUser();
+		//CClient::getChangedUser();
 		AiClient *old = FindAiClientById(pUser->user_id());
 		if(old){
 			old->close();

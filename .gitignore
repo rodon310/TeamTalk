@@ -10,7 +10,7 @@ server/src/libsecurity/android/obj
 */login_server
 */push_server
 */file_server
-*msfs
+*/msfs/msfs
 
 
 .vscode

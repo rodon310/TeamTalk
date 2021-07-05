@@ -11,7 +11,7 @@
 #include "netlib.h"
 #include "util.h"
 #include "HttpParserWrapper.h"
-#include "BaseSocket.h"
+#include "imconn.h"
 
 #define HTTP_CONN_TIMEOUT			60000
 
@@ -24,7 +24,7 @@ enum {
 	CONN_STATE_CLOSED,
 };
 
-class CHttpConn : public CRefObject
+class CHttpConn : public CImConn
 {
 public:
 	CHttpConn();
@@ -32,36 +32,17 @@ public:
 
 	uint32_t GetConnHandle() { return m_conn_handle; }
 	char* GetPeerIP() { return (char*)m_peer_ip.c_str(); }
-
-	int Send(void* data, int len);
-
-	void Close();
-	void OnConnect(net_handle_t handle);
-	void OnRead();
-	void OnWrite();
-	void OnClose();
-	void OnTimer(uint64_t curr_tick);
-
+	virtual void HandleData();
+	virtual void OnConnect(CBaseSocket* socket);
+	virtual void Close();
+	virtual void OnTimer(uint64_t curr_tick);
 	virtual void HandleWork();
-	
 	virtual void OnWriteCompelete();
 
 protected:
-	net_handle_t	m_sock_handle;
 	uint32_t		m_conn_handle;
-	bool			m_busy;
-
 	uint32_t		m_state;
-	std::string		m_peer_ip;
-	uint16_t		m_peer_port;
-	CSimpleBuffer	m_in_buf;
-	CSimpleBuffer	m_out_buf;
-
-	uint64_t		m_last_send_tick;
-	uint64_t		m_last_recv_tick;
-	
 	CHttpParserWrapper m_HttpParser;
-	CBaseSocket*	m_basesocket;
 };
 
 typedef hash_map<uint32_t, CHttpConn*> HttpConnMap_t;

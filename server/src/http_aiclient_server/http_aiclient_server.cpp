@@ -15,24 +15,11 @@
 #include "util.h"
 #include "EncDec.h"
 #include "AiClient.h"
+#include "EventSocket.h"
 
 CAes* pAes;
 
 #define DEFAULT_CONCURRENT_DB_CONN_CNT  2
-
-// for client connect in
-void http_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam)
-{
-	if (msg == NETLIB_MSG_CONNECT)
-	{
-		CHttpConn* pConn = new AiHttpConn();
-		pConn->OnConnect(handle);
-	}
-	else
-	{
-		log("!!!error msg: %d ", msg);
-	}
-}
 
 
 int main(int argc, char* argv[])
@@ -77,7 +64,7 @@ int main(int argc, char* argv[])
 	
 	CStrExplode listen_ip_list(listen_ip, ';');
 	for (uint32_t i = 0; i < listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(listen_ip_list.GetItem(i), listen_port, http_callback, NULL);
+		ret = tcp_server_listen(listen_ip_list.GetItem(i), listen_port, new IMConnEventDefaultFactory<AiHttpConn>());
 		if (ret == NETLIB_ERROR)
 			return ret;
 	}

@@ -1,18 +1,18 @@
 /*
- * DBServConn.h
- *
- *  Created on: 2013-7-8
- *      Author: ziteng@mogujie.com
+ * @File: DBServConn.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: conn for db_proxy_server
  */
 
 #ifndef DBSERVCONN_H_
 #define DBSERVCONN_H_
 
-#include "imconn.h"
+#include "ImPduConn.h"
 #include "ServInfo.h"
 #include "RouteServConn.h"
 
-class CDBServConn : public CImConn
+class CDBServConn : public CImPduConn
 {
 public:
 	CDBServConn();
@@ -30,13 +30,13 @@ public:
 	virtual void HandlePdu(CImPdu* pPdu);
 private:
 	void _HandleValidateResponse(CImPdu* pPdu);
-    void _HandleRecentSessionResponse(CImPdu* pPdu);
-    void _HandleAllUserResponse(CImPdu* pPdu);
-    void _HandleGetMsgListResponse(CImPdu* pPdu);
-    void _HandleGetMsgByIdResponse(CImPdu* pPdu);
-    void _HandleMsgData(CImPdu* pPdu);
+	void _HandleRecentSessionResponse(CImPdu* pPdu);
+	void _HandleAllUserResponse(CImPdu* pPdu);
+	void _HandleGetMsgListResponse(CImPdu* pPdu);
+	void _HandleGetMsgByIdResponse(CImPdu* pPdu);
+	void _HandleMsgData(CImPdu* pPdu);
 	void _HandleUnreadMsgCountResponse(CImPdu* pPdu);
-    void _HandleGetLatestMsgIDRsp(CImPdu* pPdu);
+	void _HandleGetLatestMsgIDRsp(CImPdu* pPdu);
 	void _HandleDBWriteResponse(CImPdu* pPdu);
 	void _HandleUsersInfoResponse(CImPdu* pPdu);
 	void _HandleStopReceivePacket(CImPdu* pPdu);

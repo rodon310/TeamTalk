@@ -8,13 +8,13 @@
 #ifndef MSGCONN_H_
 #define MSGCONN_H_
 
-#include "imconn.h"
+#include "ImPduConn.h"
 #include "BaseSocket.h"
 
 
 
-#define KICK_FROM_ROUTE_SERVER 		1
-#define MAX_ONLINE_FRIEND_CNT		100	//通知好友状态通知的最多个数
+#define KICK_FROM_ROUTE_SERVER  1
+#define MAX_ONLINE_FRIEND_CNT   100 //通知好友状态通知的最多个数
 
 typedef struct {
 	uint32_t msg_id;
@@ -24,7 +24,7 @@ typedef struct {
 
 class CImUser;
 
-class CMsgConn : public CImConn
+class CMsgConn : public CImPduConn
 {
 public:
 	CMsgConn();
@@ -48,14 +48,7 @@ public:
 
 	virtual void Close(bool kick_user = false);
 
-	virtual void OnConnect(net_handle_t handle);
-    virtual void OnConnect(net_handle_t handle, void *data);
-	virtual void OnClose();
-    virtual void OnRead();
-
-	virtual  int Send(void* data, int len);
-	virtual void OnWrite();
-	
+	virtual void OnConnect(CBaseSocket *socket);
 	virtual inline void OnTimer(uint64_t curr_tick);
 
 	virtual void HandlePdu(CImPdu* pPdu);
@@ -109,8 +102,6 @@ private:
     uint32_t        m_client_type;        //客户端登录方式
     
     uint32_t        m_online_status;      //在线状态 1-online, 2-off-line, 3-leave
-
-	CBaseSocket*	m_basesocket;
 };
 
 

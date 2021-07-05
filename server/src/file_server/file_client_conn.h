@@ -1,21 +1,20 @@
-//
-//  file_client_conn.h
-//  im-server-mac-new
-//
-//  Created by wubenqi on 15/7/16.
-//  Copyright (c) 2015年 benqi. All rights reserved.
-//
+/* 
+ * @File: file_client_conn.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: 
+ */
 
 #ifndef FILE_SERVER_FILE_CLIENT_CONN_H_
 #define FILE_SERVER_FILE_CLIENT_CONN_H_
 
-#include "base/imconn.h"
-#include "file_server/transfer_task.h"
+#include "ImPduConn.h"
+#include "transfer_task.h"
 
 // TODO
 // 异常情况处理
 // 断线、服务器重启等
-class FileClientConn : public CImConn {
+class FileClientConn : public CImPduConn {
 public:
     FileClientConn()
         : auth_(false),
@@ -29,7 +28,7 @@ public:
     
     // void Close2();
     
-    virtual void OnConnect(net_handle_t handle);
+    virtual void OnConnect(CBaseSocket* socket);
     virtual void OnClose();
     virtual void OnTimer(uint64_t curr_tick);
     
@@ -49,7 +48,7 @@ private:
     void _HandleClientFilePullFileReq(CImPdu* pdu);
     void _HandleClientFilePullFileRsp(CImPdu *pdu);
     
-    int _StatesNotify(int state, const std::string& task_id, uint32_t user_id, CImConn* conn);
+    int _StatesNotify(int state, const std::string& task_id, uint32_t user_id, CImPduConn* conn);
     
     // bool _IsAuth() const { return auth_; }
     
@@ -67,7 +66,6 @@ private:
 };
 
 void InitializeFileClientConn();
-void FileClientConnCallback(void* callback_data, uint8_t msg, uint32_t handle, void* param);
 
 
 #endif /* defined(FILE_SERVER_FILE_CLIENT_CONN_H_) */

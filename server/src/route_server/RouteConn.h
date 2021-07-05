@@ -1,16 +1,17 @@
 /*
- * RouteConn.h
- *
- *  Created on: 2013-7-4
- *      Author: ziteng@mogujie.com
+ * @File: RouteConn.h
+ * @Author: xiaominfc
+ * @Date: 2019-08-29 11:30:07
+ * @Description: routeconn for msgserver
  */
+
 
 #ifndef ROUTECONN_H_
 #define ROUTECONN_H_
 
-#include "imconn.h"
+#include "ImPduConn.h"
 
-class CRouteConn : public CImConn
+class CRouteConn : public CImPduConn
 {
 public:
 	CRouteConn();
@@ -18,7 +19,7 @@ public:
 
 	virtual void Close();
 
-	virtual void OnConnect(net_handle_t handle);
+	virtual void OnConnect(CBaseSocket* socket);
 	virtual void OnClose();
 	virtual void OnTimer(uint64_t curr_tick);
 

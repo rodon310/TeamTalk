@@ -8,7 +8,7 @@
 #ifndef LOGINCONN_H_
 #define LOGINCONN_H_
 
-#include "imconn.h"
+#include "ImPduConn.h"
 
 enum {
 	LOGIN_CONN_TYPE_CLIENT = 1,
@@ -25,15 +25,14 @@ typedef struct  {
 } msg_serv_info_t;
 
 
-class CLoginConn : public CImConn
+class CLoginConn : public CImPduConn
 {
 public:
 	CLoginConn();
 	virtual ~CLoginConn();
 
 	virtual void Close();
-
-	void OnConnect2(net_handle_t handle, int conn_type);
+	void OnConnect(CBaseSocket *socket, int conn_type);// replace OnConnect(CBaseSocket *socket)
 	virtual void OnClose();
 	virtual void OnTimer(uint64_t curr_tick);
 

@@ -23,7 +23,7 @@ datatype: json
 ```
 
 ```
-curl -H "Content-Type:application/json"  -X POST --data '{"account":"xiaominfc","password":"123456","msgserverurl":"http://im.xiaominfc.com:8080","callbackurl":"http://127.0.0.1:8401/aichat/callback"}'  http://127.0.0.1:8401/aichat/Login
+curl -H "Content-Type:application/json"  -X POST --data '{"account":"xiaominfc","password":"123456","msgserverurl":"http://im.xiaominfc.com:8080","callbackurl":"http://127.0.0.1:8401/aichat/CallBack"}'  http://127.0.0.1:8401/aichat/Login
 
 ```
 

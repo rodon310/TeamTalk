@@ -13,6 +13,8 @@
 #include "IM.Server.pb.h"
 #include "ImPduBase.h"
 #include "public_define.h"
+#include "EventSocket.h"
+
 using namespace IM::BaseDefine;
 
 static ConnMap_t g_login_server_conn_map;
@@ -105,8 +107,7 @@ void CLoginServConn::Connect(const char* server_ip, uint16_t server_port, uint32
 {
 	log("Connecting to LoginServer %s:%d ", server_ip, server_port);
 	m_serv_idx = serv_idx;
-	m_handle = netlib_connect(server_ip, server_port, imconn_callback, (void*)&g_login_server_conn_map);
-
+	m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CLoginServConn>());
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_login_server_conn_map.insert(make_pair(m_handle, this));
 	}
@@ -117,7 +118,7 @@ void CLoginServConn::Close()
 	serv_reset<CLoginServConn>(g_login_server_list, g_login_server_count, m_serv_idx);
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		CImConn::Close();
 		g_login_server_conn_map.erase(m_handle);
 	}
 

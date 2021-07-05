@@ -7,44 +7,16 @@
 
 // #include "FileConn.h"
 
-#include "base/netlib.h"
-#include "base/ConfigFileReader.h"
-#include "base/version.h"
-#include "base/pb/protocol/IM.BaseDefine.pb.h"
+#include "netlib.h"
+#include "ConfigFileReader.h"
+#include "version.h"
+#include "IM.BaseDefine.pb.h"
 
-#include "file_server/config_util.h"
-#include "file_server/file_client_conn.h"
-#include "file_server/file_msg_server_conn.h"
+#include "config_util.h"
+#include "file_client_conn.h"
+#include "file_msg_server_conn.h"
+#include "EventSocket.h"
 
-/*
- Address=0.0.0.0		 # address for client
- 
- ClientListenIP=0.0.0.0
- ClientListenPort=8600   # Listening Port for client
- 
- MsgServerListenIP=127.0.0.1
- MsgServerListenPort=8601
- 
- TaskTimeout=60		 # Task Timeout (seconds)
- */
-
-//void file_client_conn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam) {
-//	if (msg == NETLIB_MSG_CONNECT) {
-//		CFileConn* pConn = new CFileConn();
-//		pConn->OnConnect(handle);
-//	} else {
-//		log("!!!error msg: %d ", msg);
-//	}
-//}
-
-//void file_msg_server_conn_callback(void* callback_data, uint8_t msg, uint32_t handle, void* pParam) {
-//	if (msg == NETLIB_MSG_CONNECT) {
-//		CFileConn* pConn = new CFileConn();
-//		pConn->OnConnect(handle);
-//	} else {
-//		log("!!!error msg: %d ", msg);
-//	}
-//}
 
 int main(int argc, char* argv[])
 {
@@ -57,11 +29,7 @@ int main(int argc, char* argv[])
 	}
 	setsid();
 #endif
-	if ((argc == 2) && (strcmp(argv[1], "-v") == 0)) {
-		printf("Server Version: FileServer/%s\n", VERSION);
-		printf("Server Build: %s %s\n", __DATE__, __TIME__);
-		return 0;
-	}
+	PRINTSERVERVERSION()
 
 	signal(SIGPIPE, SIG_IGN);
 
@@ -102,7 +70,8 @@ int main(int argc, char* argv[])
 
 
 	for (uint32_t i = 0; i < client_listen_ip_list.GetItemCnt(); i++) {
-		ret = netlib_listen(client_listen_ip_list.GetItem(i), client_listen_port, FileClientConnCallback, NULL);
+		ret = tcp_server_listen(client_listen_ip_list.GetItem(i), client_listen_port, new IMConnEventDefaultFactory<FileClientConn>());
+		//ret = netlib_listen(client_listen_ip_list.GetItem(i), client_listen_port, FileClientConnCallback, NULL);
 		if (ret == NETLIB_ERROR) {
 			printf("listen %s:%d error!!\n", client_listen_ip_list.GetItem(i), client_listen_port);
 			return ret;
@@ -110,8 +79,8 @@ int main(int argc, char* argv[])
 			printf("server start listen on %s:%d\n", client_listen_ip_list.GetItem(i), client_listen_port);
 		}
 	}
-
-	ret = netlib_listen(str_msg_server_listen_ip, msg_server_listen_port, FileMsgServerConnCallback, NULL);
+	ret = tcp_server_listen(str_msg_server_listen_ip, msg_server_listen_port, new IMConnEventDefaultFactory<FileMsgServerConn>());
+	//ret = netlib_listen(str_msg_server_listen_ip, msg_server_listen_port, FileMsgServerConnCallback, NULL);
 	if (ret == NETLIB_ERROR) {
 		printf("listen %s:%d error!!\n", str_msg_server_listen_ip, msg_server_listen_port);
 		return ret;

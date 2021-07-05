@@ -1,31 +1,32 @@
-#ubuntu16.04 编译
+# ubuntu 编译
 
-依次运行下列脚本
 
-~~~~
-ubuntu_make_log4cxx.sh
+# 安装mysql 替代mariadb(已安装可以忽略)
+```
+sudo apt-get update
+sudo apt-get install mysql-server libmysqlclient-dev
 
-#编译调用redis API的依赖库
-make_hiredis.sh
+#配置用户密码
+sudo mysql_secure_installation
 
-#如果装了mysql可以不运行（运行脚本会提示设置mysql的密码）
-ubuntu_install_mysql.sh
+```
 
-make_protobuf.sh
+# 编译依赖
+```
+./third_party/make_hireds.sh
+./third_party/make_log4cxx.sh
+./third_party/make_protobuf.sh
+```
 
-~~~~
-
-修改点编译配置
+# 修改点编译配置
 
 编辑server/src/db_proxy_server/CMakeLists.txt
 最后一行替换 mysqlclient_r 为 mysqlclient
 
 
-运行build_ubuntu.sh
-
-~~~~
-./build_ubuntu.sh version test
-~~~~
+```
+./build.sh version test
+```
 
 
 

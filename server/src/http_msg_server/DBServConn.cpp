@@ -159,8 +159,8 @@ void CDBServConn::Connect(const char* server_ip, uint16_t server_port, uint32_t 
 	log("Connecting to DB Storage Server %s:%d", server_ip, server_port);
 
 	m_serv_idx = serv_idx;
-	m_handle = netlib_connect(server_ip, server_port, imconn_callback, (void*)&g_db_server_conn_map);
-
+	//m_handle = netlib_connect(server_ip, server_port, imconn_callback, (void*)&g_db_server_conn_map);
+    m_handle = tcp_client_conn(server_ip,server_port,new IMConnEventDefaultFactory<CDBServConn>());
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_db_server_conn_map.insert(make_pair(m_handle, this));
 	}
@@ -172,7 +172,8 @@ void CDBServConn::Close()
 	serv_reset<CDBServConn>(g_db_server_list, g_db_server_count, m_serv_idx);
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		netlib_close(m_handle);
+		//netlib_close(m_handle);
+        CImConn::Close();
 		g_db_server_conn_map.erase(m_handle);
 	}
 

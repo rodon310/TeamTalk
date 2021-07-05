@@ -11,11 +11,11 @@
 
 #include <iostream>
 
-#include "imconn.h"
+#include "ImPduConn.h"
 #include "ServInfo.h"
 #include "BaseSocket.h"
 #include "IM.BaseDefine.pb.h"
-class CFileServConn : public CImConn
+class CFileServConn : public CImPduConn
 {
 public:
 	CFileServConn();

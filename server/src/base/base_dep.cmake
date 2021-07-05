@@ -1,0 +1,24 @@
+
+SET(PB_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../third_party/protobuf/include)
+SET(PB_LIB_DIR ${PROJECT_SOURCE_DIR}/../third_party/protobuf/lib)
+SET(SLOG_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../slog)
+SET(SLOG_LIB_DIR ${PROJECT_SOURCE_DIR}/../slog)
+# SET(LOG4CXX_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../third_party/log4cxx/include)
+# SET(LOG4CXX_LIB_DIR ${PROJECT_SOURCE_DIR}/../third_party/log4cxx/lib)
+
+
+
+#设置自己mac os的openssl的路径
+if(APPLE)
+    SET(OPENSSL_INCLUDE_DIR /usr/local/Cellar/openssl/1.0.2n/include)
+    SET(OPENSSL_LIB_DIR /usr/local/Cellar/openssl/1.0.2n/lib)
+endif()
+
+
+ADD_DEFINITIONS( -g -W -Wall -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DAC_HAS_INFO
+-DAC_HAS_WARNING -DAC_HAS_ERROR -DAC_HAS_CRITICAL -DTIXML_USE_STL
+-DAC_HAS_DEBUG -DLINUX_DAEMON -std=c++11 -Wno-deprecated)
+
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../base ${PROJECT_SOURCE_DIR}/../base/security ${PROJECT_SOURCE_DIR}/../base/jsoncpp ${PB_INCLUDE_DIR} ${PROJECT_SOURCE_DIR}/../base/pb/protocol ${OPENSSL_INCLUDE_DIR} ${SLOG_INCLUDE_DIR})
+LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/../base ${PB_LIB_DIR} ${SLOG_LIB_DIR} ${OPENSSL_LIB_DIR})
+

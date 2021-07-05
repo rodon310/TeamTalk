@@ -1,6 +1,18 @@
 #!/bin/sh
-export PATH=$PATH:../server/src/protobuf/bin
 
+protobuf_bin_dir=../server/src/third_party/protobuf/bin
+
+if [ ! -d ${protobuf_bin_dir} ];then
+if [ ! -z $(which protoc) ];then
+	echo "no compile protobuf, use system protoc"
+else
+	echo "no compile protobuf, please see ../server/src/README.md"
+	exit 1 
+fi
+else 
+
+export PATH=$PATH:${protobuf_bin_dir}
+fi
 
 SRC_DIR=./
 DST_DIR=./gen
