@@ -149,8 +149,8 @@ void CPushServConn::Close()
 	m_bOpen = false;
 	g_master_push_conn = NULL;
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_push_server_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
 	
 	ReleaseRef();

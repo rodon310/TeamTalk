@@ -172,8 +172,8 @@ void CDBServConn::Close()
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		//netlib_close(m_handle);
-        CImConn::Close();
 		g_db_server_conn_map.erase(m_handle);
+        CImConn::Close();
 	}
 
 	ReleaseRef();

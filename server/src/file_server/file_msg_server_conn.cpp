@@ -55,8 +55,8 @@ void FileMsgServerConn::Close() {
 	connected_ = false;
 	
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_file_msg_server_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
 	
 	ReleaseRef();

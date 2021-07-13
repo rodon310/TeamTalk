@@ -120,8 +120,8 @@ void CLoginServConn::Close()
 	serv_reset<CLoginServConn>(g_login_server_list, g_login_server_count, m_serv_idx);
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_login_server_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
 
 	ReleaseRef();

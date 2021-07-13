@@ -67,8 +67,8 @@ CRouteConn::~CRouteConn()
 void CRouteConn::Close()
 {
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_route_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
 
 	// remove all user info from this MessageServer

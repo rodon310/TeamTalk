@@ -57,12 +57,11 @@ CLoginConn::~CLoginConn()
 void CLoginConn::Close()
 {
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
+		
 		if (m_conn_type == LOGIN_CONN_TYPE_CLIENT) {
 			g_client_conn_map.erase(m_handle);
 		} else {
 			g_msg_serv_conn_map.erase(m_handle);
-
 			// remove all user count from this message server
 			map<uint32_t, msg_serv_info_t*>::iterator it = g_msg_serv_info.find(m_handle);
 			if (it != g_msg_serv_info.end()) {
@@ -77,6 +76,7 @@ void CLoginConn::Close()
 				g_msg_serv_info.erase(it);
 			}
 		}
+		CImConn::Close();
 	}
 	ReleaseRef();
 }

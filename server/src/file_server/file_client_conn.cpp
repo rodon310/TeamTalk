@@ -97,8 +97,8 @@ void FileClientConn::Close() {
 	auth_ = false;
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_file_client_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
 
 //	if (user_id_ > 0) {

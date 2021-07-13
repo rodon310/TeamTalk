@@ -130,8 +130,8 @@ void CFileServConn::Close()
 	serv_reset<CFileServConn>(g_file_server_list, g_file_server_count, m_serv_idx);
 	m_bOpen = false;
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_file_server_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
     
 	ReleaseRef();

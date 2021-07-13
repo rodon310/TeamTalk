@@ -142,8 +142,8 @@ void CRouteServConn::Close()
 
 	m_bOpen = false;
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_route_server_conn_map.erase(m_handle);
+		CImConn::Close();
 	}
 
 	ReleaseRef();
