@@ -202,9 +202,9 @@ int CBaseSocket::Send(void* buf, int len)
 #if (defined _WIN32)
 			CEventDispatch::Instance()->AddEvent(m_socket, SOCKET_WRITE);
 #elif (defined __APPLE__)
-			CEventInterface* envet = FindEvent(m_socket);
+			CEventInterface* event = FindEvent(m_socket);
 			if(event != NULL){
-				CEventDispatch::Instance()->AddEventInterface(m_socket, SOCKET_WRITE,envet);
+				CEventDispatch::Instance()->AddEventInterface(m_socket, SOCKET_WRITE,event);
 			}
 #endif
 			ret = 0;
