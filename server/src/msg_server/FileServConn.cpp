@@ -115,12 +115,13 @@ CFileServConn::~CFileServConn()
 void CFileServConn::Connect(const char* server_ip, uint16_t server_port, uint32_t idx)
 {
 	log("Connecting to FileServer %s:%d ", server_ip, server_port);
-
 	m_serv_idx = idx;
-	
 	m_handle = tcp_client_conn(server_ip,server_port,this);
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_file_server_conn_map.insert(make_pair(m_handle, this));
+	}else {
+		log("connect to %s:%d failed", server_ip, server_port);
+		Close();
 	}
 }
 

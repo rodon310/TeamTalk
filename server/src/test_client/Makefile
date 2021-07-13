@@ -36,10 +36,10 @@ BIN=test_client
 #源文件目录
 SrcDir= .
 #头文件目录
-IncDir= . ../base ../base/jsoncpp ../base/pb/protocol ../protobuf/include ../slog
+IncDir= . ../base ../base/jsoncpp ../base/pb/protocol ../third_party/protobuf/include ../slog
 
 #连接库目录
-LibDir= ../base/ ./ ../slog ../protobuf/lib 
+LibDir= ../base/ ./ ../slog ../third_party/protobuf/lib 
 
 ifeq ($(shell uname), Darwin)
 # 修改成你mac下对应的路径

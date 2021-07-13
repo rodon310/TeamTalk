@@ -164,6 +164,8 @@ void CDBServConn::Connect(const char* server_ip, uint16_t server_port, uint32_t 
 
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_db_server_conn_map.insert(make_pair(m_handle, this));
+	}else {
+		Close();
 	}
 }
 

@@ -31,7 +31,7 @@ ClientConn::~ClientConn()
 net_handle_t ClientConn::connect(const string& strIp, uint16_t nPort, const string& strName, const string& strPass)
 {
 	//m_handle = netlib_connect(strIp.c_str(), nPort, imconn_callback, (void*)&client_conn_map);
-	m_handle = tcp_client_conn(strIp.c_str(), nPort, new IMConnEventDefaultFactory<ClientConn>());
+	m_handle = tcp_client_conn(strIp.c_str(), nPort, this);
 	if(m_handle != INVALID_SOCKET)
 	{
 		client_conn_map.insert(make_pair(m_handle, this));
