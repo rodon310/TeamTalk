@@ -142,13 +142,6 @@ void CProxyConn::OnConnect(CBaseSocket* socket)
 	//m_handle = handle;
 	CImConn::OnConnect(socket);
 	g_proxy_conn_map.insert(make_pair(m_handle, this));
-
-	// netlib_option(handle, NETLIB_OPT_SET_CALLBACK, (void*)imconn_callback);
-	// netlib_option(handle, NETLIB_OPT_SET_CALLBACK_DATA, (void*)&g_proxy_conn_map);
-	// netlib_option(handle, NETLIB_OPT_GET_REMOTE_IP, (void*)&m_peer_ip);
-	// netlib_option(handle, NETLIB_OPT_GET_REMOTE_PORT, (void*)&m_peer_port);
-
-	// log("connect from %s:%d, handle=%d", m_peer_ip.c_str(), m_peer_port, m_handle);
 }
 
 void CProxyConn::OnClose()

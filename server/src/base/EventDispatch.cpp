@@ -248,16 +248,15 @@ void CEventDispatch::StopDispatch()
 
 void CEventDispatch::AddEventInterface(SOCKET fd, uint8_t socket_event,CEventInterface* interface){
 	struct kevent ke;
-	ke.udata = interface;
 	if ((socket_event & SOCKET_READ) != 0)
 	{
-		EV_SET(&ke, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+		EV_SET(&ke, fd, EVFILT_READ, EV_ADD, 0, 0, interface);
 		kevent(m_kqfd, &ke, 1, NULL, 0, NULL);
 	}
 
 	if ((socket_event & SOCKET_WRITE) != 0)
 	{
-		EV_SET(&ke, fd, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+		EV_SET(&ke, fd, EVFILT_WRITE, EV_ADD, 0, 0, interface);
 		kevent(m_kqfd, &ke, 1, NULL, 0, NULL);
 	}
 }
