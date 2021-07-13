@@ -733,13 +733,13 @@ void CDBServConn::_HandleGetDeviceTokenResponse(CImPdu *pPdu)
 		if (pAes->Decrypt(msg_data.c_str(), msg_data.length(), &msg_out, msg_out_len) == 0)
 		{
 			msg_data = string(msg_out, msg_out_len);
+			pAes->Free(msg_out);
 		}
 		else
 		{
 			log("HandleGetDeviceTokenResponse, decrypt msg failed, from_id: %u, to_id: %u, msg_type: %u.", from_id, to_id, msg_type);
 			return;
 		}
-		pAes->Free(msg_out);
 	}
 
 	build_ios_push_flash(msg_data, msg2.msg_type(), from_id);

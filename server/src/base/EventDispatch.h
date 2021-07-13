@@ -10,7 +10,7 @@
 #include "util.h"
 
 #include "Lock.h"
-#if !((defined _WIN32) || (defined __APPLE__))
+#if !(defined _WIN32)
 #include "EventInterface.h"
 #endif
 

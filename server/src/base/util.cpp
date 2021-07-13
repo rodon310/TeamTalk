@@ -6,7 +6,6 @@ CSLog g_imlog = CSLog(LOG_MODULE_IM);
 
 CRefObject::CRefObject()
 {
-	//printf("CRefObject\n");
 	m_lock = NULL;
 	m_refCount = 1;
 }
