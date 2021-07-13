@@ -176,7 +176,6 @@ void CMsgConn::Close(bool kick_user)
 	log("Close client, handle=%d, user_id=%u ", m_handle, GetUserId());
 	if (m_handle != NETLIB_INVALID_HANDLE) {
 		g_msg_conn_map.erase(m_handle);
-		CImConn::Close();
 	}
 
 	CImUser *pImUser = CImUserManager::GetInstance()->GetImUserById(GetUserId());
@@ -197,7 +196,9 @@ void CMsgConn::Close(bool kick_user)
 			CImUserManager::GetInstance()->RemoveImUser(pImUser);
 		}
 	}
-	
+	if (m_handle != NETLIB_INVALID_HANDLE) {
+		CImConn::Close();//reset m_handle
+	}
 	ReleaseRef();
 }
 
