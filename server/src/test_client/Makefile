@@ -36,7 +36,7 @@ BIN=test_client
 #源文件目录
 SrcDir= .
 #头文件目录
-IncDir= . ../base ../base/jsoncpp ../base/pb/protocol ../protobuf/include
+IncDir= . ../base ../base/jsoncpp ../base/pb/protocol ../protobuf/include ../slog
 
 #连接库目录
 LibDir= ../base/ ./ ../slog ../protobuf/lib 
