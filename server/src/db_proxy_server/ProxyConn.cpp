@@ -130,9 +130,9 @@ CProxyConn::~CProxyConn()
 void CProxyConn::Close()
 {
 	if (m_handle != NETLIB_INVALID_HANDLE) {
-		CImConn::Close();
 		g_proxy_conn_map.erase(m_handle);
 		g_uuid_conn_map.erase(m_uuid);
+		CImConn::Close();
 	}
 	ReleaseRef();
 }
