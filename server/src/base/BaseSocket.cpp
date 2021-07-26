@@ -255,6 +255,7 @@ int CBaseSocket::CheckWriteState(){
 		return NETLIB_MSG_WRITE;
 		//m_callback(m_callback_data, NETLIB_MSG_WRITE, (net_handle_t)m_socket, NULL);
 	}
+	return 0;
 }
 
 int CBaseSocket::Close()

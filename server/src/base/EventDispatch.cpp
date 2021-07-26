@@ -313,11 +313,12 @@ void CEventDispatch::StartDispatch(uint32_t wait_timeout)
 		for (int i = 0; i < nfds; i++)
 		{
 			int ev_fd = events[i].ident;
-			CEventInterface* eventInf = (CEventInterface*)events[i].udata;
+			//CEventInterface* eventInf = (CEventInterface*)events[i].udata;
+			CEventInterface* eventInf = FindEvent(ev_fd);
 			//CBaseSocket* pSocket = FindBaseSocket(ev_fd);
 			if (!eventInf)
 				continue;
-			eventInf->AddRef();
+			//eventInf->AddRef();
 
 			if (events[i].filter == EVFILT_READ)
 			{
