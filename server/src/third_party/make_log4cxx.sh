@@ -33,7 +33,7 @@ if [[ ! -z $(which yum) || -f /usr/bin/yum ]]; then
 		yum -y install apr-devel apr-util-devel
 elif [ ! -z  $(which brew) ]; then
 		echo "found brew, the os maybe macos! install deps by brew"
-		#export HOMEBREW_NO_AUTO_UPDATE=1 #skip update
+		export HOMEBREW_NO_AUTO_UPDATE=1 #skip update
 		brew install apr apr-util gsed
 		APR_DIR=/usr/local/opt/apr 
 		APR_UTIL_DIR=/usr/local/opt/apr-util
@@ -63,6 +63,12 @@ ${sed_cmd} -i '84c unsigned char prolog[] = {' ./src/main/cpp/objectoutputstream
 ${sed_cmd} -i '93c writeProlog("java.util.Hashtable", 1, (char*)prolog, sizeof(prolog), p);' ./src/main/cpp/objectoutputstream.cpp
 ${sed_cmd} -i '96c unsigned char data[] = { 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,' ./src/main/cpp/objectoutputstream.cpp
 ${sed_cmd} -i '98c ByteBuffer dataBuf((char*)data, sizeof(data));' ./src/main/cpp/objectoutputstream.cpp
+
+if [ ! -z  $(which brew) ]; then
+	 # for mac os fix locale bug
+   ${sed_cmd} -i '32c #include <locale>' ./src/main/include/log4cxx/helpers/simpledateformat.h
+fi
+
 
 ./configure --prefix=$INSTALL_DIR --with-apr=${APR_DIR} --with-apr-util=${APR_UTIL_DIR}
 make -j 4
