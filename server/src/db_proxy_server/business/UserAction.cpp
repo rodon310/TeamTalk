@@ -81,7 +81,7 @@ namespace DB_PROXY {
 			uint32_t nLastTime = msg.latest_update_time();
 			uint32_t nLastUpdate = CSyncCenter::getInstance()->getLastUpdate();
 			list<IM::BaseDefine::UserInfo> lsUsers;
-			if( nLastUpdate > nLastTime)
+			if( nLastUpdate >= nLastTime)
 			{
 				list<uint32_t> lsIds;
 				CUserModel::getInstance()->getChangedId(nLastTime, lsIds);
