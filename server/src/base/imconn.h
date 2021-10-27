@@ -39,7 +39,7 @@ public:
 	virtual void OnWriteCompelete() {};
 	
 	virtual void WriteData();
-	virtual void ReadData();	// read all readable data
+	virtual size_t ReadData();	// read all readable data
 	virtual void HandleData(){};	// handle data for work
 	
 

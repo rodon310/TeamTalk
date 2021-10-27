@@ -125,12 +125,16 @@ void CImConn::OnRead()
 		return;
 	}
 
-	ReadData();
-	HandleData();
+	if(ReadData()){
+		m_last_recv_tick = get_tick_count();
+		HandleData();
+	}
+	
 }
 
 
-void CImConn::ReadData(){
+size_t CImConn::ReadData(){
+	size_t read_count = 0;
 	for (;;)
 	{
 		uint32_t free_buf_len = m_in_buf.GetAllocSize() - m_in_buf.GetWriteOffset();
@@ -138,12 +142,21 @@ void CImConn::ReadData(){
 			m_in_buf.Extend(READ_BUF_SIZE);
 
 		int ret = m_socket->Recv(m_in_buf.GetBuffer() + m_in_buf.GetWriteOffset(), READ_BUF_SIZE);
-		if (ret <= 0)
+		if (ret <= 0){
+			#ifdef __APPLE__
+			if(ret == 0 && read_count == 0){//为0 该关闭
+				log("read zore close conn:%d",ret);
+				OnClose();
+			}
+			#endif
 			break;
+		}
+			
+		read_count +=ret;
 		m_recv_bytes += ret;
 		m_in_buf.IncWriteOffset(ret);
-		m_last_recv_tick = get_tick_count();
 	}
+	return read_count;
 }
 
 
