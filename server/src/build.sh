@@ -36,7 +36,7 @@ build() {
 		fi
 	done
 
-	projects="http_msg_server login_server route_server msg_server msfs websocket_server http_aiclient_server push_server"
+	projects="http_msg_server login_server db_proxy_server route_server msg_server msfs websocket_server http_aiclient_server push_server"
 
 	for project in ${projects}
 	do 
@@ -59,7 +59,7 @@ build() {
 	fi
 	cd ../
 
-	projects="http_msg_server login_server route_server msg_server msfs websocket_server http_aiclient_server push_server"
+	projects="http_msg_server login_server db_proxy_server route_server msg_server msfs websocket_server http_aiclient_server push_server"
 
 	for project in ${projects}
 	do
@@ -98,7 +98,7 @@ clean() {
 		rm -rf ${dep}/build
 	done
 
-	projects="http_msg_server login_server route_server msg_server msfs websocket_server http_aiclient_server push_server"
+	projects="http_msg_server login_server db_proxy_server route_server msg_server msfs websocket_server http_aiclient_server push_server"
 
 	for project in ${projects}
 	do 
