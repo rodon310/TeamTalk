@@ -64,6 +64,11 @@ ${sed_cmd} -i '93c writeProlog("java.util.Hashtable", 1, (char*)prolog, sizeof(p
 ${sed_cmd} -i '96c unsigned char data[] = { 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,' ./src/main/cpp/objectoutputstream.cpp
 ${sed_cmd} -i '98c ByteBuffer dataBuf((char*)data, sizeof(data));' ./src/main/cpp/objectoutputstream.cpp
 
+${sed_cmd} -i '193c const logchar fname[] = { 0x6F, 0x75, 0x74, 0x70, 0x75, 0x74, 0x2F, 0x64, 0x6F, 0x6D, static_cast<logchar>(0xC2), static_cast<logchar>(0xB3), 0 };' src/test/cpp/xml/domtestcase.cpp
+${sed_cmd} -i '195c const logchar fname[] = { 0x6F, 0x75, 0x74, 0x70, 0x75, 0x74, 0x2F, 0x64, 0x6F, 0x6D, static_cast<logchar>(0xB3), 0 };' src/test/cpp/xml/domtestcase.cpp
+${sed_cmd} -i '212c const logchar fname[] = { 0x6F, 0x75, 0x74, 0x70, 0x75, 0x74, 0x2F, 0x64, 0x6F, 0x6D, static_cast<logchar>(0xE3), static_cast<logchar>(0x86), static_cast<logchar>(0x95), 0 };' src/test/cpp/xml/domtestcase.cpp
+${sed_cmd} -i '214c const logchar fname[] = { 0x6F, 0x75, 0x74, 0x70, 0x75, 0x74, 0x2F, 0x64, 0x6F, 0x6D, static_cast<logchar>(0x3195), 0 };' src/test/cpp/xml/domtestcase.cpp
+
 if [ ! -z  $(which brew) ]; then
 	 # for mac os fix locale bug
    ${sed_cmd} -i '32c #include <locale>' ./src/main/include/log4cxx/helpers/simpledateformat.h
